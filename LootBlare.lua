@@ -1,4 +1,4 @@
-﻿local weird_vibes_mode = true
+local weird_vibes_mode = true
 local srRollMessages = {}
 local msRollMessages = {}
 local osRollMessages = {}
@@ -405,6 +405,8 @@ local function HandleChatMessage(event, message, sender)
       -- The players get the new duration from the master looter after the first rolls
       lb_print("Rolling duration set to " .. FrameShownDuration .. " seconds. (set by Master Looter)")
     end
+  elseif event == "CURRENT_SPELL_CAST_CHANGED" and HideWhenUsingSpell and time_elapsed == 0 then
+    itemRollFrame:Hide()
   elseif event == "CHAT_MSG_SYSTEM" then
     local _,_, newML = string.find(message, "(%S+) is now the loot master")
     if newML then
@@ -453,9 +455,10 @@ local function HandleChatMessage(event, message, sender)
       isRolling = true
       ShowFrame(itemRollFrame,FrameShownDuration,links[1])
     end
-  elseif event == "ADDON_LOADED"then
+  elseif event == "ADDON_LOADED" then
     if FrameShownDuration == nil then FrameShownDuration = 15 end
     if FrameAutoClose == nil then FrameAutoClose = true end
+    if HideWhenUsingSpell == nil then HideWhenUsingSpell = false end
     if IsSenderMasterLooter(UnitName("player")) then
       SendAddonMessage(LB_PREFIX, LB_SET_ML .. UnitName("player"), "RAID")
       SendAddonMessage(LB_PREFIX, LB_SET_ROLL_TIME .. FrameShownDuration, "RAID")
@@ -496,6 +499,7 @@ itemRollFrame:RegisterEvent("CHAT_MSG_RAID_WARNING")
 itemRollFrame:RegisterEvent("CHAT_MSG_RAID")
 itemRollFrame:RegisterEvent("CHAT_MSG_RAID_LEADER")
 itemRollFrame:RegisterEvent("CHAT_MSG_ADDON")
+itemRollFrame:RegisterEvent("CURRENT_SPELL_CAST_CHANGED")
 itemRollFrame:SetScript("OnEvent", function () HandleChatMessage(event,arg1,arg2) end)
 
 -- Register the slash command
@@ -539,6 +543,17 @@ SlashCmdList["LOOTBLARE"] = function(msg)
     elseif autoClose == "off" then
       lb_print("Auto closing disabled.")
       FrameAutoClose = false
+    else
+      lb_print("Invalid option. Please enter 'on' or 'off'.")
+    end
+  elseif string.find(msg, "hideWhenUsingSpell") then
+    local _,_,hide = string.find(msg, "hideWhenUsingSpell (%a+)")
+    if hide == "on" then
+      lb_print("Hiding frame when using a spell enabled.")
+      HideWhenUsingSpell = true
+    elseif hide == "off" then
+      lb_print("Hiding frame when using a spell disabled.")
+      HideWhenUsingSpell = false
     else
       lb_print("Invalid option. Please enter 'on' or 'off'.")
     end
