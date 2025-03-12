@@ -31,6 +31,9 @@ Every time the master looter changes, the new master looter announces the roll t
 - **Auto-Close**: The frame closes automatically after the set time. Toggle this feature on or off with:  
   `/lootblare autoClose on/off` or `/lb autoClose on/off`
 
+- **Auto-Close when using a spell**: After the time ends, close the frame when using a spell. Toggle this feature on or off with:
+  `/lootblare hideWhenUsingSpell on/off` or `/lb hideWhenUsingSpell on/off`
+
 - **Configuration Commands**: For a full list of configuration options, type:  
   `/help`
 
