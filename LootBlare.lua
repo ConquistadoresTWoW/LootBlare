@@ -12,7 +12,7 @@ local discover = CreateFrame("GameTooltip", "CustomTooltip1", UIParent, "GameToo
 local masterLooter = nil
 
 local BUTTON_WIDTH = 32
-local BUTTON_COUNT = 4
+local BUTTON_COUNT = 3
 local BUTTON_PADING = 10
 local FONT_NAME = "Fonts\\FRIZQT__.TTF"
 local FONT_SIZE = 12
@@ -198,10 +198,9 @@ local function CreateItemRollFrame()
   frame:SetScript("OnDragStart", function () frame:StartMoving() end)
   frame:SetScript("OnDragStop", function () frame:StopMovingOrSizing() end)
   CreateCloseButton(frame)
-  CreateActionButton(frame, "SR", "Roll for Soft Reserve", 1, function() RandomRoll(1,101) end)
-  CreateActionButton(frame, "MS", "Roll for Main Spec", 2, function() RandomRoll(1,100) end)
-  CreateActionButton(frame, "OS", "Roll for Off Spec", 3, function() RandomRoll(1,99) end)
-  CreateActionButton(frame, "TM", "Roll for Transmog", 4, function() RandomRoll(1,50) end)
+  CreateActionButton(frame, "MS", "Roll for Main Spec", 1, function() RandomRoll(1,100) end)
+  CreateActionButton(frame, "OS", "Roll for Off Spec", 2, function() RandomRoll(1,99) end)
+  CreateActionButton(frame, "TM", "Roll for Transmog", 3, function() RandomRoll(1,50) end)
   frame:Hide()
 
   return frame
