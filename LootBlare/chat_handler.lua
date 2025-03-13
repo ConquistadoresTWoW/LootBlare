@@ -125,6 +125,8 @@ function handle_config_command(msg)
       'Type /lb time <seconds> to set the duration the frame is shown. This value will be automatically set by the master looter after the first rolls.')
     lb_print(
       'Type /lb autoClose on/off to enable/disable auto closing the frame after the time has elapsed.')
+    lb_print(
+      'Type /lb hideWhenUsingSpell on/off to enable/disable hiding the frame when using a spell.')
     lb_print('Type /lb settings to see the current settings.')
   elseif msg == 'settings' then
     lb_print('Frame shown duration: ' .. FrameShownDuration .. ' seconds.')
