@@ -1,5 +1,7 @@
+discover = CreateFrame('GameTooltip', 'CustomTooltip1', UIParent, 'GameTooltipTemplate')
+
 function lb_print(msg)
-  DEFAULT_CHAT_FRAME:AddMessage('|c' .. config.ADDON_TEXT_COLOR .. 'LootBlare: ' .. msg .. '|r')
+  DEFAULT_CHAT_FRAME:AddMessage('|c' .. config.ADDON_TEXT_COLOR .. config.LB_PREFIX ..': ' .. msg .. '|r')
 end
 
 function colorMsg(message)
@@ -46,4 +48,20 @@ function CheckItem(link)
     end
   end
     return false
+end
+
+function IsSenderMasterLooter(sender)
+  local lootMethod, masterLooterPartyID = GetLootMethod()
+  if lootMethod == 'master' and masterLooterPartyID then
+    if masterLooterPartyID == 0 then
+      if sender == UnitName('player') then
+      end
+      return sender == UnitName('player')
+    else
+      local senderUID = 'party' .. masterLooterPartyID
+      local masterLooterName = UnitName(senderUID)
+      return masterLooterName == sender
+    end
+  end
+  return false
 end

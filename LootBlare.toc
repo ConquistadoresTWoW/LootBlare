@@ -7,4 +7,7 @@
 
 LootBlare\config.lua
 LootBlare\utils.lua
+LootBlare\roll.lua
+LootBlare\ui.lua
+LootBlare\chat_handler.lua
 LootBlare\LootBlare.lua
