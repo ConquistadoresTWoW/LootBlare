@@ -1,4 +1,3 @@
-
 function CreateCloseButton(frame)
   -- Add a close button
   local closeButton = CreateFrame('Button', nil, frame, 'UIPanelCloseButton')
@@ -9,22 +8,26 @@ function CreateCloseButton(frame)
   -- Set textures if you want to customize the appearance
   closeButton:SetNormalTexture('Interface/Buttons/UI-Panel-MinimizeButton-Up')
   closeButton:SetPushedTexture('Interface/Buttons/UI-Panel-MinimizeButton-Down')
-  closeButton:SetHighlightTexture('Interface/Buttons/UI-Panel-MinimizeButton-Highlight')
+  closeButton:SetHighlightTexture(
+    'Interface/Buttons/UI-Panel-MinimizeButton-Highlight')
 
   -- Hide the frame when the button is clicked
   closeButton:SetScript('OnClick', function()
-      frame:Hide()
-      resetRolls()
+    frame:Hide()
+    resetRolls()
   end)
 end
-  
+
 function CreateActionButton(frame, buttonText, tooltipText, index, onClickAction)
   local panelWidth = frame:GetWidth()
-  local spacing = (panelWidth - (config.BUTTON_COUNT * config.BUTTON_WIDTH)) / (config.BUTTON_COUNT + 1)
+  local spacing = (panelWidth - (config.BUTTON_COUNT * config.BUTTON_WIDTH)) /
+                    (config.BUTTON_COUNT + 1)
   local button = CreateFrame('Button', nil, frame, UIParent)
   button:SetWidth(config.BUTTON_WIDTH)
   button:SetHeight(config.BUTTON_WIDTH)
-  button:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', index*spacing + (index-1)*config.BUTTON_WIDTH, config.BUTTON_PADING)
+  button:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT',
+                  index * spacing + (index - 1) * config.BUTTON_WIDTH,
+                  config.BUTTON_PADING)
 
   -- Set button text
   button:SetText(buttonText)
@@ -38,42 +41,42 @@ function CreateActionButton(frame, buttonText, tooltipText, index, onClickAction
   bg:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray background
 
   button:SetScript('OnMouseDown', function(self)
-      bg:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
+    bg:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
   end)
 
   button:SetScript('OnMouseUp', function(self)
-      bg:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on release
+    bg:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on release
   end)
 
   -- Add tooltip
   button:SetScript('OnEnter', function(self)
-      GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
-      GameTooltip:SetText(tooltipText, nil, nil, nil, nil, true)
-      bg:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
-      GameTooltip:Show()
+    GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
+    GameTooltip:SetText(tooltipText, nil, nil, nil, nil, true)
+    bg:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
+    GameTooltip:Show()
   end)
 
   button:SetScript('OnLeave', function(self)
-      bg:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
-      GameTooltip:Hide()
+    bg:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
+    GameTooltip:Hide()
   end)
 
   -- Add functionality to the button
-  button:SetScript('OnClick', function()
-    onClickAction()
-  end)
+  button:SetScript('OnClick', function() onClickAction() end)
 end
 
 function CreateItemRollFrame()
   local frame = CreateFrame('Frame', 'ItemRollFrame', UIParent)
   frame:SetWidth(200) -- Adjust size as needed
   frame:SetHeight(220)
-  frame:SetPoint('CENTER',UIParent,'CENTER',0,0) -- Position at center of the parent frame
+  frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0) -- Position at center of the parent frame
   frame:SetBackdrop({
-      bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
-      edgeFile = 'Interface/Tooltips/UI-Tooltip-Border',
-      tile = true, tileSize = 16, edgeSize = 16,
-      insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
+    edgeFile = 'Interface/Tooltips/UI-Tooltip-Border',
+    tile = true,
+    tileSize = 16,
+    edgeSize = 16,
+    insets = {left = 4, right = 4, top = 4, bottom = 4}
   })
   frame:SetBackdropColor(0, 0, 0, 1) -- Black background with full opacity
 
@@ -81,22 +84,22 @@ function CreateItemRollFrame()
   frame:EnableMouse(true)
 
   frame:RegisterForDrag('LeftButton') -- Only start dragging with the left mouse button
-  frame:SetScript('OnDragStart', function () frame:StartMoving() end)
-  frame:SetScript('OnDragStop', function () frame:StopMovingOrSizing() end)
+  frame:SetScript('OnDragStart', function() frame:StartMoving() end)
+  frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
   CreateCloseButton(frame)
-  CreateActionButton(frame, 'MS', 'Roll for Main Spec', 1, function() RandomRoll(1,100) end)
-  CreateActionButton(frame, 'OS', 'Roll for Off Spec', 2, function() RandomRoll(1,99) end)
-  CreateActionButton(frame, 'TM', 'Roll for Transmog', 3, function() RandomRoll(1,50) end)
+  CreateActionButton(frame, 'MS', 'Roll for Main Spec', 1,
+                     function() RandomRoll(1, 100) end)
+  CreateActionButton(frame, 'OS', 'Roll for Off Spec', 2,
+                     function() RandomRoll(1, 99) end)
+  CreateActionButton(frame, 'TM', 'Roll for Transmog', 3,
+                     function() RandomRoll(1, 50) end)
   frame:Hide()
 
   return frame
 end
 
-
 function UpdateTextArea(frame)
-  if not frame.textArea then
-    frame.textArea = CreateTextArea(frame)
-  end
+  if not frame.textArea then frame.textArea = CreateTextArea(frame) end
 
   -- frame.textArea:SetTeClear()  -- Clear the existing messages
   local text = ''
@@ -132,7 +135,7 @@ function UpdateTextArea(frame)
 
   frame.textArea:SetText(text)
 end
-  
+
 function InitItemInfo(frame)
   -- Create the texture for the item icon
   local icon = frame:CreateTexture()
@@ -161,7 +164,8 @@ function InitItemInfo(frame)
   frame.name = name
   frame.itemLink = ''
 
-  local tt = CreateFrame('GameTooltip', 'CustomTooltip2', UIParent, 'GameTooltipTemplate')
+  local tt = CreateFrame('GameTooltip', 'CustomTooltip2', UIParent,
+                         'GameTooltipTemplate')
 
   -- Set up tooltip
   iconButton:SetScript('OnEnter', function()
@@ -169,15 +173,16 @@ function InitItemInfo(frame)
     tt:SetHyperlink(frame.itemLink)
     tt:Show()
   end)
-  iconButton:SetScript('OnLeave', function()
-    tt:Hide()
-  end)
+  iconButton:SetScript('OnLeave', function() tt:Hide() end)
   iconButton:SetScript('OnClick', function()
-    if ( IsControlKeyDown() ) then
+    if (IsControlKeyDown()) then
       DressUpItemLink(frame.itemLink);
-    elseif ( IsShiftKeyDown() and ChatFrameEditBox:IsVisible() ) then
-      local itemName, itemLink, itemQuality, _, _, _, _, _, itemIcon = GetItemInfo(frame.itemLink)
-      ChatFrameEditBox:Insert(config.ITEM_QUALITY_COLORS[itemQuality].hex..'\124H'..itemLink..'\124h['..itemName..']\124h'..config.FONT_COLOR_CODE_CLOSE);
+    elseif (IsShiftKeyDown() and ChatFrameEditBox:IsVisible()) then
+      local itemName, itemLink, itemQuality, _, _, _, _, _, itemIcon =
+        GetItemInfo(frame.itemLink)
+      ChatFrameEditBox:Insert(config.ITEM_QUALITY_COLORS[itemQuality].hex ..
+                                '\124H' .. itemLink .. '\124h[' .. itemName ..
+                                ']\124h' .. config.FONT_COLOR_CODE_CLOSE);
     end
   end)
 end
@@ -190,7 +195,8 @@ function GetColoredTextByQuality(text, qualityIndex)
 end
 
 function SetItemInfo(frame, itemLinkArg)
-  local itemName, itemLink, itemQuality, _, _, _, _, _, itemIcon = GetItemInfo(itemLinkArg)
+  local itemName, itemLink, itemQuality, _, _, _, _, _, itemIcon = GetItemInfo(
+                                                                     itemLinkArg)
   if not frame.icon then InitItemInfo(frame) end
 
   -- if we know the item, and the quality isn't green+, don't show it
@@ -203,19 +209,21 @@ function SetItemInfo(frame, itemLinkArg)
   end
 
   frame.icon:SetTexture(itemIcon)
-  frame.iconButton:SetNormalTexture(itemIcon)  -- Sets the same texture as the icon
+  frame.iconButton:SetNormalTexture(itemIcon) -- Sets the same texture as the icon
 
-  frame.name:SetText(GetColoredTextByQuality(itemName,itemQuality))
+  frame.name:SetText(GetColoredTextByQuality(itemName, itemQuality))
 
   frame.itemLink = itemLink
   return true
 end
 
-function ShowFrame(frame,duration,item)
+function ShowFrame(frame, duration, item)
   frame:SetScript('OnUpdate', function()
     time_elapsed = time_elapsed + arg1
     item_query = item_query - arg1
-    if frame.timerText then frame.timerText:SetText(format('%.1f', duration - time_elapsed)) end
+    if frame.timerText then
+      frame.timerText:SetText(format('%.1f', duration - time_elapsed))
+    end
     if time_elapsed >= duration then
       frame:SetScript('OnUpdate', nil)
       time_elapsed = 0
@@ -228,7 +236,7 @@ function ShowFrame(frame,duration,item)
     if times > 0 and item_query < 0 and not CheckItem(item) then
       times = times - 1
     else
-      if not SetItemInfo(itemRollFrame,item) then frame:Hide() end
+      if not SetItemInfo(itemRollFrame, item) then frame:Hide() end
       times = 5
     end
   end)
@@ -248,10 +256,11 @@ end
 function GetClassOfRoller(rollerName)
   -- Iterate through the raid roster
   for i = 1, GetNumRaidMembers() do
-      local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
-      if name == rollerName then
-          return class -- Return the class as a string (e.g., 'Warrior', 'Mage')
-      end
+    local name, rank, subgroup, level, class, fileName, zone, online, isDead,
+          role, isML = GetRaidRosterInfo(i)
+    if name == rollerName then
+      return class -- Return the class as a string (e.g., 'Warrior', 'Mage')
+    end
   end
   return nil -- Return nil if the player is not found in the raid
 end

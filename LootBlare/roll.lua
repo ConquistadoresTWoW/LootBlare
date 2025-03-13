@@ -16,18 +16,10 @@ function resetRolls()
   tmogRollMessages = {}
   rollers = {}
 end
-  
+
 function sortRolls()
-  table.sort(srRollMessages, function(a, b)
-      return a.roll > b.roll
-  end)
-  table.sort(msRollMessages, function(a, b)
-      return a.roll > b.roll
-  end)
-  table.sort(osRollMessages, function(a, b)
-      return a.roll > b.roll
-  end)
-  table.sort(tmogRollMessages, function(a, b)
-      return a.roll > b.roll
-  end)
+  table.sort(srRollMessages, function(a, b) return a.roll > b.roll end)
+  table.sort(msRollMessages, function(a, b) return a.roll > b.roll end)
+  table.sort(osRollMessages, function(a, b) return a.roll > b.roll end)
+  table.sort(tmogRollMessages, function(a, b) return a.roll > b.roll end)
 end
