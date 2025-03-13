@@ -1,4 +1,4 @@
-function HandleChatMessage(event, message, sender)
+function handle_chat_message(event, message, sender)
   if (event == 'CHAT_MSG_RAID' or event == 'CHAT_MSG_RAID_LEADER') then
     local _, _, duration =
       string.find(message, 'Roll time set to (%d+) seconds')
@@ -11,20 +11,20 @@ function HandleChatMessage(event, message, sender)
     end
   elseif event == 'CURRENT_SPELL_CAST_CHANGED' and HideWhenUsingSpell and
     time_elapsed == 0 then
-    itemRollFrame:Hide()
+    item_roll_frame:Hide()
   elseif event == 'CHAT_MSG_SYSTEM' then
-    local _, _, newML = string.find(message, '(%S+) is now the loot master')
-    if newML then
-      masterLooter = newML
-      playerName = UnitName('player')
+    local _, _, new_ml = string.find(message, '(%S+) is now the loot master')
+    if new_ml then
+      master_looter = new_ml
+      player_name = UnitName('player')
       -- if the player is the new master looter, announce the roll time
-      if newML == playerName then
+      if new_ml == player_name then
         SendAddonMessage(config.LB_PREFIX, config.LB_SET_ROLL_TIME ..
                            FrameShownDuration .. ' seconds', 'RAID')
       end
-    elseif isRolling and string.find(message, 'rolls') and
+    elseif is_rolling and string.find(message, 'rolls') and
       string.find(message, '(%d+)') then
-      local _, _, roller, roll, minRoll, maxRoll =
+      local _, _, roller, roll, min_roll, max_roll =
         string.find(message, '(%S+) rolls (%d+) %((%d+)%-(%d+)%)')
       if roller and roll and rollers[roller] == nil then
         roll = tonumber(roll)
@@ -33,51 +33,51 @@ function HandleChatMessage(event, message, sender)
           roller = roller,
           roll = roll,
           msg = message,
-          class = GetClassOfRoller(roller)
+          class = get_class_of_roller(roller)
         }
-        if maxRoll == '101' then
-          table.insert(srRollMessages, message)
-        elseif maxRoll == '100' then
-          table.insert(msRollMessages, message)
-        elseif maxRoll == '99' then
-          table.insert(osRollMessages, message)
-        elseif maxRoll == '50' then
-          table.insert(tmogRollMessages, message)
+        if max_roll == '101' then
+          table.insert(sr_roll_messages, message)
+        elseif max_roll == '100' then
+          table.insert(ms_roll_messages, message)
+        elseif max_roll == '99' then
+          table.insert(os_roll_messages, message)
+        elseif max_roll == '50' then
+          table.insert(tmog_roll_messages, message)
         end
-        UpdateTextArea(itemRollFrame)
+        update_text_area(item_roll_frame)
       end
     end
 
-  elseif event == 'CHAT_MSG_RAID_WARNING' and sender == masterLooter then
-    local links = ExtractItemLinksFromMessage(message)
-    if tsize(links) == 1 then
+  elseif event == 'CHAT_MSG_RAID_WARNING' and sender == master_looter then
+    local links = extract_item_links_from_message(message)
+    if get_table_size(links) == 1 then
       -- these if are not being used RN. I'm just leaving them here for future reference
       if string.find(message, '^No one has need:') or
         string.find(message, 'has been sent to') or
         string.find(message, ' received ') then
-        itemRollFrame:Hide()
+        item_roll_frame:Hide()
         return
       elseif string.find(message, 'Rolling Cancelled') or -- usually a cancel is accidental in my experience
         string.find(message, 'seconds left to roll') or
         string.find(message, 'Rolling is now Closed') then
         return
       end
-      resetRolls()
-      UpdateTextArea(itemRollFrame)
+      reset_rolls()
+      update_text_area(item_roll_frame)
       time_elapsed = 0
-      isRolling = true
-      ShowFrame(itemRollFrame, FrameShownDuration, links[1])
+      is_rolling = true
+      show_frame(item_roll_frame, FrameShownDuration, links[1])
     end
   elseif event == 'ADDON_LOADED' then
     if FrameShownDuration == nil then FrameShownDuration = 15 end
     if FrameAutoClose == nil then FrameAutoClose = true end
     if HideWhenUsingSpell == nil then HideWhenUsingSpell = false end
-    if IsSenderMasterLooter(UnitName('player')) then
+    if is_sender_master_looter(UnitName('player')) then
       SendAddonMessage(config.LB_PREFIX, config.LB_SET_ML .. UnitName('player'),
                        'RAID')
       SendAddonMessage(config.LB_PREFIX,
                        config.LB_SET_ROLL_TIME .. FrameShownDuration, 'RAID')
-      itemRollFrame:UnregisterEvent('ADDON_LOADED')
+      item_roll_frame:UnregisterEvent('ADDON_LOADED')
     else
       SendAddonMessage(config.LB_PREFIX, config.LB_GET_DATA, 'RAID')
     end
@@ -86,9 +86,9 @@ function HandleChatMessage(event, message, sender)
 
     -- Someone is asking for the master looter and his roll time
     if message == config.LB_GET_DATA and
-      IsSenderMasterLooter(UnitName('player')) then
-      masterLooter = UnitName('player')
-      SendAddonMessage(config.LB_PREFIX, config.LB_SET_ML .. masterLooter,
+      is_sender_master_looter(UnitName('player')) then
+      master_looter = UnitName('player')
+      SendAddonMessage(config.LB_PREFIX, config.LB_SET_ML .. master_looter,
                        'RAID')
       SendAddonMessage(config.LB_PREFIX,
                        config.LB_SET_ROLL_TIME .. FrameShownDuration, 'RAID')
@@ -96,8 +96,8 @@ function HandleChatMessage(event, message, sender)
 
     -- Someone is setting the master looter
     if string.find(message, config.LB_SET_ML) then
-      local _, _, newML = string.find(message, 'ML set to (%S+)')
-      masterLooter = newML
+      local _, _, new_ml = string.find(message, 'ML set to (%S+)')
+      master_looter = new_ml
     end
     -- Someone is setting the roll time
     if string.find(message, config.LB_SET_ROLL_TIME) then
@@ -113,10 +113,10 @@ end
 
 function handle_config_command(msg)
   if msg == '' then
-    if itemRollFrame:IsVisible() then
-      itemRollFrame:Hide()
+    if item_roll_frame:IsVisible() then
+      item_roll_frame:Hide()
     else
-      itemRollFrame:Show()
+      item_roll_frame:Show()
     end
   elseif msg == 'help' then
     lb_print(
@@ -129,26 +129,26 @@ function handle_config_command(msg)
   elseif msg == 'settings' then
     lb_print('Frame shown duration: ' .. FrameShownDuration .. ' seconds.')
     lb_print('Auto closing: ' .. (FrameAutoClose and 'on' or 'off'))
-    lb_print('Master Looter: ' .. (masterLooter or 'unknown'))
+    lb_print('Master Looter: ' .. (master_looter or 'unknown'))
   elseif string.find(msg, 'time') then
-    local _, _, newDuration = string.find(msg, 'time (%d+)')
-    newDuration = tonumber(newDuration)
-    if newDuration and newDuration > 0 then
-      FrameShownDuration = newDuration
-      lb_print('Roll time set to ' .. newDuration .. ' seconds.')
-      if IsSenderMasterLooter(UnitName('player')) then
+    local _, _, new_duration = string.find(msg, 'time (%d+)')
+    new_duration = tonumber(new_duration)
+    if new_duration and new_duration > 0 then
+      FrameShownDuration = new_duration
+      lb_print('Roll time set to ' .. new_duration .. ' seconds.')
+      if is_sender_master_looter(UnitName('player')) then
         SendAddonMessage(config.LB_PREFIX,
-                         config.LB_SET_ROLL_TIME .. newDuration, 'RAID')
+                         config.LB_SET_ROLL_TIME .. new_duration, 'RAID')
       end
     else
       lb_print('Invalid duration. Please enter a number greater than 0.')
     end
   elseif string.find(msg, 'autoClose') then
-    local _, _, autoClose = string.find(msg, 'autoClose (%a+)')
-    if autoClose == 'on' then
+    local _, _, auto_close = string.find(msg, 'autoClose (%a+)')
+    if auto_close == 'on' then
       lb_print('Auto closing enabled.')
       FrameAutoClose = true
-    elseif autoClose == 'off' then
+    elseif auto_close == 'off' then
       lb_print('Auto closing disabled.')
       FrameAutoClose = false
     else

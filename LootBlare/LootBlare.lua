@@ -1,13 +1,13 @@
-itemRollFrame = CreateItemRollFrame()
-itemRollFrame:RegisterEvent('ADDON_LOADED')
-itemRollFrame:RegisterEvent('CHAT_MSG_SYSTEM')
-itemRollFrame:RegisterEvent('CHAT_MSG_RAID_WARNING')
-itemRollFrame:RegisterEvent('CHAT_MSG_RAID')
-itemRollFrame:RegisterEvent('CHAT_MSG_RAID_LEADER')
-itemRollFrame:RegisterEvent('CHAT_MSG_ADDON')
-itemRollFrame:RegisterEvent('CURRENT_SPELL_CAST_CHANGED')
-itemRollFrame:SetScript('OnEvent',
-                        function() HandleChatMessage(event, arg1, arg2) end)
+item_roll_frame = create_item_roll_frame()
+item_roll_frame:RegisterEvent('ADDON_LOADED')
+item_roll_frame:RegisterEvent('CHAT_MSG_SYSTEM')
+item_roll_frame:RegisterEvent('CHAT_MSG_RAID_WARNING')
+item_roll_frame:RegisterEvent('CHAT_MSG_RAID')
+item_roll_frame:RegisterEvent('CHAT_MSG_RAID_LEADER')
+item_roll_frame:RegisterEvent('CHAT_MSG_ADDON')
+item_roll_frame:RegisterEvent('CURRENT_SPELL_CAST_CHANGED')
+item_roll_frame:SetScript('OnEvent',
+                          function() handle_chat_message(event, arg1, arg2) end)
 
 -- Register the slash command
 SLASH_LOOTBLARE1 = '/lootblare'

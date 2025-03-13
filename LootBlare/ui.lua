@@ -1,26 +1,27 @@
-function CreateCloseButton(frame)
+local function create_close_button(frame)
   -- Add a close button
-  local closeButton = CreateFrame('Button', nil, frame, 'UIPanelCloseButton')
-  closeButton:SetWidth(32) -- Button size
-  closeButton:SetHeight(32) -- Button size
-  closeButton:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -5, -5) -- Position at the top right
+  local close_button = CreateFrame('Button', nil, frame, 'UIPanelCloseButton')
+  close_button:SetWidth(32) -- Button size
+  close_button:SetHeight(32) -- Button size
+  close_button:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -5, -5) -- Position at the top right
 
   -- Set textures if you want to customize the appearance
-  closeButton:SetNormalTexture('Interface/Buttons/UI-Panel-MinimizeButton-Up')
-  closeButton:SetPushedTexture('Interface/Buttons/UI-Panel-MinimizeButton-Down')
-  closeButton:SetHighlightTexture(
+  close_button:SetNormalTexture('Interface/Buttons/UI-Panel-MinimizeButton-Up')
+  close_button:SetPushedTexture('Interface/Buttons/UI-Panel-MinimizeButton-Down')
+  close_button:SetHighlightTexture(
     'Interface/Buttons/UI-Panel-MinimizeButton-Highlight')
 
   -- Hide the frame when the button is clicked
-  closeButton:SetScript('OnClick', function()
+  close_button:SetScript('OnClick', function()
     frame:Hide()
-    resetRolls()
+    reset_rolls()
   end)
 end
 
-function CreateActionButton(frame, buttonText, tooltipText, index, onClickAction)
-  local panelWidth = frame:GetWidth()
-  local spacing = (panelWidth - (config.BUTTON_COUNT * config.BUTTON_WIDTH)) /
+local function create_action_button(frame, button_text, tooltip_text, index,
+                                    on_click_action)
+  local panel_width = frame:GetWidth()
+  local spacing = (panel_width - (config.BUTTON_COUNT * config.BUTTON_WIDTH)) /
                     (config.BUTTON_COUNT + 1)
   local button = CreateFrame('Button', nil, frame, UIParent)
   button:SetWidth(config.BUTTON_WIDTH)
@@ -30,43 +31,43 @@ function CreateActionButton(frame, buttonText, tooltipText, index, onClickAction
                   config.BUTTON_PADING)
 
   -- Set button text
-  button:SetText(buttonText)
+  button:SetText(button_text)
   local font = button:GetFontString()
   font:SetFont(config.FONT_NAME, config.FONT_SIZE, config.FONT_OUTLINE)
 
   -- Add background 
-  local bg = button:CreateTexture(nil, 'BACKGROUND')
-  bg:SetAllPoints(button)
-  bg:SetTexture(1, 1, 1, 1) -- White texture
-  bg:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray background
+  local background = button:CreateTexture(nil, 'BACKGROUND')
+  background:SetAllPoints(button)
+  background:SetTexture(1, 1, 1, 1) -- White texture
+  background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray background
 
   button:SetScript('OnMouseDown', function(self)
-    bg:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
+    background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
   end)
 
   button:SetScript('OnMouseUp', function(self)
-    bg:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on release
+    background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on release
   end)
 
   -- Add tooltip
   button:SetScript('OnEnter', function(self)
     GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
-    GameTooltip:SetText(tooltipText, nil, nil, nil, nil, true)
-    bg:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
+    GameTooltip:SetText(tooltip_text, nil, nil, nil, nil, true)
+    background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
     GameTooltip:Show()
   end)
 
   button:SetScript('OnLeave', function(self)
-    bg:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
+    background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
     GameTooltip:Hide()
   end)
 
   -- Add functionality to the button
-  button:SetScript('OnClick', function() onClickAction() end)
+  button:SetScript('OnClick', function() on_click_action() end)
 end
 
-function CreateItemRollFrame()
-  local frame = CreateFrame('Frame', 'ItemRollFrame', UIParent)
+function create_item_roll_frame()
+  local frame = CreateFrame('Frame', 'item_roll_frame', UIParent)
   frame:SetWidth(200) -- Adjust size as needed
   frame:SetHeight(220)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0) -- Position at center of the parent frame
@@ -79,64 +80,71 @@ function CreateItemRollFrame()
     insets = {left = 4, right = 4, top = 4, bottom = 4}
   })
   frame:SetBackdropColor(0, 0, 0, 1) -- Black background with full opacity
-
   frame:SetMovable(true)
   frame:EnableMouse(true)
-
   frame:RegisterForDrag('LeftButton') -- Only start dragging with the left mouse button
   frame:SetScript('OnDragStart', function() frame:StartMoving() end)
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
-  CreateCloseButton(frame)
-  CreateActionButton(frame, 'MS', 'Roll for Main Spec', 1,
-                     function() RandomRoll(1, 100) end)
-  CreateActionButton(frame, 'OS', 'Roll for Off Spec', 2,
-                     function() RandomRoll(1, 99) end)
-  CreateActionButton(frame, 'TM', 'Roll for Transmog', 3,
-                     function() RandomRoll(1, 50) end)
+
+  create_close_button(frame)
+  create_action_button(frame, 'MS', 'Roll for Main Spec', 1,
+                       function() RandomRoll(1, 100) end)
+  create_action_button(frame, 'OS', 'Roll for Off Spec', 2,
+                       function() RandomRoll(1, 99) end)
+  create_action_button(frame, 'TM', 'Roll for Transmog', 3,
+                       function() RandomRoll(1, 50) end)
   frame:Hide()
 
   return frame
 end
 
-function UpdateTextArea(frame)
-  if not frame.textArea then frame.textArea = CreateTextArea(frame) end
+local function create_text_area(frame)
+  local text_area = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+  text_area:SetHeight(150) -- Size of the icon
+  text_area:SetPoint('TOP', frame, 'TOP', 0, -80)
+  text_area:SetJustifyH('LEFT')
+  text_area:SetJustifyV('TOP')
 
-  -- frame.textArea:SetTeClear()  -- Clear the existing messages
+  return text_area
+end
+
+function update_text_area(frame)
+  if not frame.textArea then frame.textArea = create_text_area(frame) end
   local text = ''
   local colored_msg = ''
   local count = 0
 
-  sortRolls()
+  sort_rolls()
 
-  for i, v in ipairs(srRollMessages) do
+  for i, v in ipairs(sr_roll_messages) do
     if count >= 5 then break end
     colored_msg = v.msg
-    text = text .. colorMsg(v) .. '\n'
+    text = text .. create_color_message(v) .. '\n'
     count = count + 1
   end
-  for i, v in ipairs(msRollMessages) do
+  for i, v in ipairs(ms_roll_messages) do
     if count >= 6 then break end
     colored_msg = v.msg
-    text = text .. colorMsg(v) .. '\n'
+    text = text .. create_color_message(v) .. '\n'
     count = count + 1
   end
-  for i, v in ipairs(osRollMessages) do
+  for i, v in ipairs(os_roll_messages) do
     if count >= 7 then break end
     colored_msg = v.msg
-    text = text .. colorMsg(v) .. '\n'
+    text = text .. create_color_message(v) .. '\n'
     count = count + 1
   end
-  for i, v in ipairs(tmogRollMessages) do
+  for i, v in ipairs(tmog_roll_messages) do
     if count >= 8 then break end
     colored_msg = v.msg
-    text = text .. colorMsg(v) .. '\n'
+    text = text .. create_color_message(v) .. '\n'
     count = count + 1
   end
 
   frame.textArea:SetText(text)
 end
 
-function InitItemInfo(frame)
+local function init_item_info(frame)
   -- Create the texture for the item icon
   local icon = frame:CreateTexture()
   icon:SetWidth(40) -- Size of the icon
@@ -144,23 +152,23 @@ function InitItemInfo(frame)
   icon:SetPoint('TOP', frame, 'TOP', 0, -10)
 
   -- Create a button for mouse interaction
-  local iconButton = CreateFrame('Button', nil, frame)
-  iconButton:SetWidth(40) -- Size of the icon
-  iconButton:SetHeight(40) -- Size of the icon
-  iconButton:SetPoint('TOP', frame, 'TOP', 0, -10)
+  local icon_button = CreateFrame('Button', nil, frame)
+  icon_button:SetWidth(40) -- Size of the icon
+  icon_button:SetHeight(40) -- Size of the icon
+  icon_button:SetPoint('TOP', frame, 'TOP', 0, -10)
 
   -- Create a FontString for the frame hide timer
-  local timerText = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-  timerText:SetPoint('CENTER', frame, 'TOPLEFT', 30, -32)
-  timerText:SetFont(timerText:GetFont(), 20)
+  local timer_text = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+  timer_text:SetPoint('CENTER', frame, 'TOPLEFT', 30, -32)
+  timer_text:SetFont(timer_text:GetFont(), 20)
 
   -- Create a FontString for the item name
   local name = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
   name:SetPoint('TOP', icon, 'BOTTOM', 0, -10)
 
   frame.icon = icon
-  frame.iconButton = iconButton
-  frame.timerText = timerText
+  frame.iconButton = icon_button
+  frame.timerText = timer_text
   frame.name = name
   frame.itemLink = ''
 
@@ -168,56 +176,56 @@ function InitItemInfo(frame)
                          'GameTooltipTemplate')
 
   -- Set up tooltip
-  iconButton:SetScript('OnEnter', function()
-    tt:SetOwner(iconButton, 'ANCHOR_RIGHT')
+  icon_button:SetScript('OnEnter', function()
+    tt:SetOwner(icon_button, 'ANCHOR_RIGHT')
     tt:SetHyperlink(frame.itemLink)
     tt:Show()
   end)
-  iconButton:SetScript('OnLeave', function() tt:Hide() end)
-  iconButton:SetScript('OnClick', function()
+  icon_button:SetScript('OnLeave', function() tt:Hide() end)
+  icon_button:SetScript('OnClick', function()
     if (IsControlKeyDown()) then
       DressUpItemLink(frame.itemLink);
     elseif (IsShiftKeyDown() and ChatFrameEditBox:IsVisible()) then
-      local itemName, itemLink, itemQuality, _, _, _, _, _, itemIcon =
+      local item_name, item_link, item_quality, _, _, _, _, _, item_icon =
         GetItemInfo(frame.itemLink)
-      ChatFrameEditBox:Insert(config.ITEM_QUALITY_COLORS[itemQuality].hex ..
-                                '\124H' .. itemLink .. '\124h[' .. itemName ..
+      ChatFrameEditBox:Insert(config.ITEM_QUALITY_COLORS[item_quality].hex ..
+                                '\124H' .. item_link .. '\124h[' .. item_name ..
                                 ']\124h' .. config.FONT_COLOR_CODE_CLOSE);
     end
   end)
 end
 -- Function to return colored text based on item quality
-function GetColoredTextByQuality(text, qualityIndex)
+local function get_colored_text_by_quality(text, quality_index)
   -- Get the color associated with the item quality
-  local r, g, b, hex = GetItemQualityColor(qualityIndex)
+  local r, g, b, hex = GetItemQualityColor(quality_index)
   -- Return the text wrapped in WoW's color formatting
   return string.format('%s%s|r', hex, text)
 end
 
-function SetItemInfo(frame, itemLinkArg)
-  local itemName, itemLink, itemQuality, _, _, _, _, _, itemIcon = GetItemInfo(
-                                                                     itemLinkArg)
-  if not frame.icon then InitItemInfo(frame) end
+local function set_item_info(frame, item_link_arg)
+  local init_name, item_link, item_quality, _, _, _, _, _, item_icon =
+    GetItemInfo(item_link_arg)
+  if not frame.icon then init_item_info(frame) end
 
   -- if we know the item, and the quality isn't green+, don't show it
-  if itemName and itemQuality < 2 then return false end
-  if not itemIcon then
+  if init_name and item_quality < 2 then return false end
+  if not item_icon then
     frame.icon:SetTexture('Interface\\Icons\\INV_Misc_QuestionMark')
     frame.name:SetText('Unknown item, attempting to query...')
     -- could be an item we want to see, try to show it
     return true
   end
 
-  frame.icon:SetTexture(itemIcon)
-  frame.iconButton:SetNormalTexture(itemIcon) -- Sets the same texture as the icon
+  frame.icon:SetTexture(item_icon)
+  frame.iconButton:SetNormalTexture(item_icon) -- Sets the same texture as the icon
 
-  frame.name:SetText(GetColoredTextByQuality(itemName, itemQuality))
+  frame.name:SetText(get_colored_text_by_quality(init_name, item_quality))
 
-  frame.itemLink = itemLink
+  frame.itemLink = item_link
   return true
 end
 
-function ShowFrame(frame, duration, item)
+function show_frame(frame, duration, item)
   frame:SetScript('OnUpdate', function()
     time_elapsed = time_elapsed + arg1
     item_query = item_query - arg1
@@ -229,47 +237,37 @@ function ShowFrame(frame, duration, item)
       time_elapsed = 0
       item_query = 1.5
       times = 3
-      rollMessages = {}
-      isRolling = false
+      roll_messages = {}
+      is_rolling = false
       if FrameAutoClose then frame:Hide() end
     end
-    if times > 0 and item_query < 0 and not CheckItem(item) then
+    if times > 0 and item_query < 0 and not check_item(item) then
       times = times - 1
     else
-      if not SetItemInfo(itemRollFrame, item) then frame:Hide() end
+      if not set_item_info(item_roll_frame, item) then frame:Hide() end
       times = 5
     end
   end)
   frame:Show()
 end
 
-function CreateTextArea(frame)
-  local textArea = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-  textArea:SetHeight(150) -- Size of the icon
-  textArea:SetPoint('TOP', frame, 'TOP', 0, -80)
-  textArea:SetJustifyH('LEFT')
-  textArea:SetJustifyV('TOP')
-
-  return textArea
-end
-
-function GetClassOfRoller(rollerName)
+function get_class_of_roller(roller_name)
   -- Iterate through the raid roster
   for i = 1, GetNumRaidMembers() do
-    local name, rank, subgroup, level, class, fileName, zone, online, isDead,
+    local name, rank, subgroup, level, class, file_name, zone, online, is_dead,
           role, isML = GetRaidRosterInfo(i)
-    if name == rollerName then
+    if name == roller_name then
       return class -- Return the class as a string (e.g., 'Warrior', 'Mage')
     end
   end
   return nil -- Return nil if the player is not found in the raid
 end
 
-function ExtractItemLinksFromMessage(message)
-  local itemLinks = {}
+function extract_item_links_from_message(message)
+  local item_links = {}
   -- This pattern matches the standard item link structure in WoW
   for link in string.gfind(message, '|c.-|H(item:.-)|h.-|h|r') do
-    table.insert(itemLinks, link)
+    table.insert(item_links, link)
   end
-  return itemLinks
+  return item_links
 end

@@ -6,29 +6,29 @@ function lb_print(msg)
                                   config.LB_PREFIX .. ': ' .. msg .. '|r')
 end
 
-function colorMsg(message)
+function create_color_message(message)
   msg = message.msg
   class = message.class
   _, _, _, message_end = string.find(msg, '(%S+)%s+(.+)')
-  classColor = config.RAID_CLASS_COLORS[class]
-  textColor = config.DEFAULT_TEXT_COLOR
+  class_color = config.RAID_CLASS_COLORS[class]
+  text_color = config.DEFAULT_TEXT_COLOR
 
   if string.find(msg, '-101') then
-    textColor = config.SR_TEXT_COLOR
+    text_color = config.SR_TEXT_COLOR
   elseif string.find(msg, '-100') then
-    textColor = config.MS_TEXT_COLOR
+    text_color = config.MS_TEXT_COLOR
   elseif string.find(msg, '-99') then
-    textColor = config.OS_TEXT_COLOR
+    text_color = config.OS_TEXT_COLOR
   elseif string.find(msg, '-50') then
-    textColor = config.TM_TEXT_COLOR
+    text_color = config.TM_TEXT_COLOR
   end
 
-  colored_msg = '|c' .. classColor .. '' .. message.roller .. '|r |c' ..
-                  textColor .. message_end .. '|r'
+  colored_msg = '|c' .. class_color .. '' .. message.roller .. '|r |c' ..
+                  text_color .. message_end .. '|r'
   return colored_msg
 end
 
-function tsize(t)
+function get_table_size(t)
   c = 0
   for _ in pairs(t) do c = c + 1 end
   if c > 0 then
@@ -38,10 +38,11 @@ function tsize(t)
   end
 end
 
-function CheckItem(link)
+function check_item(link)
   discover:SetOwner(UIParent, 'ANCHOR_PRESERVE')
   discover:SetHyperlink(link)
-
+  -- I don't know why this is here or what it does. I'm just leaving it here for future reference
+  -- these variables are not defined 
   if discoverTextLeft1 and discoverTooltipTextLeft1:IsVisible() then
     local name = discoverTooltipTextLeft1:GetText()
     discoverTooltip:Hide()
@@ -55,16 +56,16 @@ function CheckItem(link)
   return false
 end
 
-function IsSenderMasterLooter(sender)
-  local lootMethod, masterLooterPartyID = GetLootMethod()
-  if lootMethod == 'master' and masterLooterPartyID then
-    if masterLooterPartyID == 0 then
+function is_sender_master_looter(sender)
+  local loot_method, master_looter_party_id = GetLootMethod()
+  if loot_method == 'master' and master_looter_party_id then
+    if master_looter_party_id == 0 then
       if sender == UnitName('player') then end
       return sender == UnitName('player')
     else
-      local senderUID = 'party' .. masterLooterPartyID
-      local masterLooterName = UnitName(senderUID)
-      return masterLooterName == sender
+      local sender_UID = 'party' .. master_looter_party_id
+      local master_looter_name = UnitName(sender_UID)
+      return master_looter_name == sender
     end
   end
   return false
