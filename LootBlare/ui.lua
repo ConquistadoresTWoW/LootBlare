@@ -271,3 +271,124 @@ function extract_item_links_from_message(message)
   end
   return item_links
 end
+
+local frame_backdrop = {
+  bgFile = 'Interface\\DialogFrame\\UI-DialogBox-Background',
+  edgeFile = 'Interface\\DialogFrame\\UI-DialogBox-Border',
+  tile = true,
+  tileSize = 32,
+  edgeSize = 32,
+  insets = {left = 8, right = 8, top = 8, bottom = 8}
+}
+
+local control_backdrop = {
+  bgFile = 'Interface\\Tooltips\\UI-Tooltip-Background',
+  edgeFile = 'Interface\\Tooltips\\UI-Tooltip-Border',
+  tile = true,
+  tileSize = 16,
+  edgeSize = 16,
+  insets = {left = 3, right = 3, top = 3, bottom = 3}
+}
+
+function create_text_box_frame()
+  local frame = CreateFrame('Frame', 'load_sr_from_text_frame', UIParent)
+  frame:Hide()
+  frame:SetWidth(565)
+  frame:SetHeight(300)
+  frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
+  frame:EnableMouse()
+  frame:SetMovable(true)
+  frame:SetResizable(true)
+  frame:SetFrameStrata('DIALOG')
+
+  frame:SetBackdrop(frame_backdrop)
+  frame:SetBackdropColor(0, 0, 0, 1)
+
+  frame:SetMinResize(400, 200)
+  frame:SetToplevel(true)
+
+  local backdrop = CreateFrame('Frame', nil, frame)
+  backdrop:SetBackdrop(control_backdrop)
+  backdrop:SetBackdropColor(0, 0, 0)
+  backdrop:SetBackdropBorderColor(0.4, 0.4, 0.4)
+
+  backdrop:SetPoint('TOPLEFT', frame, 'TOPLEFT', 17, -18)
+  backdrop:SetPoint('BOTTOMRIGHT', frame, 'BOTTOMRIGHT', -17, 43)
+
+  local scroll_frame = CreateFrame('ScrollFrame', "a@ScrollFrame@c", backdrop,
+                                   'UIPanelScrollFrameTemplate')
+  scroll_frame:SetPoint('TOPLEFT', 5, -6)
+  scroll_frame:SetPoint('BOTTOMRIGHT', -28, 6)
+  scroll_frame:EnableMouse(true)
+
+  local scroll_child = CreateFrame('Frame', nil, scroll_frame)
+  scroll_frame:SetScrollChild(scroll_child)
+  scroll_child:SetHeight(2)
+  scroll_child:SetWidth(2)
+
+  local edit_box = CreateFrame('EditBox', nil, scroll_child)
+  edit_box:SetPoint('TOPLEFT', 0, 0)
+  edit_box:SetHeight(50)
+  edit_box:SetWidth(50)
+  edit_box:SetMultiLine(true)
+  edit_box:SetTextInsets(5, 5, 3, 3)
+  edit_box:EnableMouse(true)
+  edit_box:SetAutoFocus(false)
+  edit_box:SetFontObject('ChatFontNormal')
+  frame.editbox = edit_box
+
+  edit_box:SetScript('OnEscapePressed', function() frame:Hide() end)
+  scroll_frame:SetScript('OnMouseUp', function() edit_box:SetFocus() end)
+
+  local function fix_size()
+    scroll_child:SetHeight(scroll_frame:GetHeight())
+    scroll_child:SetWidth(scroll_frame:GetWidth())
+    edit_box:SetWidth(scroll_frame:GetWidth())
+  end
+
+  scroll_frame:SetScript('OnShow', fix_size)
+  scroll_frame:SetScript('OnSizeChanged', fix_size)
+
+  local cancel_button = CreateFrame('Button', nil, frame,
+                                    'UIPanelButtonTemplate')
+  cancel_button:SetScript('OnClick', function()
+    frame:Hide()
+    edit_box:SetText("")
+  end)
+  cancel_button:SetPoint('BOTTOMRIGHT', frame, 'BOTTOMRIGHT', -27, 17)
+  cancel_button:SetHeight(20)
+  cancel_button:SetWidth(80)
+  cancel_button:SetText('Close')
+
+  local clear_button =
+    CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
+  clear_button:SetScript('OnClick', function()
+    edit_box:SetText('')
+    cancel_button:SetText('Close')
+    edit_box:SetText('')
+  end)
+  clear_button:SetPoint('RIGHT', cancel_button, 'LEFT', -10, 0)
+  clear_button:SetHeight(20)
+  clear_button:SetWidth(80)
+  clear_button:SetText('Clear')
+
+  local import_button = CreateFrame('Button', nil, frame,
+                                    'UIPanelButtonTemplate')
+  import_button:SetScript('OnClick', function()
+    current_sr_text = edit_box:GetText()
+    load_sr_from_csv()
+    frame:Hide()
+
+  end)
+  import_button:SetPoint('RIGHT', clear_button, 'LEFT', -10, 0)
+  import_button:SetHeight(20)
+  import_button:SetWidth(100)
+  import_button:SetText('Import!')
+
+  edit_box:SetScript("OnTextChanged",
+                     function(_) scroll_frame:UpdateScrollChildRect() end)
+
+  frame:SetScript("OnShow", function() cancel_button:SetText("Close") end)
+
+  return frame
+end

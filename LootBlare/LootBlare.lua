@@ -9,6 +9,8 @@ item_roll_frame:RegisterEvent('CURRENT_SPELL_CAST_CHANGED')
 item_roll_frame:SetScript('OnEvent',
                           function() handle_chat_message(event, arg1, arg2) end)
 
+text_box_frame = create_text_box_frame()
+
 -- Register the slash command
 SLASH_LOOTBLARE1 = '/lootblare'
 SLASH_LOOTBLARE2 = '/lb'
