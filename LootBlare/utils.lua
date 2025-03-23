@@ -29,7 +29,7 @@ function create_color_message(message)
   return colored_msg
 end
 
-function get_table_size(t)
+function len(t)
   c = 0
   for _ in pairs(t) do c = c + 1 end
   if c > 0 then

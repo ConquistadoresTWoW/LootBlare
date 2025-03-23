@@ -50,7 +50,7 @@ function handle_chat_message(event, message, sender)
 
   elseif event == 'CHAT_MSG_RAID_WARNING' and sender == master_looter then
     local links = extract_item_links_from_message(message)
-    if get_table_size(links) == 1 then
+    if len(links) == 1 then
       -- these if are not being used RN. I'm just leaving them here for future reference
       if string.find(message, '^No one has need:') or
         string.find(message, 'has been sent to') or
