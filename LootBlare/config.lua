@@ -14,10 +14,15 @@ config = {
     ['Shaman'] = 'FF0070DE',
     ['Priest'] = 'FFFFFFFF',
     ['Warlock'] = 'FF9482C9',
-    ['Paladin'] = 'FFF58CBA'
+    ['Paladin'] = 'FFF58CBA',
+    ['unknown'] = 'FFAD0202'
   },
   ADDON_TEXT_COLOR = 'FFEDD8BB',
   DEFAULT_TEXT_COLOR = 'FFFFFF00',
+
+  SR_MS_TEXT_COLOR = 'FFFF0000',
+  SR_OS_TEXT_COLOR = 'FFFFA837',
+
   SR_TEXT_COLOR = 'FFFF0000',
   MS_TEXT_COLOR = 'FFFFFF00',
   OS_TEXT_COLOR = 'FF00FF00',

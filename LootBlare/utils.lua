@@ -8,13 +8,19 @@ function lb_print(msg)
 end
 
 function create_color_message(message)
-  msg = message.msg
-  class = message.class
+  local msg = message.msg
+  local class = message.class
   _, _, _, message_end = string.find(msg, '(%S+)%s+(.+)')
-  class_color = config.RAID_CLASS_COLORS[class]
-  text_color = config.DEFAULT_TEXT_COLOR
+  local class_color = config.RAID_CLASS_COLORS[class] or
+                        config.DEFAULT_TEXT_COLOR
+  local text_color = config.DEFAULT_TEXT_COLOR
 
-  if string.find(msg, '-101') then
+  -- match 'SR-MS'
+  if string.find(msg, '(SR%-MS)') then
+    text_color = config.SR_MS_TEXT_COLOR
+  elseif string.find(msg, '(SR%-OS)') then
+    text_color = config.SR_OS_TEXT_COLOR
+  elseif string.find(msg, '-101') then
     text_color = config.SR_TEXT_COLOR
   elseif string.find(msg, '-100') then
     text_color = config.MS_TEXT_COLOR
@@ -24,19 +30,15 @@ function create_color_message(message)
     text_color = config.TM_TEXT_COLOR
   end
 
-  colored_msg = '|c' .. class_color .. '' .. message.roller .. '|r |c' ..
-                  text_color .. message_end .. '|r'
+  local colored_msg = '|c' .. class_color .. '' .. message.roller .. '|r |c' ..
+                        text_color .. message_end .. '|r'
   return colored_msg
 end
 
 function len(t)
   c = 0
   for _ in pairs(t) do c = c + 1 end
-  if c > 0 then
-    return c
-  else
-    return nil
-  end
+  return c
 end
 
 function check_item(link)

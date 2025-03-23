@@ -35,14 +35,34 @@ function handle_chat_message(event, message, sender)
           msg = message,
           class = get_class_of_roller(roller)
         }
-        if max_roll == '101' then
-          table.insert(sr_roll_messages, message)
-        elseif max_roll == '100' then
-          table.insert(ms_roll_messages, message)
-        elseif max_roll == '99' then
-          table.insert(os_roll_messages, message)
-        elseif max_roll == '50' then
-          table.insert(tmog_roll_messages, message)
+
+        local has_sr = false
+        -- update roll message if the roller is a soft reserver
+        for i, sr in ipairs(sr_ms_messages) do
+          if sr.roller == roller then
+            has_sr = true
+            sr.roll = roll
+            sr.msg = sr.roller .. ' rolls ' .. roll .. ' (SR-MS: ' .. sr.sr ..
+                       ')'
+          end
+        end
+        for i, sr in ipairs(sr_os_messages) do
+          if sr.roller == roller then
+            has_sr = true
+            sr.roll = roll
+            sr.msg = sr.roller .. ' rolls ' .. roll .. ' (SR-OS: ' .. sr.sr ..
+                       ')'
+          end
+        end
+
+        if not has_sr then
+          if max_roll == '100' then
+            table.insert(ms_roll_messages, message)
+          elseif max_roll == '99' then
+            table.insert(os_roll_messages, message)
+          elseif max_roll == '50' then
+            table.insert(tmog_roll_messages, message)
+          end
         end
         update_text_area(item_roll_frame)
       end
@@ -50,19 +70,34 @@ function handle_chat_message(event, message, sender)
 
   elseif event == 'CHAT_MSG_RAID_WARNING' and sender == master_looter then
     local links = extract_item_links_from_message(message)
+
     if len(links) == 1 then
-      -- these if are not being used RN. I'm just leaving them here for future reference
-      if string.find(message, '^No one has need:') or
-        string.find(message, 'has been sent to') or
-        string.find(message, ' received ') then
-        item_roll_frame:Hide()
-        return
-      elseif string.find(message, 'Rolling Cancelled') or -- usually a cancel is accidental in my experience
-        string.find(message, 'seconds left to roll') or
-        string.find(message, 'Rolling is now Closed') then
-        return
-      end
       reset_rolls()
+      local sr_ms, sr_os = find_ms_and_os_sr(links[1])
+
+      -- Add the SR-MS and SR-OS rollers to the roll messages
+      for i, sr in ipairs(sr_ms) do
+        local fake_roller = {
+          roller = sr["Attendee"],
+          roll = 1,
+          msg = sr["Attendee"] .. ' rolls 1 (SR-MS: ' .. sr["SR+"] .. ')',
+          class = get_class_of_roller(sr["Attendee"]),
+          sr = sr["SR+"]
+        }
+        table.insert(sr_ms_messages, fake_roller)
+      end
+
+      for i, sr in ipairs(sr_os) do
+        local fake_roller = {
+          roller = sr["Attendee"],
+          roll = 1,
+          msg = sr["Attendee"] .. ' rolls 1 (SR-OS: ' .. sr["SR+"] .. ')',
+          class = get_class_of_roller(sr["Attendee"]),
+          sr = sr["SR+"]
+        }
+        table.insert(sr_os_messages, fake_roller)
+      end
+
       update_text_area(item_roll_frame)
       time_elapsed = 0
       is_rolling = true

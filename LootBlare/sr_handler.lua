@@ -69,7 +69,9 @@ local function parse_csv()
       ["Item"] = nil,
       ["Attendee"] = nil,
       ["Comment"] = nil,
-      ["SR+"] = nil
+      ["SR+"] = nil,
+      ["MS"] = true,
+      ["Alt"] = false
     }
 
     local values = split_string(lines[i])
@@ -79,6 +81,13 @@ local function parse_csv()
     end
 
     for i, value in ipairs(values) do row[header[i]] = value end
+
+    local comment = string.lower(row["Comment"])
+    row["MS"] = not (string.find(comment, 'os')) and true
+    row["Alt"] = string.find(comment, 'alt') and true or false
+    row["SR+"] = tonumber(row["SR+"])
+    if row["SR+"] == 0 then row["SR+"] = 1 end
+
     table.insert(data, row)
   end
 
@@ -101,6 +110,46 @@ function print_sr_list()
   for i, item in ipairs(sr_list) do
     lb_print('ItemID: ' .. item["ID"] .. ', ItemName: ' .. item["Item"] ..
                ', Attendee: ' .. item["Attendee"] .. ', Comment: ' ..
-               item["Comment"] .. ', SR+: ' .. item["SR+"])
+               item["Comment"] .. ', SR+: ' .. item["SR+"] .. ', MS: ' ..
+               tostring(item["MS"]) .. ', Alt: ' .. tostring(item["Alt"]))
   end
+end
+
+function find_soft_reservers(item_link)
+  local item_id = tonumber(string.match(item_link, 'item:(%d+):'))
+
+  local soft_reservers = {}
+  for i, item in ipairs(sr_list) do
+    local comment = string.lower(item["Comment"])
+    local os = string.find(comment, 'os')
+    local alt = string.find(comment, 'alt')
+
+    if tonumber(item["ID"]) == item_id then
+      table.insert(soft_reservers, item)
+    end
+  end
+
+  return soft_reservers
+end
+
+function find_ms_and_os_sr(item_link)
+  local soft_reservers = find_soft_reservers(item_link)
+
+  if len(soft_reservers) == 0 then return {}, {} end
+
+  local sorted_ms = {}
+  local sorted_os = {}
+
+  for i, sr in ipairs(soft_reservers) do
+    if sr["MS"] then
+      table.insert(sorted_ms, sr)
+    else
+      table.insert(sorted_os, sr)
+    end
+  end
+
+  table.sort(sorted_ms, function(a, b) return a["SR+"] > b["SR+"] end)
+  table.sort(sorted_os, function(a, b) return a["SR+"] > b["SR+"] end)
+
+  return sorted_ms, sorted_os
 end

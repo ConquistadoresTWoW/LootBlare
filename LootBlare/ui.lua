@@ -14,7 +14,7 @@ local function create_close_button(frame)
   -- Hide the frame when the button is clicked
   close_button:SetScript('OnClick', function()
     frame:Hide()
-    reset_rolls()
+    -- reset_rolls()
   end)
 end
 
@@ -69,7 +69,7 @@ end
 function create_item_roll_frame()
   local frame = CreateFrame('Frame', 'item_roll_frame', UIParent)
   frame:SetWidth(200) -- Adjust size as needed
-  frame:SetHeight(220)
+  frame:SetHeight(300)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0) -- Position at center of the parent frame
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -116,8 +116,16 @@ function update_text_area(frame)
 
   sort_rolls()
 
-  for i, v in ipairs(sr_roll_messages) do
-    if count >= 5 then break end
+  for i, v in ipairs(sr_ms_messages) do lb_print('sr_ms_messages: ' .. v.msg) end
+
+  -- sr ms
+  for i, v in ipairs(sr_ms_messages) do
+    colored_msg = v.msg
+    text = text .. create_color_message(v) .. '\n'
+    count = count + 1
+  end
+  -- sr os
+  for i, v in ipairs(sr_os_messages) do
     colored_msg = v.msg
     text = text .. create_color_message(v) .. '\n'
     count = count + 1
@@ -260,7 +268,7 @@ function get_class_of_roller(roller_name)
       return class -- Return the class as a string (e.g., 'Warrior', 'Mage')
     end
   end
-  return nil -- Return nil if the player is not found in the raid
+  return 'unknown' -- Return nil if the player is not found in the raid
 end
 
 function extract_item_links_from_message(message)
