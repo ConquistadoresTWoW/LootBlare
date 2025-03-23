@@ -60,7 +60,7 @@ local function parse_csv()
     end
   end
 
-  -- Parse the data rows
+  -- Parse the data
   local data = {}
 
   for i = 2, len(lines) do
@@ -72,24 +72,16 @@ local function parse_csv()
       ["SR+"] = nil
     }
 
-    local index = 1
-    local values = {}
-
-    local pared_values = split_string(lines[i])
-    if len(pared_values) ~= len(header) then
+    local values = split_string(lines[i])
+    if len(values) ~= len(header) then
       return nil,
              "Invalid CSV row: Incorrect number of fields in row " .. (i - 1)
     end
 
-    for value in pared_values do
-      row[header[index]] = value
-      index = index + 1
-    end
-    -- Validate that the row has the correct number of fields
+    for i, value in ipairs(values) do row[header[i]] = value end
     table.insert(data, row)
   end
 
-  -- Return the parsed data
   return data, nil
 end
 
@@ -103,4 +95,12 @@ function load_sr_from_csv()
 
   sr_list = items
   lb_print('Loading SR from CSV')
+end
+
+function print_sr_list()
+  for i, item in ipairs(sr_list) do
+    lb_print('ItemID: ' .. item["ID"] .. ', ItemName: ' .. item["Item"] ..
+               ', Attendee: ' .. item["Attendee"] .. ', Comment: ' ..
+               item["Comment"] .. ', SR+: ' .. item["SR+"])
+  end
 end

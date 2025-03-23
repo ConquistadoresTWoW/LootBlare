@@ -167,6 +167,8 @@ function handle_config_command(msg)
     else
       lb_print('Invalid option. Please enter \'on\' or \'off\'.')
     end
+  elseif string.find(msg, 'srs') then
+    print_sr_list()
   elseif string.find(msg, 'sr') then
     text_box_frame:Show()
   else
