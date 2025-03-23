@@ -2,6 +2,7 @@ discover = CreateFrame('GameTooltip', 'CustomTooltip1', UIParent,
                        'GameTooltipTemplate')
 
 function lb_print(msg)
+  if msg == nil then msg = 'nil' end
   DEFAULT_CHAT_FRAME:AddMessage('|c' .. config.ADDON_TEXT_COLOR ..
                                   config.LB_PREFIX .. ': ' .. msg .. '|r')
 end
