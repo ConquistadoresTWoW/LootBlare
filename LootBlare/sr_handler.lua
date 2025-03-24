@@ -170,3 +170,31 @@ function find_ms_and_os_sr(item_link)
   return sorted_ms, sorted_os
 end
 
+function insert_sr_rolls(sr_ms, sr_os)
+  for i, sr in ipairs(sr_ms) do
+    local fake_roller = {
+      roller = sr["Attendee"],
+      roll = 1,
+      msg = sr["Attendee"] .. ' rolls 1 (SR-MS: ' .. sr["SR+"] .. ')',
+      class = get_class_of_roller(sr["Attendee"]),
+      sr = sr["SR+"]
+    }
+    table.insert(sr_ms_messages, fake_roller)
+  end
+
+  for i, sr in ipairs(sr_os) do
+    local fake_roller = {
+      roller = sr["Attendee"],
+      roll = 1,
+      msg = sr["Attendee"] .. ' rolls 1 (SR-OS: ' .. sr["SR+"] .. ')',
+      class = get_class_of_roller(sr["Attendee"]),
+      sr = sr["SR+"]
+    }
+    table.insert(sr_os_messages, fake_roller)
+  end
+end
+
+function has_sr(sr_list, roller)
+  for i, sr in ipairs(sr_list) do if sr.roller == roller then return true end end
+  return false
+end

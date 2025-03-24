@@ -26,7 +26,12 @@ function handle_chat_message(event, message, sender)
       string.find(message, '(%d+)') then
       local _, _, roller, roll, min_roll, max_roll =
         string.find(message, '(%S+) rolls (%d+) %((%d+)%-(%d+)%)')
+      max_roll = tonumber(max_roll)
       if roller and roll and rollers[roller] == nil then
+
+        local has_ms_sr = has_sr(sr_ms_messages, roller)
+        local has_os_sr = has_sr(sr_os_messages, roller)
+        if (has_ms_sr or has_os_sr) and max_roll ~= 100 then return end
         roll = tonumber(roll)
         rollers[roller] = 1
         message = {
@@ -36,26 +41,25 @@ function handle_chat_message(event, message, sender)
           class = get_class_of_roller(roller)
         }
 
-        local has_sr = false
-        -- update roll message if the roller is a soft reserver
-        for i, sr in ipairs(sr_ms_messages) do
-          if sr.roller == roller then
-            has_sr = true
-            sr.roll = roll
-            sr.msg = sr.roller .. ' rolls ' .. roll .. ' (SR-MS: ' .. sr.sr ..
-                       ')'
+        if has_ms_sr then
+          for i, sr in ipairs(sr_ms_messages) do
+            if sr.roller == roller then
+              sr.roll = roll
+              sr.msg = sr.roller .. ' rolls ' .. roll .. ' (SR-MS: ' .. sr.sr ..
+                         ')'
+            end
           end
-        end
-        for i, sr in ipairs(sr_os_messages) do
-          if sr.roller == roller then
-            has_sr = true
-            sr.roll = roll
-            sr.msg = sr.roller .. ' rolls ' .. roll .. ' (SR-OS: ' .. sr.sr ..
-                       ')'
+        elseif has_os_sr then
+          for i, sr in ipairs(sr_os_messages) do
+            if sr.roller == roller then
+              sr.roll = roll
+              sr.msg = sr.roller .. ' rolls ' .. roll .. ' (SR-OS: ' .. sr.sr ..
+                         ')'
+            end
           end
         end
 
-        if not has_sr then
+        if not has_ms_sr and not has_os_sr then
           if max_roll == '100' then
             table.insert(ms_roll_messages, message)
           elseif max_roll == '99' then
