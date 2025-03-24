@@ -112,6 +112,7 @@ function handle_chat_message(event, message, sender)
     if FrameAutoClose == nil then FrameAutoClose = true end
     if HideWhenUsingSpell == nil then HideWhenUsingSpell = false end
     if AltList == nil then AltList = {} end
+    if SRList == nil then SRList = {} end
     if is_sender_master_looter(UnitName('player')) then
       SendAddonMessage(config.LB_PREFIX, config.LB_SET_ML .. UnitName('player'),
                        'RAID')

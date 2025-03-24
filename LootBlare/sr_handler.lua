@@ -1,5 +1,4 @@
 current_sr_text = ''
-sr_list = {}
 
 local function parse_csv()
   -- Check if the input is valid
@@ -77,17 +76,17 @@ function load_sr_from_csv()
     return
   end
 
-  sr_list = items
+  SRList = items
   lb_print('Loading SR from CSV')
 end
 
 function clear_sr_list()
-  sr_list = {}
+  SRList = {}
   lb_print('SR list cleared')
 end
 
 function print_sr_list()
-  for i, item in ipairs(sr_list) do
+  for i, item in ipairs(SRList) do
     lb_print('ItemID: ' .. item["ID"] .. ', ItemName: ' .. item["Item"] ..
                ', Attendee: ' .. item["Attendee"] .. ', Comment: ' ..
                item["Comment"] .. ', SR+: ' .. item["SR+"] .. ', MS: ' ..
@@ -101,7 +100,7 @@ function find_soft_reservers_for_item(item_link)
   lb_print('Item ID: ' .. tostring(item_id))
 
   local soft_reservers = {}
-  for i, item in ipairs(sr_list) do
+  for i, item in ipairs(SRList) do
     if tonumber(item["ID"]) == item_id then
       table.insert(soft_reservers, item)
     end
