@@ -116,8 +116,6 @@ function update_text_area(frame)
 
   sort_rolls()
 
-  for i, v in ipairs(sr_ms_messages) do lb_print('sr_ms_messages: ' .. v.msg) end
-
   -- sr ms
   for i, v in ipairs(sr_ms_messages) do
     colored_msg = v.msg
