@@ -61,7 +61,6 @@ local function parse_csv()
     row["MS"] = not (string.find(comment, 'os')) and true
     row["Alt"] = string.find(comment, 'alt') and true or false
     row["SR+"] = tonumber(row["SR+"])
-    if row["SR+"] == 0 then row["SR+"] = 1 end
     if row["Alt"] then AltList[row["Attendee"]] = true end
     if AltList[row["Attendee"]] then row["Alt"] = true end
 
@@ -102,7 +101,7 @@ function find_soft_reservers_for_item(item_link)
 
   local current_item_sr = {}
   for i, item in ipairs(SRList) do
-    if tonumber(item["ID"]) == item_id then
+    if tonumber(item["ID"]) == item_id and item["SR+"] > 0 then
       table.insert(current_item_sr, item)
     end
   end
