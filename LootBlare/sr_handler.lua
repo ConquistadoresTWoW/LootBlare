@@ -132,8 +132,24 @@ function find_soft_reservers(item_link)
   return soft_reservers
 end
 
+local function is_member_in_raid(member_name)
+  for i = 1, GetNumRaidMembers() do
+    local name, _, _, _, _, _, _, online = GetRaidRosterInfo(i)
+    if name == member_name and online then return true end
+  end
+
+  return false
+end
+
 function find_ms_and_os_sr(item_link)
   local soft_reservers = find_soft_reservers(item_link)
+
+  -- Filter out members not in the raid
+  for i = len(soft_reservers), 1, -1 do
+    if not is_member_in_raid(soft_reservers[i]["Attendee"]) then
+      table.remove(soft_reservers, i)
+    end
+  end
 
   if len(soft_reservers) == 0 then return {}, {} end
 
@@ -153,3 +169,4 @@ function find_ms_and_os_sr(item_link)
 
   return sorted_ms, sorted_os
 end
+
