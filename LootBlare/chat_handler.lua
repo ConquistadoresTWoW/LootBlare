@@ -37,34 +37,29 @@ function handle_chat_message(event, message, sender)
         message = {
           roller = roller,
           roll = roll,
-          msg = message,
-          class = get_class_of_roller(roller)
+          class = get_class_of_roller(roller),
+          alt = AltList[roller]
         }
 
         if has_ms_sr then
           for i, sr in ipairs(sr_ms_messages) do
-            if sr.roller == roller then
-              sr.roll = roll
-              sr.msg = sr.roller .. ' rolls ' .. roll .. ' (SR-MS: ' .. sr.sr ..
-                         ')'
-            end
+            if sr.roller == roller then sr.roll = roll end
           end
         elseif has_os_sr then
           for i, sr in ipairs(sr_os_messages) do
-            if sr.roller == roller then
-              sr.roll = roll
-              sr.msg = sr.roller .. ' rolls ' .. roll .. ' (SR-OS: ' .. sr.sr ..
-                         ')'
-            end
+            if sr.roller == roller then sr.roll = roll end
           end
         end
 
         if not has_ms_sr and not has_os_sr then
-          if max_roll == '100' then
+          if max_roll == 100 then
+            message.roll_type = RollType.MS
             table.insert(ms_roll_messages, message)
-          elseif max_roll == '99' then
+          elseif max_roll == 99 then
+            message.roll_type = RollType.OS
             table.insert(os_roll_messages, message)
-          elseif max_roll == '50' then
+          elseif max_roll == 50 then
+            message.roll_type = RollType.TM
             table.insert(tmog_roll_messages, message)
           end
         end
@@ -77,27 +72,32 @@ function handle_chat_message(event, message, sender)
 
     if len(links) == 1 then
       reset_rolls()
-      local sr_ms, sr_os = find_ms_and_os_sr(links[1])
+      local sr_ms, sr_os = find_ms_and_os_sr_for_item(links[1])
 
       -- Add the SR-MS and SR-OS rollers to the roll messages
       for i, sr in ipairs(sr_ms) do
         local fake_roller = {
           roller = sr["Attendee"],
           roll = 1,
-          msg = sr["Attendee"] .. ' rolls 1 (SR-MS: ' .. sr["SR+"] .. ')',
           class = get_class_of_roller(sr["Attendee"]),
-          sr = sr["SR+"]
+          sr = sr["SR+"],
+          sr_type = 'SR-MS',
+          alt = AltList[sr["Attendee"]],
+          roll_type = RollType.SR_MS
         }
         table.insert(sr_ms_messages, fake_roller)
       end
 
       for i, sr in ipairs(sr_os) do
+        local alt_str = ''
         local fake_roller = {
           roller = sr["Attendee"],
           roll = 1,
-          msg = sr["Attendee"] .. ' rolls 1 (SR-OS: ' .. sr["SR+"] .. ')',
           class = get_class_of_roller(sr["Attendee"]),
-          sr = sr["SR+"]
+          sr = sr["SR+"],
+          sr_type = 'SR-OS',
+          alt = AltList[sr["Attendee"]],
+          roll_type = RollType.SR_OS
         }
         table.insert(sr_os_messages, fake_roller)
       end
@@ -111,6 +111,7 @@ function handle_chat_message(event, message, sender)
     if FrameShownDuration == nil then FrameShownDuration = 15 end
     if FrameAutoClose == nil then FrameAutoClose = true end
     if HideWhenUsingSpell == nil then HideWhenUsingSpell = false end
+    if AltList == nil then AltList = {} end
     if is_sender_master_looter(UnitName('player')) then
       SendAddonMessage(config.LB_PREFIX, config.LB_SET_ML .. UnitName('player'),
                        'RAID')
@@ -211,6 +212,16 @@ function handle_config_command(msg)
     print_sr_list()
   elseif string.find(msg, 'sr') then
     text_box_frame:Show()
+  elseif string.find(msg, 'src') then
+    clear_sr_list()
+  elseif string.find(msg, 'alts list') or string.find(msg, 'al') then
+    print_alts_list()
+  elseif string.find(msg, 'alts add (%a+)') then
+    local _, _, new_alts = string.find(msg, 'alts add (%a+)')
+    load_alts_from_string(new_alts)
+  elseif string.find(msg, 'aa (%a+)') then
+    local _, _, new_alts = string.find(msg, 'aa (%a+)')
+    load_alts_from_string(new_alts)
   else
     lb_print('Invalid command. Type /lb help for a list of commands.')
   end

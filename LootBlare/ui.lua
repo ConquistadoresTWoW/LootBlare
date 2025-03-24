@@ -117,33 +117,33 @@ function update_text_area(frame)
   sort_rolls()
 
   -- sr ms
-  for i, v in ipairs(sr_ms_messages) do
-    colored_msg = v.msg
-    text = text .. create_color_message(v) .. '\n'
+  for i, msg in ipairs(sr_ms_messages) do
+    create_roller_message(msg)
+    text = text .. create_color_message(msg) .. '\n'
     count = count + 1
   end
   -- sr os
-  for i, v in ipairs(sr_os_messages) do
-    colored_msg = v.msg
-    text = text .. create_color_message(v) .. '\n'
+  for i, msg in ipairs(sr_os_messages) do
+    create_roller_message(msg)
+    text = text .. create_color_message(msg) .. '\n'
     count = count + 1
   end
-  for i, v in ipairs(ms_roll_messages) do
+  for i, msg in ipairs(ms_roll_messages) do
     if count >= 6 then break end
-    colored_msg = v.msg
-    text = text .. create_color_message(v) .. '\n'
+    create_roller_message(msg)
+    text = text .. create_color_message(msg) .. '\n'
     count = count + 1
   end
-  for i, v in ipairs(os_roll_messages) do
+  for i, msg in ipairs(os_roll_messages) do
     if count >= 7 then break end
-    colored_msg = v.msg
-    text = text .. create_color_message(v) .. '\n'
+    create_roller_message(msg)
+    text = text .. create_color_message(msg) .. '\n'
     count = count + 1
   end
-  for i, v in ipairs(tmog_roll_messages) do
+  for i, msg in ipairs(tmog_roll_messages) do
     if count >= 8 then break end
-    colored_msg = v.msg
-    text = text .. create_color_message(v) .. '\n'
+    create_roller_message(msg)
+    text = text .. create_color_message(msg) .. '\n'
     count = count + 1
   end
 

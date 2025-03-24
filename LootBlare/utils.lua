@@ -8,30 +8,25 @@ function lb_print(msg)
 end
 
 function create_color_message(message)
-  local msg = message.msg
-  local class = message.class
-  _, _, _, message_end = string.find(msg, '(%S+)%s+(.+)')
-  local class_color = config.RAID_CLASS_COLORS[class] or
+  local class_color = config.RAID_CLASS_COLORS[message.class] or
                         config.DEFAULT_TEXT_COLOR
   local text_color = config.DEFAULT_TEXT_COLOR
 
-  -- match 'SR-MS'
-  if string.find(msg, '(SR%-MS)') then
+  if message.roll_type == RollType.SR_MS then
     text_color = config.SR_MS_TEXT_COLOR
-  elseif string.find(msg, '(SR%-OS)') then
+  elseif message.roll_type == RollType.SR_OS then
     text_color = config.SR_OS_TEXT_COLOR
-  elseif string.find(msg, '-101') then
-    text_color = config.SR_TEXT_COLOR
-  elseif string.find(msg, '-100') then
+  elseif message.roll_type == RollType.MS then
     text_color = config.MS_TEXT_COLOR
-  elseif string.find(msg, '-99') then
+  elseif message.roll_type == RollType.OS then
     text_color = config.OS_TEXT_COLOR
-  elseif string.find(msg, '-50') then
+  elseif message.roll_type == RollType.TM then
     text_color = config.TM_TEXT_COLOR
   end
 
-  local colored_msg = '|c' .. class_color .. '' .. message.roller .. '|r |c' ..
-                        text_color .. message_end .. '|r'
+  local colored_msg =
+    '|c' .. class_color .. '' .. message.alt_roller .. '|r |c' .. text_color ..
+      message.message_end .. '|r'
   return colored_msg
 end
 
@@ -102,4 +97,26 @@ function split_string(input_str, sep)
   for i, v in ipairs(result) do if tonumber(v) then result[i] = tonumber(v) end end
 
   return result
+end
+
+function load_alts_from_string(alts_string)
+
+  local alts = split_string(alts_string, ',')
+
+  for i, alt in ipairs(alts) do AltList[alt] = true end
+end
+
+function print_alts_list()
+  local alt_str = ''
+  for alt, _ in pairs(AltList) do alt_str = alt_str .. alt .. ', ' end
+  lb_print(alt_str)
+end
+
+function is_member_in_raid(member_name)
+  for i = 1, GetNumRaidMembers() do
+    local name, _, _, _, _, _, _, online = GetRaidRosterInfo(i)
+    if name == member_name and online then return true end
+  end
+
+  return false
 end

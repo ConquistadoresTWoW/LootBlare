@@ -60,6 +60,8 @@ local function parse_csv()
     row["Alt"] = string.find(comment, 'alt') and true or false
     row["SR+"] = tonumber(row["SR+"])
     if row["SR+"] == 0 then row["SR+"] = 1 end
+    if row["Alt"] then AltList[row["Attendee"]] = true end
+    if AltList[row["Attendee"]] then row["Alt"] = true end
 
     table.insert(data, row)
   end
@@ -79,6 +81,11 @@ function load_sr_from_csv()
   lb_print('Loading SR from CSV')
 end
 
+function clear_sr_list()
+  sr_list = {}
+  lb_print('SR list cleared')
+end
+
 function print_sr_list()
   for i, item in ipairs(sr_list) do
     lb_print('ItemID: ' .. item["ID"] .. ', ItemName: ' .. item["Item"] ..
@@ -88,15 +95,11 @@ function print_sr_list()
   end
 end
 
-function find_soft_reservers(item_link)
-  local item_id = tonumber(string.match(item_link, 'item:(%d+):'))
+function find_soft_reservers_for_item(item_link)
+  local item_id = tonumber(string.find(item_link, 'item:(%d+):'))
 
   local soft_reservers = {}
   for i, item in ipairs(sr_list) do
-    local comment = string.lower(item["Comment"])
-    local os = string.find(comment, 'os')
-    local alt = string.find(comment, 'alt')
-
     if tonumber(item["ID"]) == item_id then
       table.insert(soft_reservers, item)
     end
@@ -105,17 +108,8 @@ function find_soft_reservers(item_link)
   return soft_reservers
 end
 
-local function is_member_in_raid(member_name)
-  for i = 1, GetNumRaidMembers() do
-    local name, _, _, _, _, _, _, online = GetRaidRosterInfo(i)
-    if name == member_name and online then return true end
-  end
-
-  return false
-end
-
-function find_ms_and_os_sr(item_link)
-  local soft_reservers = find_soft_reservers(item_link)
+function find_ms_and_os_sr_for_item(item_link)
+  local soft_reservers = find_soft_reservers_for_item(item_link)
 
   -- Filter out members not in the raid
   for i = len(soft_reservers), 1, -1 do

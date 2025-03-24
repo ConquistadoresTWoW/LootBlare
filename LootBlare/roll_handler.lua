@@ -10,6 +10,7 @@ time_elapsed = 0
 item_query = 0.5
 times = 5
 master_looter = nil
+RollType = {SR_MS = 102, SR_OS = 101, MS = 100, OS = 99, TM = 50}
 
 function reset_rolls()
   sr_roll_messages = {}
@@ -35,4 +36,20 @@ function sort_rolls()
     if a.sr == b.sr then return a.roll > b.roll end
     return a.sr > b.sr
   end)
+end
+
+function create_roller_message(message)
+  local roller = message.roller
+
+  if message.alt then roller = '*' .. roller end
+
+  local message_end = ' rolls ' .. message.roll
+
+  if message.sr_type then
+    message_end =
+      message_end .. ' (' .. message.sr_type .. ': ' .. message.sr .. ')'
+  end
+
+  message.alt_roller = roller
+  message.message_end = message_end
 end

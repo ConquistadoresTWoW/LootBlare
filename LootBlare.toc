@@ -3,7 +3,7 @@
 ## Author: Ehawne, Sivent, Gulolio
 ## Version: 1.1.7
 ## Notes: Make loot rolls obvious
-## SavedVariables:FrameShownDuration, FrameAutoClose, HideWhenUsingSpell
+## SavedVariables:FrameShownDuration, FrameAutoClose, HideWhenUsingSpell, AltList
 
 LootBlare\config.lua
 LootBlare\utils.lua
