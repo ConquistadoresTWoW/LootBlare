@@ -1,33 +1,6 @@
 current_sr_text = ''
 sr_list = {}
 
-local function split_string(input_str, sep)
-  if sep == nil then sep = "," end
-  local result = {}
-  local field = ""
-
-  for i = 1, string.len(input_str) do
-    -- local char = input_str:sub(i, i)
-    local char = string.sub(input_str, i, i)
-
-    if char == '"' then
-      -- ignore quotes and continue to next char
-    elseif char == sep then
-      table.insert(result, field)
-      field = "" -- Reset field
-    else
-      field = field .. char
-    end
-  end
-
-  table.insert(result, field) -- Add last field
-
-  -- Convert numeric fields where applicable
-  for i, v in ipairs(result) do if tonumber(v) then result[i] = tonumber(v) end end
-
-  return result
-end
-
 local function parse_csv()
   -- Check if the input is valid
   if type(current_sr_text) ~= "string" or current_sr_text == "" then

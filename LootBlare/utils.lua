@@ -73,3 +73,33 @@ function is_sender_master_looter(sender)
   end
   return false
 end
+
+function split_string(input_str, sep)
+  if sep == nil then sep = "," end
+  local result = {}
+  local field = ""
+
+  -- remove spaces of input_str
+  input_str = string.gsub(input_str, ' ', '')
+
+  for i = 1, string.len(input_str) do
+    -- local char = input_str:sub(i, i)
+    local char = string.sub(input_str, i, i)
+
+    if char == '"' then
+      -- ignore quotes and continue to next char
+    elseif char == sep then
+      table.insert(result, field)
+      field = "" -- Reset field
+    else
+      field = field .. char
+    end
+  end
+
+  table.insert(result, field) -- Add last field
+
+  -- Convert numeric fields where applicable
+  for i, v in ipairs(result) do if tonumber(v) then result[i] = tonumber(v) end end
+
+  return result
+end
