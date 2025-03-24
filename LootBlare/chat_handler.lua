@@ -166,6 +166,7 @@ function handle_config_command(msg)
   elseif msg == 'settings' then
     lb_print('Frame shown duration: ' .. FrameShownDuration .. ' seconds.')
     lb_print('Auto closing: ' .. (FrameAutoClose and 'on' or 'off'))
+    lb_print('Hide when using spell: ' .. (HideWhenUsingSpell and 'on' or 'off'))
     lb_print('Master Looter: ' .. (master_looter or 'unknown'))
   elseif string.find(msg, 'time') then
     local _, _, new_duration = string.find(msg, 'time (%d+)')
