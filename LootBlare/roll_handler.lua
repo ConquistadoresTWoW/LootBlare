@@ -5,6 +5,7 @@ ms_roll_messages = {}
 os_roll_messages = {}
 tmog_roll_messages = {}
 rollers = {}
+current_link = nil
 is_rolling = false
 time_elapsed = 0
 item_query = 0.5

@@ -28,5 +28,8 @@ config = {
   LB_PREFIX = 'LootBlare',
   LB_GET_DATA = 'get data',
   LB_SET_ML = 'ML set to ',
-  LB_SET_ROLL_TIME = 'Roll time set to '
+  LB_SET_ROLL_TIME = 'Roll time set to ',
+  LB_CLEAR_SR = 'clear sr',
+  LB_ADD_SR = 'add sr:',
+  LB_START_ROLL = 'start roll'
 }

@@ -71,41 +71,12 @@ function handle_chat_message(event, message, sender)
     local links = extract_item_links_from_message(message)
 
     if len(links) == 1 then
-      reset_rolls()
-      local sr_ms, sr_os = find_ms_and_os_sr_for_item(links[1])
-
-      -- Add the SR-MS and SR-OS rollers to the roll messages
-      for i, sr in ipairs(sr_ms) do
-        local fake_roller = {
-          roller = sr["Attendee"],
-          roll = 1,
-          class = get_class_of_roller(sr["Attendee"]),
-          sr = sr["SR+"],
-          sr_type = 'SR-MS',
-          alt = AltList[sr["Attendee"]],
-          roll_type = RollType.SR_MS
-        }
-        table.insert(sr_ms_messages, fake_roller)
+      current_link = links[1]
+      if is_master_looter(UnitName('player')) then
+        current_item_sr = find_soft_reservers_for_item(current_link)
+        report_sr_list()
       end
-
-      for i, sr in ipairs(sr_os) do
-        local alt_str = ''
-        local fake_roller = {
-          roller = sr["Attendee"],
-          roll = 1,
-          class = get_class_of_roller(sr["Attendee"]),
-          sr = sr["SR+"],
-          sr_type = 'SR-OS',
-          alt = AltList[sr["Attendee"]],
-          roll_type = RollType.SR_OS
-        }
-        table.insert(sr_os_messages, fake_roller)
-      end
-
-      update_text_area(item_roll_frame)
-      time_elapsed = 0
-      is_rolling = true
-      show_frame(item_roll_frame, FrameShownDuration, links[1])
+      SendAddonMessage(config.LB_PREFIX, config.LB_START_ROLL, 'RAID')
     end
   elseif event == 'ADDON_LOADED' then
     if FrameShownDuration == nil then FrameShownDuration = 15 end
@@ -113,7 +84,7 @@ function handle_chat_message(event, message, sender)
     if HideWhenUsingSpell == nil then HideWhenUsingSpell = false end
     if AltList == nil then AltList = {} end
     if SRList == nil then SRList = {} end
-    if is_sender_master_looter(UnitName('player')) then
+    if is_master_looter(UnitName('player')) then
       SendAddonMessage(config.LB_PREFIX, config.LB_SET_ML .. UnitName('player'),
                        'RAID')
       SendAddonMessage(config.LB_PREFIX,
@@ -126,8 +97,7 @@ function handle_chat_message(event, message, sender)
     local prefix, message, channel, sender = arg1, arg2, arg3, arg4
 
     -- Someone is asking for the master looter and his roll time
-    if message == config.LB_GET_DATA and
-      is_sender_master_looter(UnitName('player')) then
+    if message == config.LB_GET_DATA and is_master_looter(UnitName('player')) then
       master_looter = UnitName('player')
       SendAddonMessage(config.LB_PREFIX, config.LB_SET_ML .. master_looter,
                        'RAID')
@@ -140,6 +110,7 @@ function handle_chat_message(event, message, sender)
       local _, _, new_ml = string.find(message, 'ML set to (%S+)')
       master_looter = new_ml
     end
+
     -- Someone is setting the roll time
     if string.find(message, config.LB_SET_ROLL_TIME) then
       local _, _, duration = string.find(message, 'Roll time set to (%d+)')
@@ -147,6 +118,27 @@ function handle_chat_message(event, message, sender)
       if duration and duration ~= FrameShownDuration then
         FrameShownDuration = duration
         lb_print('Roll time set to ' .. FrameShownDuration .. ' seconds.')
+      end
+    end
+
+    -- Someone is starting a roll
+    if is_master_looter(sender) and message == config.LB_START_ROLL then
+      reset_rolls()
+      sr_ms, sr_os = find_ms_and_os_sr_for_item()
+      insert_sr_rolls(sr_ms, sr_os)
+      update_text_area(item_roll_frame)
+      time_elapsed = 0
+      is_rolling = true
+      show_frame(item_roll_frame, FrameShownDuration, current_link)
+    end
+
+    -- ML is reseting the SR list for the current item
+    if is_master_looter(sender) and sender ~= UnitName('player') then
+      if message == config.LB_CLEAR_SR then current_item_sr = {} end
+      if string.find(message, config.LB_ADD_SR) then
+        local _, _, sr_str = string.find(message, config.LB_ADD_SR .. '(.+)')
+        local row = built_sr_row_from_string(sr_str)
+        table.insert(current_item_sr, row)
       end
     end
   end
@@ -180,7 +172,7 @@ function handle_config_command(msg)
     if new_duration and new_duration > 0 then
       FrameShownDuration = new_duration
       lb_print('Roll time set to ' .. new_duration .. ' seconds.')
-      if is_sender_master_looter(UnitName('player')) then
+      if is_master_looter(UnitName('player')) then
         SendAddonMessage(config.LB_PREFIX,
                          config.LB_SET_ROLL_TIME .. new_duration, 'RAID')
       end
@@ -211,10 +203,10 @@ function handle_config_command(msg)
     end
   elseif string.find(msg, 'srs') then
     print_sr_list()
-  elseif string.find(msg, 'sr') then
-    text_box_frame:Show()
   elseif string.find(msg, 'src') then
     clear_sr_list()
+  elseif string.find(msg, 'sr') then
+    text_box_frame:Show()
   elseif string.find(msg, 'alts list') or string.find(msg, 'al') then
     print_alts_list()
   elseif string.find(msg, 'alts add (%a+)') then

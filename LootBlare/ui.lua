@@ -249,7 +249,7 @@ function show_frame(frame, duration, item)
       is_rolling = false
       if FrameAutoClose then frame:Hide() end
     end
-    if times > 0 and item_query < 0 and not check_item(item) then
+    if times > 0 and item_query < 0 then
       times = times - 1
     else
       if not set_item_info(item_roll_frame, item) then frame:Hide() end

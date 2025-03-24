@@ -1,4 +1,7 @@
 current_sr_text = ''
+current_item_sr = {}
+current_item_sr_ms = {}
+current_item_sr_od = {}
 
 local function parse_csv()
   -- Check if the input is valid
@@ -97,34 +100,30 @@ end
 function find_soft_reservers_for_item(item_link)
   local item_id = tonumber(string_match(item_link, 'item:(%d+):'))
 
-  lb_print('Item ID: ' .. tostring(item_id))
-
-  local soft_reservers = {}
+  local current_item_sr = {}
   for i, item in ipairs(SRList) do
     if tonumber(item["ID"]) == item_id then
-      table.insert(soft_reservers, item)
+      table.insert(current_item_sr, item)
     end
   end
-
-  return soft_reservers
-end
-
-function find_ms_and_os_sr_for_item(item_link)
-  local soft_reservers = find_soft_reservers_for_item(item_link)
 
   -- Filter out members not in the raid
-  for i = len(soft_reservers), 1, -1 do
-    if not is_member_in_raid(soft_reservers[i]["Attendee"]) then
-      table.remove(soft_reservers, i)
+  for i = len(current_item_sr), 1, -1 do
+    if not is_member_in_raid(current_item_sr[i]["Attendee"]) then
+      table.remove(current_item_sr, i)
     end
   end
 
-  if len(soft_reservers) == 0 then return {}, {} end
+  return current_item_sr
+end
+
+function find_ms_and_os_sr_for_item()
+  if len(current_item_sr) == 0 then return {}, {} end
 
   local sorted_ms = {}
   local sorted_os = {}
 
-  for i, sr in ipairs(soft_reservers) do
+  for i, sr in ipairs(current_item_sr) do
     if sr["MS"] then
       table.insert(sorted_ms, sr)
     else
@@ -143,20 +142,25 @@ function insert_sr_rolls(sr_ms, sr_os)
     local fake_roller = {
       roller = sr["Attendee"],
       roll = 1,
-      msg = sr["Attendee"] .. ' rolls 1 (SR-MS: ' .. sr["SR+"] .. ')',
       class = get_class_of_roller(sr["Attendee"]),
-      sr = sr["SR+"]
+      sr = sr["SR+"],
+      sr_type = 'SR-MS',
+      alt = AltList[sr["Attendee"]],
+      roll_type = RollType.SR_MS
     }
     table.insert(sr_ms_messages, fake_roller)
   end
 
   for i, sr in ipairs(sr_os) do
+    local alt_str = ''
     local fake_roller = {
       roller = sr["Attendee"],
       roll = 1,
-      msg = sr["Attendee"] .. ' rolls 1 (SR-OS: ' .. sr["SR+"] .. ')',
       class = get_class_of_roller(sr["Attendee"]),
-      sr = sr["SR+"]
+      sr = sr["SR+"],
+      sr_type = 'SR-OS',
+      alt = AltList[sr["Attendee"]],
+      roll_type = RollType.SR_OS
     }
     table.insert(sr_os_messages, fake_roller)
   end
@@ -165,4 +169,27 @@ end
 function has_sr(sr_list, roller)
   for i, sr in ipairs(sr_list) do if sr.roller == roller then return true end end
   return false
+end
+
+function built_sr_row_from_string(sr_str)
+  local sr = string_split(sr_str, ',')
+  local row = {
+    ["ID"] = tonumber(sr[1]),
+    ["Item"] = sr[2],
+    ["Attendee"] = sr[3],
+    ["SR+"] = tonumber(sr[4]),
+    ["MS"] = sr[5] == 'true',
+    ["Alt"] = sr[6] == 'true'
+  }
+  return row
+end
+
+function report_sr_list()
+  SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_SR, 'RAID')
+  for i, sr in current_item_sr do
+    local message = sr["ID"] .. ',' .. sr["Item"] .. ',' .. sr["Attendee"] ..
+                      ',' .. sr["SR+"] .. ',' .. tostring(sr["MS"]) .. ',' ..
+                      tostring(sr["Alt"])
+    SendAddonMessage(config.LB_PREFIX, config.LB_ADD_SR .. message, 'RAID')
+  end
 end

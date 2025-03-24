@@ -54,16 +54,16 @@ function check_item(link)
   return false
 end
 
-function is_sender_master_looter(sender)
+function is_master_looter(player_name)
   local loot_method, master_looter_party_id = GetLootMethod()
   if loot_method == 'master' and master_looter_party_id then
     if master_looter_party_id == 0 then
-      if sender == UnitName('player') then end
-      return sender == UnitName('player')
+      if player_name == UnitName('player') then end
+      return player_name == UnitName('player')
     else
       local sender_UID = 'party' .. master_looter_party_id
       local master_looter_name = UnitName(sender_UID)
-      return master_looter_name == sender
+      return master_looter_name == player_name
     end
   end
   return false
@@ -107,9 +107,7 @@ function string_match(str, pattern)
 end
 
 function load_alts_from_string(alts_string)
-
   local alts = string_split(alts_string, ',')
-
   for i, alt in ipairs(alts) do AltList[alt] = true end
 end
 
