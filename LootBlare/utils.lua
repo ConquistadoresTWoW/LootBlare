@@ -111,6 +111,11 @@ function load_alts_from_string(alts_string)
   for i, alt in ipairs(alts) do AltList[alt] = true end
 end
 
+function remove_alts_from_string(alts_string)
+  local alts = string_split(alts_string, ',')
+  for i, alt in ipairs(alts) do AltList[alt] = nil end
+end
+
 function print_alts_list()
   local alt_str = ''
   for alt, _ in pairs(AltList) do alt_str = alt_str .. alt .. ', ' end

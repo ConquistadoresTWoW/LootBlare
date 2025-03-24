@@ -215,6 +215,12 @@ function handle_config_command(msg)
   elseif string.find(msg, 'aa (%a+)') then
     local _, _, new_alts = string.find(msg, 'aa (%a+)')
     load_alts_from_string(new_alts)
+  elseif string.find(msg, 'alts remove (%a+)') then
+    local _, _, new_alts = string.find(msg, 'alts remove (%a+)')
+    remove_alts_from_string(new_alts)
+  elseif string.find(msg, 'ar (%a+)') then
+    local _, _, new_alts = string.find(msg, 'ar (%a+)')
+    remove_alts_from_string(new_alts)
   else
     lb_print('Invalid command. Type /lb help for a list of commands.')
   end
