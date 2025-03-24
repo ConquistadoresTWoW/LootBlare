@@ -69,7 +69,7 @@ end
 function create_item_roll_frame()
   local frame = CreateFrame('Frame', 'item_roll_frame', UIParent)
   frame:SetWidth(200) -- Adjust size as needed
-  frame:SetHeight(300)
+  frame:SetHeight(220)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0) -- Position at center of the parent frame
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -118,12 +118,7 @@ function update_text_area(frame)
 
   -- sr ms
   for i, msg in ipairs(sr_ms_messages) do
-    create_roller_message(msg)
-    text = text .. create_color_message(msg) .. '\n'
-    count = count + 1
-  end
-  -- sr os
-  for i, msg in ipairs(sr_os_messages) do
+    if count >= 5 then break end
     create_roller_message(msg)
     text = text .. create_color_message(msg) .. '\n'
     count = count + 1
@@ -134,14 +129,21 @@ function update_text_area(frame)
     text = text .. create_color_message(msg) .. '\n'
     count = count + 1
   end
-  for i, msg in ipairs(os_roll_messages) do
+  -- sr os
+  for i, msg in ipairs(sr_os_messages) do
     if count >= 7 then break end
     create_roller_message(msg)
     text = text .. create_color_message(msg) .. '\n'
     count = count + 1
   end
-  for i, msg in ipairs(tmog_roll_messages) do
+  for i, msg in ipairs(os_roll_messages) do
     if count >= 8 then break end
+    create_roller_message(msg)
+    text = text .. create_color_message(msg) .. '\n'
+    count = count + 1
+  end
+  for i, msg in ipairs(tmog_roll_messages) do
+    if count >= 9 then break end
     create_roller_message(msg)
     text = text .. create_color_message(msg) .. '\n'
     count = count + 1

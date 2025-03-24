@@ -45,9 +45,17 @@ function create_roller_message(message)
 
   local message_end = ' rolls ' .. message.roll
 
-  if message.sr_type then
-    message_end =
-      message_end .. ' (' .. message.sr_type .. ': ' .. message.sr .. ')'
+  -- roll type to text 
+  if message.roll_type == RollType.SR_MS then
+    message_end = message_end .. ' (SR-MS: ' .. message.sr .. ')'
+  elseif message.roll_type == RollType.SR_OS then
+    message_end = message_end .. ' (SR-OS: ' .. message.sr .. ')'
+  elseif message.roll_type == RollType.MS then
+    message_end = message_end .. ' (MS)'
+  elseif message.roll_type == RollType.OS then
+    message_end = message_end .. ' (OS)'
+  elseif message.roll_type == RollType.TM then
+    message_end = message_end .. ' (TM)'
   end
 
   message.alt_roller = roller
