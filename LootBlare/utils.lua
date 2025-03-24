@@ -69,7 +69,7 @@ function is_sender_master_looter(sender)
   return false
 end
 
-function split_string(input_str, sep)
+function string_split(input_str, sep)
   if sep == nil then sep = "," end
   local result = {}
   local field = ""
@@ -99,9 +99,16 @@ function split_string(input_str, sep)
   return result
 end
 
+function string_match(str, pattern)
+  if not str then return nil end
+
+  local _, _, r1, r2, r3, r4, r5, r6, r7, r8, r9 = string.find(str, pattern)
+  return r1, r2, r3, r4, r5, r6, r7, r8, r9
+end
+
 function load_alts_from_string(alts_string)
 
-  local alts = split_string(alts_string, ',')
+  local alts = string_split(alts_string, ',')
 
   for i, alt in ipairs(alts) do AltList[alt] = true end
 end

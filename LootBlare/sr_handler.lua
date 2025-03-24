@@ -9,7 +9,7 @@ local function parse_csv()
 
   -- Split the CSV into lines
   local lines = {}
-  for line in string.gmatch(current_sr_text, "[^\r\n]+") do
+  for line in string.gfind(current_sr_text, "[^\r\n]+") do
     table.insert(lines, line)
   end
 
@@ -17,7 +17,7 @@ local function parse_csv()
   if len(lines) < 2 then return nil, "Invalid CSV: Missing header or data" end
 
   -- Parse the header
-  local header = split_string(lines[1])
+  local header = string_split(lines[1])
 
   -- Validate the header structure
   local expected_header = {"ID", "Item", "Attendee", "Comment", "SR+"}
@@ -47,7 +47,7 @@ local function parse_csv()
       ["Alt"] = false
     }
 
-    local values = split_string(lines[i])
+    local values = string_split(lines[i])
     if len(values) ~= len(header) then
       return nil,
              "Invalid CSV row: Incorrect number of fields in row " .. (i - 1)
@@ -96,7 +96,9 @@ function print_sr_list()
 end
 
 function find_soft_reservers_for_item(item_link)
-  local item_id = tonumber(string.find(item_link, 'item:(%d+):'))
+  local item_id = tonumber(string_match(item_link, 'item:(%d+):'))
+
+  lb_print('Item ID: ' .. tostring(item_id))
 
   local soft_reservers = {}
   for i, item in ipairs(sr_list) do
