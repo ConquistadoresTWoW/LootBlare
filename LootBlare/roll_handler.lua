@@ -76,7 +76,7 @@ function create_roller_message(message)
     message_end = message_end .. ' (TM)'
   end
 
-  if PlusOneList[message.roller] then
+  if PlusOneList[message.roller] and PlusOneList[message.roller] > 0 then
     message_end = message_end .. ' (+' .. PlusOneList[message.roller] .. ')'
   end
 
