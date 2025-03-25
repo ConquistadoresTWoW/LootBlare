@@ -192,17 +192,3 @@ function report_sr_list()
     SendAddonMessage(config.LB_PREFIX, config.LB_ADD_SR .. message, 'RAID')
   end
 end
-
-function report_alt_list()
-  local alt_str = ''
-  for alt, _ in pairs(AltList) do
-    alt_str = alt_str .. alt .. ','
-    if string.len(alt_str) > 100 then
-      SendAddonMessage(config.LB_PREFIX, config.LB_ADD_ALTS .. alt_str, 'RAID')
-      alt_str = ''
-    end
-  end
-  if string.len(alt_str) > 0 then
-    SendAddonMessage(config.LB_PREFIX, config.LB_ADD_ALTS .. alt_str, 'RAID')
-  end
-end

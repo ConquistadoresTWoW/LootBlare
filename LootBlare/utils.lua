@@ -107,22 +107,6 @@ function string_match(str, pattern)
   return r1, r2, r3, r4, r5, r6, r7, r8, r9
 end
 
-function load_alts_from_string(alts_string)
-  local alts = string_split(alts_string, ',')
-  for i, alt in ipairs(alts) do if alt ~= '' then AltList[alt] = true end end
-end
-
-function remove_alts_from_string(alts_string)
-  local alts = string_split(alts_string, ',')
-  for i, alt in ipairs(alts) do AltList[alt] = nil end
-end
-
-function print_alts_list()
-  local alt_str = ''
-  for alt, _ in pairs(AltList) do alt_str = alt_str .. alt .. ', ' end
-  lb_print(alt_str)
-end
-
 function is_member_in_raid(member_name)
   for i = 1, GetNumRaidMembers() do
     local name, _, _, _, _, _, _, online = GetRaidRosterInfo(i)
