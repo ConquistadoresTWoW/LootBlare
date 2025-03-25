@@ -73,7 +73,7 @@ end
 function create_item_roll_frame()
   local frame = CreateFrame('Frame', 'item_roll_frame', UIParent)
   frame:SetWidth(200) -- Adjust size as needed
-  frame:SetHeight(220)
+  frame:SetHeight(250)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0) -- Position at center of the parent frame
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -130,58 +130,84 @@ function create_item_roll_frame()
   return frame
 end
 
-local function create_text_area(frame)
-  local text_area = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-  text_area:SetHeight(150) -- Size of the icon
-  text_area:SetPoint('TOP', frame, 'TOP', 0, -80)
-  text_area:SetJustifyH('LEFT')
-  text_area:SetJustifyV('TOP')
+local function create_clickable_text(parent, text, player_name)
+  local btn = CreateFrame("Button", nil, parent)
+  btn:SetWidth(200)
+  btn:SetHeight(20)
 
+  -- Set button font
+  local font_string = btn:CreateFontString(nil, "OVERLAY")
+  font_string:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
+  font_string:SetPoint("CENTER", btn, "CENTER", 0, 0)
+  font_string:SetText(text)
+  btn:SetFontString(font_string)
+
+  -- Highlight effect when hovered
+  btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+  btn:GetHighlightTexture():SetWidth(200)
+
+  btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+
+  btn:SetScript("OnMouseUp", function()
+
+    if arg1 == "LeftButton" then
+      increase_plus_one(player_name)
+    elseif arg1 == "RightButton" then
+      reduce_plus_one(player_name)
+    end
+
+    update_text_area(item_roll_frame)
+  end)
+
+  return btn
+end
+
+local function create_text_area(frame)
+  local text_area = CreateFrame("Frame", nil, frame)
+  text_area:SetHeight(150)
+  text_area:SetWidth(300)
+  text_area:SetPoint('TOPLEFT', frame, 'TOPLEFT', 0, -80)
+  text_area.text_lines = {}
   return text_area
 end
 
 function update_text_area(frame)
-  if not frame.textArea then frame.textArea = create_text_area(frame) end
+  if not frame.text_area then frame.text_area = create_text_area(frame) end
+  local text_area = frame.text_area
+
+  for _, btn in ipairs(text_area.text_lines) do btn:Hide() end
+  text_area.text_lines = {}
+
   local text = ''
   local colored_msg = ''
   local count = 0
+  local y_offset = 0
 
   sort_rolls()
 
-  -- sr ms
-  for i, msg in ipairs(sr_ms_messages) do
-    if count >= 5 then break end
-    create_roller_message(msg)
-    text = text .. create_color_message(msg) .. '\n'
-    count = count + 1
-  end
-  for i, msg in ipairs(ms_roll_messages) do
-    if count >= 6 then break end
-    create_roller_message(msg)
-    text = text .. create_color_message(msg) .. '\n'
-    count = count + 1
-  end
-  -- sr os
-  for i, msg in ipairs(sr_os_messages) do
-    if count >= 7 then break end
-    create_roller_message(msg)
-    text = text .. create_color_message(msg) .. '\n'
-    count = count + 1
-  end
-  for i, msg in ipairs(os_roll_messages) do
-    if count >= 8 then break end
-    create_roller_message(msg)
-    text = text .. create_color_message(msg) .. '\n'
-    count = count + 1
-  end
-  for i, msg in ipairs(tmog_roll_messages) do
-    if count >= 9 then break end
-    create_roller_message(msg)
-    text = text .. create_color_message(msg) .. '\n'
-    count = count + 1
+  -- helper function to process each category of messages
+  local function process_messages(messages, max_count)
+    for _, msg in ipairs(messages) do
+      if count >= max_count then break end
+      create_roller_message(msg)
+      local colored_text = create_color_message(msg)
+
+      local btn = create_clickable_text(text_area, colored_text, msg.roller)
+      btn:SetPoint("TOPLEFT", text_area, "TOPLEFT", 0, -y_offset)
+      btn:Show()
+
+      table.insert(text_area.text_lines, btn)
+      y_offset = y_offset + 20
+      count = count + 1
+    end
   end
 
-  frame.textArea:SetText(text)
+  -- Process different message categories
+  process_messages(sr_ms_messages, 5)
+  process_messages(ms_roll_messages, 6)
+  process_messages(sr_os_messages, 7)
+  process_messages(os_roll_messages, 8)
+  process_messages(tmog_roll_messages, 9)
 end
 
 local function init_item_info(frame)
@@ -410,13 +436,13 @@ function create_text_box_frame()
     CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
   clear_button:SetScript('OnClick', function()
     edit_box:SetText('')
+    SRList = {}
     cancel_button:SetText('Close')
-    edit_box:SetText('')
   end)
   clear_button:SetPoint('RIGHT', cancel_button, 'LEFT', -10, 0)
   clear_button:SetHeight(20)
-  clear_button:SetWidth(80)
-  clear_button:SetText('Clear')
+  clear_button:SetWidth(100)
+  clear_button:SetText('Clear SRs!')
 
   local import_button = CreateFrame('Button', nil, frame,
                                     'UIPanelButtonTemplate')
@@ -428,8 +454,20 @@ function create_text_box_frame()
   end)
   import_button:SetPoint('RIGHT', clear_button, 'LEFT', -10, 0)
   import_button:SetHeight(20)
-  import_button:SetWidth(100)
-  import_button:SetText('Import!')
+  import_button:SetWidth(110)
+  import_button:SetText('Import SRs!')
+
+  -- add another button on the left
+  local reset_plus_one = CreateFrame('Button', nil, frame,
+                                     'UIPanelButtonTemplate')
+  reset_plus_one:SetScript('OnClick', function()
+    PlusOneList = {}
+    edit_box:SetText('')
+  end)
+  reset_plus_one:SetPoint('RIGHT', import_button, 'LEFT', -10, 0)
+  reset_plus_one:SetHeight(20)
+  reset_plus_one:SetWidth(100)
+  reset_plus_one:SetText('Reset +1!')
 
   edit_box:SetScript("OnTextChanged",
                      function(_) scroll_frame:UpdateScrollChildRect() end)

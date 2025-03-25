@@ -37,8 +37,7 @@ function handle_chat_message(event, message, sender)
         message = {
           roller = roller,
           roll = roll,
-          class = get_class_of_roller(roller),
-          alt = AltList[roller]
+          class = get_class_of_roller(roller)
         }
 
         if has_ms_sr then
@@ -76,6 +75,8 @@ function handle_chat_message(event, message, sender)
         current_item_sr = find_soft_reservers_for_item(current_link)
         SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_ALTS, 'RAID')
         report_alt_list()
+        SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_PLUS_ONE, 'RAID')
+        report_plus_one_list()
         report_sr_list()
       end
       SendAddonMessage(config.LB_PREFIX, config.LB_START_ROLL, 'RAID')
@@ -86,6 +87,7 @@ function handle_chat_message(event, message, sender)
     if HideWhenUsingSpell == nil then HideWhenUsingSpell = false end
     if AltList == nil then AltList = {} end
     if SRList == nil then SRList = {} end
+    if PlusOneList == nil then PlusOneList = {} end
     if is_master_looter(UnitName('player')) then
       SendAddonMessage(config.LB_PREFIX, config.LB_SET_ML .. UnitName('player'),
                        'RAID')
@@ -147,6 +149,13 @@ function handle_chat_message(event, message, sender)
         local _, _, alts_str =
           string.find(message, config.LB_ADD_ALTS .. '(.+)')
         load_alts_from_string(alts_str)
+      end
+      if message == config.LB_CLEAR_PLUS_ONE then PlusOneList = {} end
+      if string.find(message, config.LB_ADD_PLUS_ONE) then
+        local _, _, plus_one_str = string.find(message,
+                                               config.LB_ADD_PLUS_ONE .. '(.+)')
+        load_plus_one_from_string(plus_one_str)
+        update_text_area(item_roll_frame)
       end
     end
   end
@@ -217,18 +226,20 @@ function handle_config_command(msg)
     text_box_frame:Show()
   elseif string.find(msg, 'alts list') or string.find(msg, 'al') then
     print_alts_list()
-  elseif string.find(msg, 'alts add (%a+)') then
-    local _, _, new_alts = string.find(msg, 'alts add (%a+)')
-    load_alts_from_string(new_alts)
   elseif string.find(msg, 'aa (%a+)') then
     local _, _, new_alts = string.find(msg, 'aa (%a+)')
     load_alts_from_string(new_alts)
-  elseif string.find(msg, 'alts remove (%a+)') then
-    local _, _, new_alts = string.find(msg, 'alts remove (%a+)')
-    remove_alts_from_string(new_alts)
   elseif string.find(msg, 'ar (%a+)') then
     local _, _, new_alts = string.find(msg, 'ar (%a+)')
     remove_alts_from_string(new_alts)
+  elseif string.find(msg, 'po (%a)') then
+    local _, _, new_plus_one = string.find(msg, 'po (%a+)')
+    increase_plus_one(new_plus_one)
+  elseif string.find(msg, 'mo (%a)') then
+    local _, _, new_plus_one = string.find(msg, 'mo (%a+)')
+    increase_plus_one(new_plus_one)
+  elseif string.find(msg, 'plus one list') or string.find(msg, 'pol') then
+    print_plus_one_list()
   else
     lb_print('Invalid command. Type /lb help for a list of commands.')
   end

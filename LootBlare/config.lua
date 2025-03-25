@@ -34,5 +34,7 @@ config = {
   LB_START_ROLL = 'start roll',
   LB_ADD_ALTS = 'add alts:',
   LB_CLEAR_ALTS = 'clear alts',
+  LB_ADD_PLUS_ONE = 'add plus:',
+  LB_CLEAR_PLUS_ONE = 'clear plus',
   GRESSIL = 'Gressil, Dawn of Ruin'
 }

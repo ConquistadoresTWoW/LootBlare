@@ -23,20 +23,29 @@ function reset_rolls()
 end
 
 function sort_rolls()
-  -- sort by roll but mains first
   table.sort(ms_roll_messages, function(a, b)
-    if a.alt and not b.alt then return false end
-    if not a.alt and b.alt then return true end
-    return a.roll > b.roll
+    local a_alt = AltList[a.roller] or false
+    local b_alt = AltList[b.roller] or false
+    local a_plus_one = PlusOneList[a.roller] or 0
+    local b_plus_one = PlusOneList[b.roller] or 0
+
+    if a_alt and not b_alt then return false end
+    if not a_alt and b_alt then return true end
+    if a_plus_one == b_plus_one then return a.roll > b.roll end
+    return a_plus_one < b_plus_one
   end)
-  -- sort by roll but mains first
   table.sort(os_roll_messages, function(a, b)
-    if a.alt and not b.alt then return false end
-    if not a.alt and b.alt then return true end
-    return a.roll > b.roll
+    local a_alt = AltList[a.roller] or false
+    local b_alt = AltList[b.roller] or false
+    local a_plus_one = PlusOneList[a.roller] or 0
+    local b_plus_one = PlusOneList[b.roller] or 0
+
+    if a_alt and not b_alt then return false end
+    if not a_alt and b_alt then return true end
+    if a_plus_one == b_plus_one then return a.roll > b.roll end
+    return a_plus_one < b_plus_one
   end)
   table.sort(tmog_roll_messages, function(a, b) return a.roll > b.roll end)
-  -- sort ms_roll_messages by SR and then by roll
   table.sort(sr_ms_messages, function(a, b)
     if a.sr == b.sr then return a.roll > b.roll end
     return a.sr > b.sr
@@ -65,6 +74,10 @@ function create_roller_message(message)
     message_end = message_end .. ' (OS)'
   elseif message.roll_type == RollType.TM then
     message_end = message_end .. ' (TM)'
+  end
+
+  if PlusOneList[message.roller] then
+    message_end = message_end .. ' (+' .. PlusOneList[message.roller] .. ')'
   end
 
   message.alt_roller = roller
