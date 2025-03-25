@@ -31,5 +31,6 @@ config = {
   LB_SET_ROLL_TIME = 'Roll time set to ',
   LB_CLEAR_SR = 'clear sr',
   LB_ADD_SR = 'add sr:',
-  LB_START_ROLL = 'start roll'
+  LB_START_ROLL = 'start roll',
+  GRESSIL = 'Gressil, Dawn of Ruin'
 }

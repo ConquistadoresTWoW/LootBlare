@@ -1,5 +1,6 @@
 discover = CreateFrame('GameTooltip', 'CustomTooltip1', UIParent,
                        'GameTooltipTemplate')
+greesil_sound_played = false
 
 function lb_print(msg)
   if msg == nil then msg = 'nil' end
@@ -129,4 +130,12 @@ function is_member_in_raid(member_name)
   end
 
   return false
+end
+
+function play_sound(path)
+  lb_print('Playing sound ')
+  if path == nil then
+    path = 'Interface\\AddOns\\LootBlare\\LootBlare\\conxale.mp3'
+  end
+  PlaySoundFile(path, 'Master')
 end

@@ -21,6 +21,7 @@ function reset_rolls()
   rollers = {}
   sr_ms_messages = {}
   sr_os_messages = {}
+  greesil_sound_played = false
 end
 
 function sort_rolls()

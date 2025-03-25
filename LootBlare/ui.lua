@@ -211,12 +211,18 @@ local function get_colored_text_by_quality(text, quality_index)
 end
 
 local function set_item_info(frame, item_link_arg)
-  local init_name, item_link, item_quality, _, _, _, _, _, item_icon =
+  local item_name, item_link, item_quality, _, _, _, _, _, item_icon =
     GetItemInfo(item_link_arg)
+
+  if item_name == config.GRESSIL and not greesil_sound_played then
+    greesil_sound_played = true
+    play_sound()
+  end
+
   if not frame.icon then init_item_info(frame) end
 
   -- if we know the item, and the quality isn't green+, don't show it
-  if init_name and item_quality < 2 then return false end
+  if item_name and item_quality < 2 then return false end
   if not item_icon then
     frame.icon:SetTexture('Interface\\Icons\\INV_Misc_QuestionMark')
     frame.name:SetText('Unknown item, attempting to query...')
@@ -227,7 +233,7 @@ local function set_item_info(frame, item_link_arg)
   frame.icon:SetTexture(item_icon)
   frame.iconButton:SetNormalTexture(item_icon) -- Sets the same texture as the icon
 
-  frame.name:SetText(get_colored_text_by_quality(init_name, item_quality))
+  frame.name:SetText(get_colored_text_by_quality(item_name, item_quality))
 
   frame.itemLink = item_link
   return true
