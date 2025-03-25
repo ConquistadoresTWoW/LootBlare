@@ -87,7 +87,7 @@ function create_item_roll_frame()
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
   create_close_button(frame)
-  create_action_button(frame, 'MS', 'Roll for Main Spec', 1,
+  create_action_button(frame, 'SR/MS', 'Roll for Main Spec', 1,
                        function() RandomRoll(1, 100) end)
   create_action_button(frame, 'OS', 'Roll for Off Spec', 2,
                        function() RandomRoll(1, 99) end)
@@ -255,7 +255,7 @@ function show_frame(frame, duration, item)
       is_rolling = false
       if FrameAutoClose then frame:Hide() end
     end
-    if times > 0 and item_query < 0 then
+    if times > 0 and item_query < 0 and not check_item(item) then
       times = times - 1
     else
       if not set_item_info(item_roll_frame, item) then frame:Hide() end
