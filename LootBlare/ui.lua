@@ -99,14 +99,14 @@ function create_item_roll_frame()
       roll = function() RandomRoll(1, 100) end,
       big_button = true
     }, {
-      text = 'MS',
-      tooltip = 'Roll for Main Spec',
-      roll = function() RandomRoll(1, 100) end,
-      big_button = false
-    }, {
       text = 'OS',
       tooltip = 'Roll for Off Spec',
       roll = function() RandomRoll(1, 99) end,
+      big_button = false
+    }, {
+      text = 'TM',
+      tooltip = 'Roll for Trasmog',
+      roll = function() RandomRoll(1, 50) end,
       big_button = false
     }
   }
