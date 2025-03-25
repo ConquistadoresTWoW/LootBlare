@@ -1,3 +1,5 @@
+total_button_width = 0
+
 local function create_close_button(frame)
   -- Add a close button
   local close_button = CreateFrame('Button', nil, frame, 'UIPanelCloseButton')
@@ -19,15 +21,17 @@ local function create_close_button(frame)
 end
 
 local function create_action_button(frame, button_text, tooltip_text, index,
-                                    on_click_action)
+                                    on_click_action, big_button,
+                                    big_buttons_before)
+  local width_multiplier = big_button and 2 or 1
   local panel_width = frame:GetWidth()
-  local spacing = (panel_width - (config.BUTTON_COUNT * config.BUTTON_WIDTH)) /
-                    (config.BUTTON_COUNT + 1)
+  local spacing = (panel_width - total_button_width) / (config.BUTTON_COUNT + 1)
   local button = CreateFrame('Button', nil, frame, UIParent)
-  button:SetWidth(config.BUTTON_WIDTH)
+  button:SetWidth(config.BUTTON_WIDTH * width_multiplier)
   button:SetHeight(config.BUTTON_WIDTH)
   button:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT',
-                  index * spacing + (index - 1) * config.BUTTON_WIDTH,
+                  index * spacing + (index - 1) * config.BUTTON_WIDTH +
+                    big_buttons_before * config.BUTTON_WIDTH,
                   config.BUTTON_PADING)
 
   -- Set button text
@@ -87,12 +91,40 @@ function create_item_roll_frame()
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
   create_close_button(frame)
-  create_action_button(frame, 'SR/MS', 'Roll for Main Spec', 1,
-                       function() RandomRoll(1, 100) end)
-  create_action_button(frame, 'OS', 'Roll for Off Spec', 2,
-                       function() RandomRoll(1, 99) end)
-  create_action_button(frame, 'TM', 'Roll for Transmog', 3,
-                       function() RandomRoll(1, 50) end)
+
+  local action_button_settings = {
+    {
+      text = 'SR/MS',
+      tooltip = 'Roll for Soft Reserve or Main Spec',
+      roll = function() RandomRoll(1, 100) end,
+      big_button = true
+    }, {
+      text = 'MS',
+      tooltip = 'Roll for Main Spec',
+      roll = function() RandomRoll(1, 100) end,
+      big_button = false
+    }, {
+      text = 'OS',
+      tooltip = 'Roll for Off Spec',
+      roll = function() RandomRoll(1, 99) end,
+      big_button = false
+    }
+  }
+
+  total_button_width = 0
+
+  for i, settings in ipairs(action_button_settings) do
+    total_button_width = total_button_width +
+                           (config.BUTTON_WIDTH *
+                             (settings.big_button and 2 or 1))
+  end
+  local big_buttons_before = 0
+  for i, settings in ipairs(action_button_settings) do
+    create_action_button(frame, settings.text, settings.tooltip, i,
+                         settings.roll, settings.big_button, big_buttons_before)
+    if settings.big_button then big_buttons_before = big_buttons_before + 1 end
+  end
+
   frame:Hide()
 
   return frame
