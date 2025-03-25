@@ -74,6 +74,7 @@ function handle_chat_message(event, message, sender)
       current_link = links[1]
       if is_master_looter(UnitName('player')) then
         current_item_sr = find_soft_reservers_for_item(current_link)
+        SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_ALTS, 'RAID')
         report_alt_list()
         report_sr_list()
       end
@@ -141,6 +142,7 @@ function handle_chat_message(event, message, sender)
         local row = built_sr_row_from_string(sr_str)
         table.insert(current_item_sr, row)
       end
+      if message == config.LB_CLEAR_ALTS then AltList = {} end
       if string.find(message, config.LB_ADD_ALTS) then
         local _, _, alts_str =
           string.find(message, config.LB_ADD_ALTS .. '(.+)')
