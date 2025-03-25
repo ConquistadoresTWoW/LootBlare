@@ -59,7 +59,7 @@ end
 function create_roller_message(message)
   local roller = message.roller
 
-  if message.alt then roller = '*' .. roller end
+  if AltList[roller] then roller = '*' .. roller end
 
   local message_end = ' rolls ' .. message.roll
 

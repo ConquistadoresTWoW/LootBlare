@@ -92,7 +92,8 @@ function print_sr_list()
     lb_print('ItemID: ' .. item["ID"] .. ', ItemName: ' .. item["Item"] ..
                ', Attendee: ' .. item["Attendee"] .. ', Comment: ' ..
                item["Comment"] .. ', SR+: ' .. item["SR+"] .. ', MS: ' ..
-               tostring(item["MS"]) .. ', Alt: ' .. tostring(item["Alt"]))
+               tostring(item["MS"]) .. ', Alt: ' ..
+               tostring(AltList[item["Attendee"]]))
   end
 end
 
@@ -177,8 +178,7 @@ function built_sr_row_from_string(sr_str)
     ["Item"] = sr[2],
     ["Attendee"] = sr[3],
     ["SR+"] = tonumber(sr[4]),
-    ["MS"] = sr[5] == 'true',
-    ["Alt"] = sr[6] == 'true'
+    ["MS"] = sr[5] == 'true'
   }
   return row
 end
@@ -187,8 +187,7 @@ function report_sr_list()
   SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_SR, 'RAID')
   for i, sr in current_item_sr do
     local message = sr["ID"] .. ',' .. sr["Item"] .. ',' .. sr["Attendee"] ..
-                      ',' .. sr["SR+"] .. ',' .. tostring(sr["MS"]) .. ',' ..
-                      tostring(sr["Alt"])
+                      ',' .. sr["SR+"] .. ',' .. tostring(sr["MS"])
     SendAddonMessage(config.LB_PREFIX, config.LB_ADD_SR .. message, 'RAID')
   end
 end
