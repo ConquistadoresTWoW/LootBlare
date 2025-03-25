@@ -109,7 +109,7 @@ end
 
 function load_alts_from_string(alts_string)
   local alts = string_split(alts_string, ',')
-  for i, alt in ipairs(alts) do AltList[alt] = true end
+  for i, alt in ipairs(alts) do if alt ~= '' then AltList[alt] = true end end
 end
 
 function remove_alts_from_string(alts_string)
