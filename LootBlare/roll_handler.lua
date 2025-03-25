@@ -1,4 +1,3 @@
-sr_roll_messages = {}
 sr_ms_messages = {}
 sr_os_messages = {}
 ms_roll_messages = {}
@@ -14,7 +13,6 @@ master_looter = nil
 RollType = {SR_MS = 102, SR_OS = 101, MS = 100, OS = 99, TM = 50}
 
 function reset_rolls()
-  sr_roll_messages = {}
   ms_roll_messages = {}
   os_roll_messages = {}
   tmog_roll_messages = {}
@@ -25,9 +23,18 @@ function reset_rolls()
 end
 
 function sort_rolls()
-  table.sort(sr_roll_messages, function(a, b) return a.roll > b.roll end)
-  table.sort(ms_roll_messages, function(a, b) return a.roll > b.roll end)
-  table.sort(os_roll_messages, function(a, b) return a.roll > b.roll end)
+  -- sort by roll but mains first
+  table.sort(ms_roll_messages, function(a, b)
+    if a.alt and not b.alt then return false end
+    if not a.alt and b.alt then return true end
+    return a.roll > b.roll
+  end)
+  -- sort by roll but mains first
+  table.sort(os_roll_messages, function(a, b)
+    if a.alt and not b.alt then return false end
+    if not a.alt and b.alt then return true end
+    return a.roll > b.roll
+  end)
   table.sort(tmog_roll_messages, function(a, b) return a.roll > b.roll end)
   -- sort ms_roll_messages by SR and then by roll
   table.sort(sr_ms_messages, function(a, b)
