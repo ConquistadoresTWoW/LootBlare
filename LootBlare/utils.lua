@@ -75,11 +75,8 @@ function string_split(input_str, sep)
   local result = {}
   local field = ""
 
-  -- remove spaces of input_str
-  input_str = string.gsub(input_str, ' ', '')
-
   for i = 1, string.len(input_str) do
-    -- local char = input_str:sub(i, i)
+
     local char = string.sub(input_str, i, i)
 
     if char == '"' then
@@ -93,6 +90,8 @@ function string_split(input_str, sep)
     elseif char == sep then
       table.insert(result, field)
       field = "" -- Reset field
+    elseif char == ' ' then
+      -- skip spaces
     else
       field = field .. char
     end
