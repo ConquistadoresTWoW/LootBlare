@@ -83,7 +83,13 @@ function string_split(input_str, sep)
     local char = string.sub(input_str, i, i)
 
     if char == '"' then
-      -- ignore quotes and continue to next char
+      -- skip separators until next quote
+      field = field .. char
+      repeat
+        i = i + 1
+        char = string.sub(input_str, i, i)
+        field = field .. char
+      until char == '"' or i == string.len(input_str)
     elseif char == sep then
       table.insert(result, field)
       field = "" -- Reset field
