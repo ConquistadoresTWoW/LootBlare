@@ -60,10 +60,10 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   font:SetPoint("CENTER", button, "CENTER", 0, -2) -- Move text down by 2 pixels
 
   -- Add background
-    local background = button:CreateTexture(nil, 'BACKGROUND')
-    background:SetAllPoints(button)
-    background:SetTexture(1, 1, 1, 1)
-    background:SetVertexColor(0.2, 0.2, 0.2, 1)
+  local background = button:CreateTexture(nil, 'BACKGROUND')
+  background:SetAllPoints(button)
+  background:SetTexture(1, 1, 1, 1)
+  background:SetVertexColor(0.2, 0.2, 0.2, 1)
 
   button:SetScript('OnMouseDown', function(self)
     background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
