@@ -93,7 +93,7 @@ end
 function create_item_roll_frame()
   local frame = CreateFrame('Frame', 'item_roll_frame', UIParent)
   frame:SetWidth(185)
-  frame:SetHeight(250)
+  frame:SetHeight(270)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
