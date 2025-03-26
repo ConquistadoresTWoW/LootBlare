@@ -59,7 +59,7 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   font:SetFont(config.FONT_NAME, config.FONT_SIZE, config.FONT_OUTLINE)
   font:SetPoint("CENTER", button, "CENTER", 0, -2) -- Move text down by 2 pixels
 
-  -- Add background (existing code)
+  -- Add background
     local background = button:CreateTexture(nil, 'BACKGROUND')
     background:SetAllPoints(button)
     background:SetTexture(1, 1, 1, 1)
@@ -92,9 +92,9 @@ end
 
 function create_item_roll_frame()
   local frame = CreateFrame('Frame', 'item_roll_frame', UIParent)
-  frame:SetWidth(185) -- Adjust size as needed
+  frame:SetWidth(185)
   frame:SetHeight(250)
-  frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0) -- Position at center of the parent frame
+  frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
     tile = true,
@@ -109,7 +109,7 @@ function create_item_roll_frame()
   frame:SetScript('OnDragStart', function() frame:StartMoving() end)
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
-  create_close_button(frame) -- Uses default position (TOPRIGHT, -4, -4)
+  create_close_button(frame)
 
   local action_button_settings = {
     {
@@ -443,7 +443,7 @@ function create_text_box_frame()
   scroll_frame:SetScript('OnShow', fix_size)
   scroll_frame:SetScript('OnSizeChanged', fix_size)
 
-  -- Clear SRs button (now positioned at BOTTOMRIGHT since Close is gone)
+  -- Clear SRs button
   local clear_button = CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
   clear_button:SetScript('OnClick', function()
     edit_box:SetText('')
@@ -479,6 +479,6 @@ function create_text_box_frame()
 
   edit_box:SetScript("OnTextChanged",
                      function(_) scroll_frame:UpdateScrollChildRect() end)
-  create_close_button(frame, 'TOPRIGHT', -2, -2) -- Custom position for this frame
+  create_close_button(frame, 'TOPRIGHT', -2, -2)
   return frame
 end
