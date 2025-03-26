@@ -9,6 +9,7 @@ function print_plus_one_list()
 end
 
 function increase_plus_one(player_name)
+  lb_print('Increasing plus one for ' .. player_name)
   if not is_master_looter(UnitName('player')) then
     lb_print('You are not the master looter')
     return

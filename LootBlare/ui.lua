@@ -1,23 +1,42 @@
 total_button_width = 0
 
-local function create_close_button(frame)
-  -- Add a close button
-  local close_button = CreateFrame('Button', nil, frame, 'UIPanelCloseButton')
-  close_button:SetWidth(32) -- Button size
-  close_button:SetHeight(32) -- Button size
-  close_button:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -5, -5) -- Position at the top right
+local function create_close_button(frame, position, xOffset, yOffset)
+  -- Default values if not provided
+  position = position or 'TOPRIGHT'
+  xOffset = xOffset or -7
+  yOffset = yOffset or -7
+  
+  -- Add a custom close button
+  local close_button = CreateFrame('Button', nil, frame)
+  close_button:SetWidth(16) -- Button size
+  close_button:SetHeight(16) -- Button size
+  close_button:SetPoint(position, frame, position, xOffset, yOffset) -- Custom position
 
-  -- Set textures if you want to customize the appearance
-  close_button:SetNormalTexture('Interface/Buttons/UI-Panel-MinimizeButton-Up')
-  close_button:SetPushedTexture('Interface/Buttons/UI-Panel-MinimizeButton-Down')
-  close_button:SetHighlightTexture(
-    'Interface/Buttons/UI-Panel-MinimizeButton-Highlight')
+  -- Set normal texture
+  local normal_texture = close_button:CreateTexture(nil, 'BACKGROUND')
+  normal_texture:SetTexture("Interface\\AddOns\\LootBlare\\close.tga")
+  normal_texture:SetAllPoints(close_button)
+  close_button:SetNormalTexture(normal_texture)
+
+  -- Set pushed texture
+  local pushed_texture = close_button:CreateTexture(nil, 'BACKGROUND')
+  pushed_texture:SetTexture("Interface\\AddOns\\LootBlare\\close.tga")
+  pushed_texture:SetAllPoints(close_button)
+  close_button:SetPushedTexture(pushed_texture)
+  
+  -- Set highlight texture
+  local highlight_texture = close_button:CreateTexture(nil, 'HIGHLIGHT')
+  highlight_texture:SetTexture('Interface/Buttons/UI-Panel-MinimizeButton-Highlight')
+  highlight_texture:SetAllPoints(close_button)
+  close_button:SetHighlightTexture(highlight_texture)
 
   -- Hide the frame when the button is clicked
   close_button:SetScript('OnClick', function()
     frame:Hide()
     -- reset_rolls()
   end)
+  
+  return close_button
 end
 
 local function create_action_button(frame, button_text, tooltip_text, index,
@@ -28,7 +47,7 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   local spacing = (panel_width - total_button_width) / (config.BUTTON_COUNT + 1)
   local button = CreateFrame('Button', nil, frame, UIParent)
   button:SetWidth(config.BUTTON_WIDTH * width_multiplier)
-  button:SetHeight(config.BUTTON_WIDTH)
+  button:SetHeight(config.BUTTON_HEIGHT) -- Changed from BUTTON_WIDTH to BUTTON_HEIGHT
   button:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT',
                   index * spacing + (index - 1) * config.BUTTON_WIDTH +
                     big_buttons_before * config.BUTTON_WIDTH,
@@ -38,12 +57,13 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   button:SetText(button_text)
   local font = button:GetFontString()
   font:SetFont(config.FONT_NAME, config.FONT_SIZE, config.FONT_OUTLINE)
+  font:SetPoint("CENTER", button, "CENTER", 0, -2) -- Move text down by 2 pixels
 
-  -- Add background 
-  local background = button:CreateTexture(nil, 'BACKGROUND')
-  background:SetAllPoints(button)
-  background:SetTexture(1, 1, 1, 1) -- White texture
-  background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray background
+  -- Add background (existing code)
+    local background = button:CreateTexture(nil, 'BACKGROUND')
+    background:SetAllPoints(button)
+    background:SetTexture(1, 1, 1, 1)
+    background:SetVertexColor(0.2, 0.2, 0.2, 1)
 
   button:SetScript('OnMouseDown', function(self)
     background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
@@ -72,12 +92,11 @@ end
 
 function create_item_roll_frame()
   local frame = CreateFrame('Frame', 'item_roll_frame', UIParent)
-  frame:SetWidth(200) -- Adjust size as needed
+  frame:SetWidth(185) -- Adjust size as needed
   frame:SetHeight(250)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0) -- Position at center of the parent frame
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
-    edgeFile = 'Interface/Tooltips/UI-Tooltip-Border',
     tile = true,
     tileSize = 16,
     edgeSize = 16,
@@ -90,7 +109,7 @@ function create_item_roll_frame()
   frame:SetScript('OnDragStart', function() frame:StartMoving() end)
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
-  create_close_button(frame)
+  create_close_button(frame) -- Uses default position (TOPRIGHT, -4, -4)
 
   local action_button_settings = {
     {
@@ -132,30 +151,28 @@ end
 
 local function create_clickable_text(parent, text, player_name)
   local btn = CreateFrame("Button", nil, parent)
-  btn:SetWidth(200)
+  btn:SetWidth(170)
   btn:SetHeight(20)
 
   -- Set button font
   local font_string = btn:CreateFontString(nil, "OVERLAY")
-  font_string:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
-  font_string:SetPoint("CENTER", btn, "CENTER", 0, 0)
+  font_string:SetFont("Fonts\\BalooBhaina.ttf", 11, "OUTLINE")
+  font_string:SetPoint("LEFT", btn, "LEFT", 10, 0)
   font_string:SetText(text)
   btn:SetFontString(font_string)
 
   -- Highlight effect when hovered
   btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-  btn:GetHighlightTexture():SetWidth(200)
+  btn:GetHighlightTexture():SetWidth(170)
 
   btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
   btn:SetScript("OnMouseUp", function()
-
     if arg1 == "LeftButton" then
       increase_plus_one(player_name)
     elseif arg1 == "RightButton" then
       reduce_plus_one(player_name)
     end
-
     update_text_area(item_roll_frame)
   end)
 
@@ -260,6 +277,7 @@ local function init_item_info(frame)
     end
   end)
 end
+
 -- Function to return colored text based on item quality
 local function get_colored_text_by_quality(text, quality_index)
   -- Get the color associated with the item quality
@@ -373,7 +391,11 @@ function create_text_box_frame()
   frame:SetResizable(true)
   frame:SetFrameStrata('DIALOG')
 
-  frame:SetBackdrop(frame_backdrop)
+  frame:SetBackdrop({
+    bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
+    tile = true,
+    tileSize = 16,
+  })
   frame:SetBackdropColor(0, 0, 0, 1)
 
   frame:SetMinResize(400, 200)
@@ -421,45 +443,31 @@ function create_text_box_frame()
   scroll_frame:SetScript('OnShow', fix_size)
   scroll_frame:SetScript('OnSizeChanged', fix_size)
 
-  local cancel_button = CreateFrame('Button', nil, frame,
-                                    'UIPanelButtonTemplate')
-  cancel_button:SetScript('OnClick', function()
-    frame:Hide()
-    edit_box:SetText("")
-  end)
-  cancel_button:SetPoint('BOTTOMRIGHT', frame, 'BOTTOMRIGHT', -27, 17)
-  cancel_button:SetHeight(20)
-  cancel_button:SetWidth(80)
-  cancel_button:SetText('Close')
-
-  local clear_button =
-    CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
+  -- Clear SRs button (now positioned at BOTTOMRIGHT since Close is gone)
+  local clear_button = CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
   clear_button:SetScript('OnClick', function()
     edit_box:SetText('')
     SRList = {}
-    cancel_button:SetText('Close')
   end)
-  clear_button:SetPoint('RIGHT', cancel_button, 'LEFT', -10, 0)
+  clear_button:SetPoint('BOTTOMRIGHT', frame, 'BOTTOMRIGHT', -27, 17)
   clear_button:SetHeight(20)
   clear_button:SetWidth(100)
   clear_button:SetText('Clear SRs!')
 
-  local import_button = CreateFrame('Button', nil, frame,
-                                    'UIPanelButtonTemplate')
+  -- Import SRs button (positioned left of Clear)
+  local import_button = CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
   import_button:SetScript('OnClick', function()
     current_sr_text = edit_box:GetText()
     load_sr_from_csv()
     frame:Hide()
-
   end)
   import_button:SetPoint('RIGHT', clear_button, 'LEFT', -10, 0)
   import_button:SetHeight(20)
   import_button:SetWidth(110)
   import_button:SetText('Import SRs!')
 
-  -- add another button on the left
-  local reset_plus_one = CreateFrame('Button', nil, frame,
-                                     'UIPanelButtonTemplate')
+  -- Reset +1 button (positioned left of Import)
+  local reset_plus_one = CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
   reset_plus_one:SetScript('OnClick', function()
     PlusOneList = {}
     edit_box:SetText('')
@@ -471,8 +479,6 @@ function create_text_box_frame()
 
   edit_box:SetScript("OnTextChanged",
                      function(_) scroll_frame:UpdateScrollChildRect() end)
-
-  frame:SetScript("OnShow", function() cancel_button:SetText("Close") end)
-
+  create_close_button(frame, 'TOPRIGHT', -2, -2) -- Custom position for this frame
   return frame
 end

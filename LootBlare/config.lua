@@ -1,9 +1,10 @@
 config = {
+  BUTTON_HEIGHT = 24,
   BUTTON_WIDTH = 32,
   BUTTON_COUNT = 3,
   BUTTON_PADING = 10,
-  FONT_NAME = 'Fonts\\FRIZQT__.TTF',
-  FONT_SIZE = 12,
+  FONT_NAME = 'Interface\\AddOns\\LootBlare\\BalooBhaina.ttf',
+  FONT_SIZE = 14,
   FONT_OUTLINE = 'OUTLINE',
   RAID_CLASS_COLORS = {
     ['Warrior'] = 'FFC79C6E',
