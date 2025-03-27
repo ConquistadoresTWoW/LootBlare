@@ -163,7 +163,7 @@ local function create_clickable_text(parent, text, player_name)
 
   -- Highlight effect when hovered
   btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-  btn:GetHighlightTexture():SetWidth(170)
+  btn:GetHighlightTexture():SetWidth(180)
 
   btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
