@@ -126,7 +126,7 @@ function handle_chat_message(event, message, sender)
     end
 
     -- Someone is starting a roll
-    if is_master_looter(sender) and message == config.LB_START_ROLL then
+    if sender == master_looter and message == config.LB_START_ROLL then
       reset_rolls()
       sr_ms, sr_os = find_ms_and_os_sr_for_item()
       insert_sr_rolls(sr_ms, sr_os)
@@ -137,7 +137,7 @@ function handle_chat_message(event, message, sender)
     end
 
     -- ML is reseting the SR list for the current item
-    if is_master_looter(sender) and sender ~= UnitName('player') then
+    if sender == master_looter and sender ~= UnitName('player') then
       if message == config.LB_CLEAR_SR then current_item_sr = {} end
       if string.find(message, config.LB_ADD_SR) then
         local _, _, sr_str = string.find(message, config.LB_ADD_SR .. '(.+)')
