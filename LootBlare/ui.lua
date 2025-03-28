@@ -156,7 +156,7 @@ local function create_clickable_text(parent, text, player_name)
 
   -- Set button font
   local font_string = btn:CreateFontString(nil, "OVERLAY")
-  font_string:SetFont("Fonts\\BalooBhaina.ttf", 11, "OUTLINE")
+  font_string:SetFont("Interface\\AddOns\\LootBlare\\BalooBhaina.ttf", 11, "OUTLINE")
   font_string:SetPoint("LEFT", btn, "LEFT", 12, 0)
   font_string:SetText(text)
   btn:SetFontString(font_string)
