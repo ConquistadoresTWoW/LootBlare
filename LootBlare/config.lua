@@ -18,6 +18,14 @@ config = {
     ['Paladin'] = 'FFF58CBA',
     ['unknown'] = 'FFAD0202'
   },
+  CHAT_COLORS = {
+  POSITIVE = 'FF00FF00', -- Green
+  NEGATIVE = 'FFFF0000', -- Red
+  NEUTRAL = 'FFFFFF00',  -- Yellow
+  INFO = 'FF69CCF0',     -- Light blue (Mage color)
+  WARNING = 'FFFFA500',  -- Orange
+  HIGHLIGHT = 'FFFFFFFF' -- White
+  },
   ADDON_TEXT_COLOR = 'FFEDD8BB',
   DEFAULT_TEXT_COLOR = 'FFFFFF00',
 

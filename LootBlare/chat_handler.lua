@@ -126,7 +126,7 @@ function handle_chat_message(event, message, sender)
     end
 
     -- Someone is starting a roll
-    if is_master_looter(sender) and message == config.LB_START_ROLL then
+    if sender == master_looter and message == config.LB_START_ROLL then
       reset_rolls()
       sr_ms, sr_os = find_ms_and_os_sr_for_item()
       insert_sr_rolls(sr_ms, sr_os)
@@ -137,7 +137,7 @@ function handle_chat_message(event, message, sender)
     end
 
     -- ML is reseting the SR list for the current item
-    if is_master_looter(sender) and sender ~= UnitName('player') then
+    if sender == master_looter and sender ~= UnitName('player') then
       if message == config.LB_CLEAR_SR then current_item_sr = {} end
       if string.find(message, config.LB_ADD_SR) then
         local _, _, sr_str = string.find(message, config.LB_ADD_SR .. '(.+)')
@@ -170,19 +170,19 @@ function handle_config_command(msg)
     end
   elseif msg == 'help' then
     lb_print(
-      'LootBlare is a simple addon that displays and sort item rolls in a frame.')
+      '|cFF69CCF0LootBlare|r is a simple addon that displays and sort item rolls in a frame.')
     lb_print(
-      'Type /lb time <seconds> to set the duration the frame is shown. This value will be automatically set by the master looter after the first rolls.')
+      'Type |cFFFFFF00/lb time <seconds>|r to set the duration the frame is shown. This value will be automatically set by the master looter after the first rolls.')
     lb_print(
-      'Type /lb autoClose on/off to enable/disable auto closing the frame after the time has elapsed.')
+      'Type |cFFFFFF00/lb autoClose on/off|r to enable/disable auto closing the frame after the time has elapsed.')
     lb_print(
-      'Type /lb hideWhenUsingSpell on/off to enable/disable hiding the frame when using a spell.')
-    lb_print('Type /lb settings to see the current settings.')
+      'Type |cFFFFFF00/lb hideWhenUsingSpell on/off|r to enable/disable hiding the frame when using a spell.')
+    lb_print('Type |cFFFFFF00/lb settings|r to see the current settings.')
   elseif msg == 'settings' then
-    lb_print('Frame shown duration: ' .. FrameShownDuration .. ' seconds.')
-    lb_print('Auto closing: ' .. (FrameAutoClose and 'on' or 'off'))
-    lb_print('Hide when using spell: ' .. (HideWhenUsingSpell and 'on' or 'off'))
-    lb_print('Master Looter: ' .. (master_looter or 'unknown'))
+    lb_print('Frame shown duration: |cFFFFFF00' .. FrameShownDuration .. ' seconds|r.')
+    lb_print('Auto closing: |cFFFFFF00' .. (FrameAutoClose and 'on' or 'off') .. '|r')
+    lb_print('Hide when using spell: |cFFFFFF00' .. (HideWhenUsingSpell and 'on' or 'off') .. '|r')
+    lb_print('Master Looter: |cFFFFFF00' .. (master_looter or 'unknown') .. '|r')
   elseif string.find(msg, 'time') then
     local _, _, new_duration = string.find(msg, 'time (%d+)')
     new_duration = tonumber(new_duration)

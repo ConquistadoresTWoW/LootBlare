@@ -186,7 +186,9 @@ end
 function report_sr_list()
   SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_SR, 'RAID')
   for i, sr in current_item_sr do
-    local message = sr["ID"] .. ',' .. sr["Item"] .. ',' .. sr["Attendee"] ..
+    local class = get_class_of_roller(sr["Attendee"])
+    local colored_name = colorize_name_by_class(sr["Attendee"], class)
+    local message = sr["ID"] .. ',' .. sr["Item"] .. ',' .. colored_name ..
                       ',' .. sr["SR+"] .. ',' .. tostring(sr["MS"])
     SendAddonMessage(config.LB_PREFIX, config.LB_ADD_SR .. message, 'RAID')
   end

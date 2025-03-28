@@ -8,6 +8,11 @@ function lb_print(msg)
                                   config.LB_PREFIX .. ': ' .. msg .. '|r')
 end
 
+function colorize_name_by_class(name, class)
+  local class_color = config.RAID_CLASS_COLORS[class] or config.DEFAULT_TEXT_COLOR
+  return '|c' .. class_color .. name .. '|r'
+end
+
 function create_color_message(message)
   local class_color = config.RAID_CLASS_COLORS[message.class] or
                         config.DEFAULT_TEXT_COLOR

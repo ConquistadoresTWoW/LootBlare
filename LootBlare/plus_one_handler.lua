@@ -14,13 +14,16 @@ function increase_plus_one(player_name)
     return
   end
 
+  local class = get_class_of_roller(player_name)
+  local colored_name = colorize_name_by_class(player_name, class)
+  
   if PlusOneList[player_name] then
     PlusOneList[player_name] = PlusOneList[player_name] + 1
-    SendChatMessage(player_name .. ' +1. (+' .. PlusOneList[player_name] .. ')',
+    SendChatMessage(colored_name .. ' |cFF00FF00+1|r. (|cFFFFFF00+' .. PlusOneList[player_name] .. '|r)',
                     'RAID')
   else
     PlusOneList[player_name] = 1
-    SendChatMessage(player_name .. ' +1. (+1)', 'RAID')
+    SendChatMessage(colored_name .. ' |cFF00FF00+1|r. (|cFFFFFF00+1|r)', 'RAID')
   end
   report_plus_one_list()
 end
@@ -31,14 +34,17 @@ function reduce_plus_one(player_name)
     return
   end
 
+  local class = get_class_of_roller(player_name)
+  local colored_name = colorize_name_by_class(player_name, class)
+  
   if PlusOneList[player_name] then
     PlusOneList[player_name] = PlusOneList[player_name] - 1
     if PlusOneList[player_name] < 0 then PlusOneList[player_name] = 0 end
-    SendChatMessage(player_name .. ' -1. (+' .. PlusOneList[player_name] .. ')',
+    SendChatMessage(colored_name .. ' |cFFFF0000-1|r. (|cFFFFFF00+' .. PlusOneList[player_name] .. '|r)',
                     'RAID')
   else
     PlusOneList[player_name] = 0
-    SendChatMessage(player_name .. ' -1. (+0)', 'RAID')
+    SendChatMessage(colored_name .. ' |cFFFF0000-1|r. (|cFFFFFF00+0|r)', 'RAID')
   end
   report_plus_one_list()
 end
