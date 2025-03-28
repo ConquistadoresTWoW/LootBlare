@@ -20,13 +20,13 @@ local function create_close_button(frame, position, xOffset, yOffset)
 
   -- Set pushed texture
   local pushed_texture = close_button:CreateTexture(nil, 'BACKGROUND')
-  pushed_texture:SetTexture("Interface\\AddOns\\LootBlare\\close.tga")
+  pushed_texture:SetTexture("Interface\\AddOns\\LootBlare\\close2.tga")
   pushed_texture:SetAllPoints(close_button)
   close_button:SetPushedTexture(pushed_texture)
   
   -- Set highlight texture
   local highlight_texture = close_button:CreateTexture(nil, 'HIGHLIGHT')
-  highlight_texture:SetTexture('Interface/Buttons/UI-Panel-MinimizeButton-Highlight')
+  highlight_texture:SetTexture("Interface\\AddOns\\LootBlare\\close2.tga")
   highlight_texture:SetAllPoints(close_button)
   close_button:SetHighlightTexture(highlight_texture)
 
@@ -93,7 +93,7 @@ end
 function create_item_roll_frame()
   local frame = CreateFrame('Frame', 'item_roll_frame', UIParent)
   frame:SetWidth(185)
-  frame:SetHeight(280)
+  frame:SetHeight(270)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -163,7 +163,7 @@ local function create_clickable_text(parent, text, player_name)
 
   -- Highlight effect when hovered
   btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-  btn:GetHighlightTexture():SetWidth(180)
+  btn:GetHighlightTexture():SetWidth(170)
 
   btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
