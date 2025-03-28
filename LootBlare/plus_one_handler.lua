@@ -33,9 +33,6 @@ function reduce_plus_one(player_name)
     lb_print('You are not the master looter')
     return
   end
-
-  local class = get_class_of_roller(player_name)
-  local colored_name = colorize_name_by_class(player_name, class)
   
   if PlusOneList[player_name] then
     PlusOneList[player_name] = PlusOneList[player_name] - 1
