@@ -134,3 +134,11 @@ function play_sound(path)
   end
   PlaySoundFile(path, 'Master')
 end
+
+function run_if_master_looter(callback)
+  if is_master_looter(UnitName('player')) then
+    callback()
+  else
+    lb_print('You are not the master looter')
+  end
+end

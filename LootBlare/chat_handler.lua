@@ -174,11 +174,33 @@ function handle_config_command(msg)
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
                '/lb time <seconds>|r to set the duration the frame is shown. This value will be automatically set by the master looter after the first rolls.')
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb autoClose on/off|r to enable/disable auto closing the frame after the time has elapsed.')
+               '/lb ac on/off|r to enable/disable auto closing the frame after the time has elapsed.')
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb hideWhenUsingSpell on/off|r to enable/disable hiding the frame when using a spell.')
+               '/lb hwus on/off|r (hide when using a spell) to enable/disable hiding the frame when using a spell.')
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
                '/lb settings|r to see the current settings.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb srl|r to show the soft reserve list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb al|r to show the alts list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb pol|r to show the plus one list.')
+    lb_print('Master looter commands:')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb sr|r to show the soft reserve frame.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb src|r to clear the soft reserve list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb aa alt1,alt2,alt3,...,altN|r to add alts to the alts list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb ar alt1,alt2,alt3,...,altN|r to remove alts from the alts list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb po <player>|r to increase the plus one count for a player.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb mo <player>|r to reduce the plus one count for a player.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb poc|r to clear the plus one list.')
+
   elseif msg == 'settings' then
     lb_print('Frame shown duration: |c' .. config.DEFAULT_TEXT_COLOR ..
                FrameShownDuration .. ' seconds|r.')
@@ -188,7 +210,7 @@ function handle_config_command(msg)
                (HideWhenUsingSpell and 'on' or 'off') .. '|r')
     lb_print('Master Looter: |c' .. config.DEFAULT_TEXT_COLOR .. '' ..
                (master_looter or 'unknown') .. '|r')
-  elseif string.find(msg, 'time') then
+  elseif string.find(msg, 'time (%d+)') then
     local _, _, new_duration = string.find(msg, 'time (%d+)')
     new_duration = tonumber(new_duration)
     if new_duration and new_duration > 0 then
@@ -201,8 +223,8 @@ function handle_config_command(msg)
     else
       lb_print('Invalid duration. Please enter a number greater than 0.')
     end
-  elseif string.find(msg, 'autoClose') then
-    local _, _, auto_close = string.find(msg, 'autoClose (%a+)')
+  elseif string.find(msg, 'ac (%a+)') then
+    local _, _, auto_close = string.find(msg, 'ac (%a+)')
     if auto_close == 'on' then
       lb_print('Auto closing enabled.')
       FrameAutoClose = true
@@ -212,8 +234,8 @@ function handle_config_command(msg)
     else
       lb_print('Invalid option. Please enter \'on\' or \'off\'.')
     end
-  elseif string.find(msg, 'hideWhenUsingSpell') then
-    local _, _, hide = string.find(msg, 'hideWhenUsingSpell (%a+)')
+  elseif string.find(msg, 'hwup (%a+)') then
+    local _, _, hide = string.find(msg, 'hwup (%a+)')
     if hide == 'on' then
       lb_print('Hiding frame when using a spell enabled.')
       HideWhenUsingSpell = true
@@ -223,28 +245,38 @@ function handle_config_command(msg)
     else
       lb_print('Invalid option. Please enter \'on\' or \'off\'.')
     end
-  elseif string.find(msg, 'srs') then
+  elseif msg == 'srl' then
     print_sr_list()
-  elseif string.find(msg, 'src') then
-    clear_sr_list()
-  elseif string.find(msg, 'sr') then
-    text_box_frame:Show()
-  elseif string.find(msg, 'alts list') or string.find(msg, 'al') then
+  elseif msg == 'al' then
     print_alts_list()
-  elseif string.find(msg, 'aa (%a+)') then
-    local _, _, new_alts = string.find(msg, 'aa (%a+)')
-    load_alts_from_string(new_alts)
-  elseif string.find(msg, 'ar (%a+)') then
-    local _, _, new_alts = string.find(msg, 'ar (%a+)')
-    remove_alts_from_string(new_alts)
-  elseif string.find(msg, 'po (%a)') then
-    local _, _, new_plus_one = string.find(msg, 'po (%a+)')
-    increase_plus_one(new_plus_one)
-  elseif string.find(msg, 'mo (%a)') then
-    local _, _, new_plus_one = string.find(msg, 'mo (%a+)')
-    increase_plus_one(new_plus_one)
-  elseif string.find(msg, 'plus one list') or string.find(msg, 'pol') then
+  elseif msg == 'pol' then
     print_plus_one_list()
+  elseif msg == 'sr' then
+    run_if_master_looter(function() text_box_frame:Show() end)
+  elseif msg == 'src' then
+    run_if_master_looter(function() clear_sr_list() end)
+  elseif string.find(msg, 'aa (%a+)') then
+    run_if_master_looter(function()
+      local _, _, new_alts = string.find(msg, 'aa (%a+)')
+      load_alts_from_string(new_alts)
+    end)
+  elseif string.find(msg, 'ar (%a+)') then
+    run_if_master_looter(function()
+      local _, _, new_alts = string.find(msg, 'ar (%a+)')
+      remove_alts_from_string(new_alts)
+    end)
+  elseif string.find(msg, 'po (%a)') then
+    run_if_master_looter(function()
+      local _, _, new_plus_one = string.find(msg, 'po (%a+)')
+      increase_plus_one(new_plus_one)
+    end)
+  elseif string.find(msg, 'mo (%a)') then
+    run_if_master_looter(function()
+      local _, _, new_plus_one = string.find(msg, 'mo (%a+)')
+      reduce_plus_one(new_plus_one)
+    end)
+  elseif msg == 'poc' then
+    run_if_master_looter(function() clear_plus_one_list() end)
   else
     lb_print('Invalid command. Type /lb help for a list of commands.')
   end
