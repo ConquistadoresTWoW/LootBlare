@@ -44,7 +44,7 @@ WIP
 
 ### The (moveable) frame in game:
 
-![LootBlare Frame](./lootblareframe.png)
+![LootBlare Frame](./assets/lootblareframe.png)
 
 Changelog:
 

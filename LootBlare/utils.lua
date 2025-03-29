@@ -124,7 +124,7 @@ end
 function play_sound(path)
   lb_print('Playing sound ')
   if path == nil then
-    path = 'Interface\\AddOns\\LootBlare\\LootBlare\\conxale.mp3'
+    path = 'Interface\\AddOns\\LootBlare\\assets\\conxale.mp3'
   end
   PlaySoundFile(path, 'Master')
 end
