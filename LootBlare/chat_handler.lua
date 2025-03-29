@@ -169,20 +169,25 @@ function handle_config_command(msg)
       item_roll_frame:Show()
     end
   elseif msg == 'help' then
-    lb_print(
-      'LootBlare is a simple addon that displays and sort item rolls in a frame.')
-    lb_print(
-      'Type /lb time <seconds> to set the duration the frame is shown. This value will be automatically set by the master looter after the first rolls.')
-    lb_print(
-      'Type /lb autoClose on/off to enable/disable auto closing the frame after the time has elapsed.')
-    lb_print(
-      'Type /lb hideWhenUsingSpell on/off to enable/disable hiding the frame when using a spell.')
-    lb_print('Type /lb settings to see the current settings.')
+    lb_print('|c' .. config.CHAT_COLORS.INFO ..
+               'LootBlare|r is a simple addon that displays and sort item rolls in a frame.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb time <seconds>|r to set the duration the frame is shown. This value will be automatically set by the master looter after the first rolls.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb autoClose on/off|r to enable/disable auto closing the frame after the time has elapsed.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb hideWhenUsingSpell on/off|r to enable/disable hiding the frame when using a spell.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb settings|r to see the current settings.')
   elseif msg == 'settings' then
-    lb_print('Frame shown duration: ' .. FrameShownDuration .. ' seconds.')
-    lb_print('Auto closing: ' .. (FrameAutoClose and 'on' or 'off'))
-    lb_print('Hide when using spell: ' .. (HideWhenUsingSpell and 'on' or 'off'))
-    lb_print('Master Looter: ' .. (master_looter or 'unknown'))
+    lb_print('Frame shown duration: |c' .. config.DEFAULT_TEXT_COLOR ..
+               FrameShownDuration .. ' seconds|r.')
+    lb_print('Auto closing: |c' .. config.DEFAULT_TEXT_COLOR .. '' ..
+               (FrameAutoClose and 'on' or 'off') .. '|r')
+    lb_print('Hide when using spell: |c' .. config.DEFAULT_TEXT_COLOR .. '' ..
+               (HideWhenUsingSpell and 'on' or 'off') .. '|r')
+    lb_print('Master Looter: |c' .. config.DEFAULT_TEXT_COLOR .. '' ..
+               (master_looter or 'unknown') .. '|r')
   elseif string.find(msg, 'time') then
     local _, _, new_duration = string.find(msg, 'time (%d+)')
     new_duration = tonumber(new_duration)
