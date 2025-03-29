@@ -1,13 +1,13 @@
 config = {
   FRAME_WIDTH = 230,
-  FRAME_HEIGHT = 270,
+  FRAME_HEIGHT = 250,
   BUTTON_WIDTH = 32,
   BUTTON_COUNT = 3,
   BUTTON_PADING = 10,
   CLICKABLE_TEXT_HEIGHT = 15,
   CLICKABLE_TEXT_FONT_SIZE = 11,
-  FONT_NAME = 'Fonts\\FRIZQT__.TTF',
-  FONT_SIZE = 12,
+  FONT_NAME = 'Interface\\AddOns\\LootBlare\\assets\\BalooBhaina.ttf',
+  FONT_SIZE = 16,
   FONT_OUTLINE = 'OUTLINE',
   RAID_CLASS_COLORS = {
     ['Warrior'] = 'FFC79C6E',

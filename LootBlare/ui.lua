@@ -38,18 +38,16 @@ local function create_close_button(frame, position, xOffset, yOffset)
 end
 
 local function create_action_button(frame, button_text, tooltip_text, index,
-                                    on_click_action, big_button,
-                                    big_buttons_before)
-  local width_multiplier = big_button and 2 or 1
+                                    on_click_action, width_multiplier,
+                                    button_space_before)
+  local width_multiplier = width_multiplier or 1
   local panel_width = frame:GetWidth()
   local spacing = (panel_width - total_button_width) / (config.BUTTON_COUNT + 1)
   local button = CreateFrame('Button', nil, frame, UIParent)
   button:SetWidth(config.BUTTON_WIDTH * width_multiplier)
   button:SetHeight(config.BUTTON_WIDTH)
   button:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT',
-                  index * spacing + (index - 1) * config.BUTTON_WIDTH +
-                    big_buttons_before * config.BUTTON_WIDTH,
-                  config.BUTTON_PADING)
+                  spacing * index + button_space_before, config.BUTTON_PADING)
 
   -- Set button text
   button:SetText(button_text)
@@ -114,32 +112,37 @@ function create_item_roll_frame()
       text = 'SR/MS',
       tooltip = 'Roll for Soft Reserve or Main Spec',
       roll = function() RandomRoll(1, 100) end,
-      big_button = true
+      width_multiplier = 2.2
     }, {
       text = 'OS',
       tooltip = 'Roll for Off Spec',
       roll = function() RandomRoll(1, 99) end,
-      big_button = false
+      width_multiplier = 1.2
     }, {
       text = 'TM',
       tooltip = 'Roll for Trasmog',
       roll = function() RandomRoll(1, 50) end,
-      big_button = false
+      width_multiplier = 1.2
     }
   }
 
   total_button_width = 0
+  local button_space_before = 0
 
   for i, settings in ipairs(action_button_settings) do
+    settings.button_space_before = button_space_before
+    lb_print(button_space_before)
     total_button_width = total_button_width +
-                           (config.BUTTON_WIDTH *
-                             (settings.big_button and 2 or 1))
+                           (config.BUTTON_WIDTH * settings.width_multiplier)
+
+    button_space_before = button_space_before +
+                            (config.BUTTON_WIDTH * settings.width_multiplier)
   end
-  local big_buttons_before = 0
+
   for i, settings in ipairs(action_button_settings) do
     create_action_button(frame, settings.text, settings.tooltip, i,
-                         settings.roll, settings.big_button, big_buttons_before)
-    if settings.big_button then big_buttons_before = big_buttons_before + 1 end
+                         settings.roll, settings.width_multiplier,
+                         settings.button_space_before)
   end
 
   frame:Hide()
@@ -154,11 +157,9 @@ local function create_clickable_text(parent, text, player_name)
 
   -- Set button font
   local font_string = btn:CreateFontString(nil, "OVERLAY")
-  font_string:SetFont("Interface\\AddOns\\LootBlare\\assets\\BalooBhaina.ttf",
-                      config.CLICKABLE_TEXT_FONT_SIZE, "THICKOUTLINE")
-  font_string:SetPoint("LEFT", btn, "LEFT", 15,
-                       (config.CLICKABLE_TEXT_FONT_SIZE -
-                         config.CLICKABLE_TEXT_HEIGHT) / 2)
+  font_string:SetFont(config.FONT_NAME, config.CLICKABLE_TEXT_FONT_SIZE,
+                      config.FONT_OUTLINE)
+  font_string:SetPoint("LEFT", btn, "LEFT", 15, -1.5)
   font_string:SetText(text)
   btn:SetFontString(font_string)
 
