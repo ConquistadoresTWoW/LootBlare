@@ -259,11 +259,13 @@ function handle_config_command(msg)
     run_if_master_looter(function()
       local _, _, new_alts = string.find(msg, 'aa (%a+)')
       load_alts_from_string(new_alts)
+      lb_print('Alts added')
     end)
   elseif string.find(msg, 'ar (%a+)') then
     run_if_master_looter(function()
       local _, _, new_alts = string.find(msg, 'ar (%a+)')
       remove_alts_from_string(new_alts)
+      lb_print('Alts removed')
     end)
   elseif string.find(msg, 'po (%a)') then
     run_if_master_looter(function()
