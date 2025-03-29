@@ -14,13 +14,19 @@ function increase_plus_one(player_name)
     return
   end
 
+  local class = get_class_of_roller(player_name)
+  local colored_name = create_color_name_by_class(player_name, class)
+
   if PlusOneList[player_name] then
     PlusOneList[player_name] = PlusOneList[player_name] + 1
-    SendChatMessage(player_name .. ' +1. (+' .. PlusOneList[player_name] .. ')',
-                    'RAID')
+    SendChatMessage(colored_name .. ' |c' .. config.CHAT_COLORS.POSITIVE ..
+                      '+1|r. (|c' .. config.CHAT_COLORS.NEUTRAL .. '+' ..
+                      PlusOneList[player_name] .. '|r)', 'RAID')
   else
     PlusOneList[player_name] = 1
-    SendChatMessage(player_name .. ' +1. (+1)', 'RAID')
+    SendChatMessage(colored_name .. ' |c' .. config.CHAT_COLORS.POSITIVE ..
+                      '+1|r. (|c' .. config.CHAT_COLORS.NEUTRAL .. '+1|r)',
+                    'RAID')
   end
   report_plus_one_list()
 end
@@ -31,14 +37,20 @@ function reduce_plus_one(player_name)
     return
   end
 
+  local class = get_class_of_roller(player_name)
+  local colored_name = create_color_name_by_class(player_name, class)
+
   if PlusOneList[player_name] then
     PlusOneList[player_name] = PlusOneList[player_name] - 1
     if PlusOneList[player_name] < 0 then PlusOneList[player_name] = 0 end
-    SendChatMessage(player_name .. ' -1. (+' .. PlusOneList[player_name] .. ')',
-                    'RAID')
+    SendChatMessage(colored_name .. ' |c' .. config.CHAT_COLORS.NEGATIVE ..
+                      '-1|r. (|c' .. config.CHAT_COLORS.NEUTRAL .. '+' ..
+                      PlusOneList[player_name] .. '|r)', 'RAID')
   else
     PlusOneList[player_name] = 0
-    SendChatMessage(player_name .. ' -1. (+0)', 'RAID')
+    SendChatMessage(colored_name .. ' |c' .. config.CHAT_COLORS.NEGATIVE ..
+                      '-1|r. (|c' .. config.CHAT_COLORS.NEUTRAL .. '+0|r)',
+                    'RAID')
   end
   report_plus_one_list()
 end
