@@ -150,19 +150,21 @@ end
 local function create_clickable_text(parent, text, player_name)
   local btn = CreateFrame("Button", nil, parent)
   btn:SetWidth(config.FRAME_WIDTH)
-  btn:SetHeight(20)
+  btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT)
 
   -- Set button font
   local font_string = btn:CreateFontString(nil, "OVERLAY")
   font_string:SetFont("Interface\\AddOns\\LootBlare\\assets\\BalooBhaina.ttf",
-                      11, "OUTLINE")
-  font_string:SetPoint("LEFT", btn, "LEFT", 12, 0)
+                      config.CLICKABLE_TEXT_FONT_SIZE, "THICKOUTLINE")
+  font_string:SetPoint("LEFT", btn, "LEFT", 15,
+                       (config.CLICKABLE_TEXT_FONT_SIZE -
+                         config.CLICKABLE_TEXT_HEIGHT) / 2)
   font_string:SetText(text)
   btn:SetFontString(font_string)
 
   -- Highlight effect when hovered
   btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-  btn:GetHighlightTexture():SetWidth(config.FRAME_WIDTH)
+  btn:GetHighlightTexture():SetWidth(config.FRAME_WIDTH * 0.8)
 
   btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
@@ -213,7 +215,7 @@ function update_text_area(frame)
       btn:Show()
 
       table.insert(text_area.text_lines, btn)
-      y_offset = y_offset + 20
+      y_offset = y_offset + config.CLICKABLE_TEXT_HEIGHT
       count = count + 1
     end
   end
