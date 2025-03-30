@@ -201,8 +201,8 @@ function update_text_area(frame)
 
   local text = ''
   local colored_msg = ''
-  local y_offset = 0
   local count = 0
+  local y_offset = 0
   sort_rolls()
 
   -- helper function to process each category of messages
