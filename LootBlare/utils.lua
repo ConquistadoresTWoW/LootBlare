@@ -19,22 +19,37 @@ function create_color_message(message)
                         config.DEFAULT_TEXT_COLOR
   local text_color = config.DEFAULT_TEXT_COLOR
 
+  -- First line: Character name (class colored) + "rolls XX" (yellow)
+  local line1 = '|c' .. class_color .. message.alt_roller .. '|r |c' .. 
+                config.DEFAULT_TEXT_COLOR .. 'rolls ' .. message.roll .. '|r'
+  
+  -- Second line: Roll type and additional info
+  local line2_parts = {}
+  
+  -- Add roll type info
   if message.roll_type == RollType.SR_MS then
-    text_color = config.SR_MS_TEXT_COLOR
+    table.insert(line2_parts, '|c' .. config.SR_MS_TEXT_COLOR .. 'SR-MS: ' .. message.sr .. '|r')
   elseif message.roll_type == RollType.SR_OS then
-    text_color = config.SR_OS_TEXT_COLOR
+    table.insert(line2_parts, '|c' .. config.SR_OS_TEXT_COLOR .. 'SR-OS: ' .. message.sr .. '|r')
   elseif message.roll_type == RollType.MS then
-    text_color = config.MS_TEXT_COLOR
+    table.insert(line2_parts, '|c' .. config.MS_TEXT_COLOR .. 'MS|r')
   elseif message.roll_type == RollType.OS then
-    text_color = config.OS_TEXT_COLOR
+    table.insert(line2_parts, '|c' .. config.OS_TEXT_COLOR .. 'OS|r')
   elseif message.roll_type == RollType.TM then
-    text_color = config.TM_TEXT_COLOR
+    table.insert(line2_parts, '|c' .. config.TM_TEXT_COLOR .. 'TM|r')
   end
-
-  local colored_msg =
-    '|c' .. class_color .. '' .. message.alt_roller .. '|r |c' .. text_color ..
-      message.message_end .. '|r'
-  return colored_msg
+  
+  -- Add plus one info if applicable
+  if PlusOneList[message.roller] and PlusOneList[message.roller] > 0 then
+    table.insert(line2_parts, '|c' .. config.CHAT_COLORS.NEUTRAL .. 
+                '+ ' .. PlusOneList[message.roller] .. '|r')
+  end
+  
+  -- Combine all parts of line 2
+  local line2 = table.concat(line2_parts, ' ')
+  
+  -- Combine both lines with newline
+  return line1 .. '\n' .. line2
 end
 
 function len(t)

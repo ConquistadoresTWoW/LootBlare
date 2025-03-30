@@ -153,16 +153,18 @@ end
 local function create_clickable_text(parent, text, player_name)
   local btn = CreateFrame("Button", nil, parent)
   btn:SetWidth(config.FRAME_WIDTH)
-  btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT)
-
+  btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT * 2) -- Double height for two lines
+  
   -- Set button font
   local font_string = btn:CreateFontString(nil, "OVERLAY")
   font_string:SetFont(config.FONT_NAME, config.CLICKABLE_TEXT_FONT_SIZE,
                       config.FONT_OUTLINE)
   font_string:SetPoint("LEFT", btn, "LEFT", 15, -1.5)
   font_string:SetText(text)
+  font_string:SetJustifyH("LEFT")
+  font_string:SetJustifyV("TOP")
   btn:SetFontString(font_string)
-
+  
   -- Highlight effect when hovered
   btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
   btn:GetHighlightTexture():SetWidth(config.FRAME_WIDTH * 0.8)
@@ -199,10 +201,8 @@ function update_text_area(frame)
 
   local text = ''
   local colored_msg = ''
+    local y_offset = 0
   local count = 0
-  local y_offset = 0
-
-  sort_rolls()
 
   -- helper function to process each category of messages
   local function process_messages(messages, max_count)
@@ -216,7 +216,26 @@ function update_text_area(frame)
       btn:Show()
 
       table.insert(text_area.text_lines, btn)
-      y_offset = y_offset + config.CLICKABLE_TEXT_HEIGHT
+      y_offset = y_offset + (config.CLICKABLE_TEXT_HEIGHT * 2) -- Double the height increment
+      count = count + 1
+    end
+  end  
+  local y_offset = 0
+  local count = 0
+
+  -- helper function to process each category of messages
+  local function process_messages(messages, max_count)
+    for _, msg in ipairs(messages) do
+      if count >= max_count then break end
+      create_roller_message(msg)
+      local colored_text = create_color_message(msg)
+
+      local btn = create_clickable_text(text_area, colored_text, msg.roller)
+      btn:SetPoint("TOPLEFT", text_area, "TOPLEFT", 0, -y_offset)
+      btn:Show()
+
+      table.insert(text_area.text_lines, btn)
+      y_offset = y_offset + (config.CLICKABLE_TEXT_HEIGHT * 2) -- Double the height increment
       count = count + 1
     end
   end
