@@ -222,23 +222,6 @@ function update_text_area(frame)
     end
   end
 
-  -- helper function to process each category of messages
-  local function process_messages(messages, max_count)
-    for _, msg in ipairs(messages) do
-      if count >= max_count then break end
-      create_roller_message(msg)
-      local colored_text = create_color_message(msg)
-
-      local btn = create_clickable_text(text_area, colored_text, msg.roller)
-      btn:SetPoint("TOPLEFT", text_area, "TOPLEFT", 0, -y_offset)
-      btn:Show()
-
-      table.insert(text_area.text_lines, btn)
-      y_offset = y_offset + (config.CLICKABLE_TEXT_HEIGHT * 2) -- Double the height increment
-      count = count + 1
-    end
-  end
-
   -- Process different message categories
   process_messages(sr_ms_messages, 5)
   process_messages(ms_roll_messages, 6)
