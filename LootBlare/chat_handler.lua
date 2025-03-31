@@ -85,6 +85,7 @@ function handle_chat_message(event, message, sender)
     if FrameShownDuration == nil then FrameShownDuration = 15 end
     if FrameAutoClose == nil then FrameAutoClose = true end
     if HideWhenUsingSpell == nil then HideWhenUsingSpell = false end
+    if ResetPOAfterImportingSR == nil then ResetPOAfterImportingSR = false end
     if AltList == nil then AltList = {} end
     if SRList == nil then SRList = {} end
     if PlusOneList == nil then PlusOneList = {} end
@@ -210,6 +211,9 @@ function handle_config_command(msg)
                (HideWhenUsingSpell and 'on' or 'off') .. '|r')
     lb_print('Master Looter: |c' .. config.DEFAULT_TEXT_COLOR .. '' ..
                (master_looter or 'unknown') .. '|r')
+    lb_print('Reset plus one after importing SR: |c' ..
+               config.DEFAULT_TEXT_COLOR .. '' ..
+               (ResetPOAfterImportingSR and 'on' or 'off') .. '|r')
   elseif string.find(msg, 'time (%d+)') then
     local _, _, new_duration = string.find(msg, 'time (%d+)')
     new_duration = tonumber(new_duration)

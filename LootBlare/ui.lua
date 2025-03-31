@@ -478,5 +478,20 @@ function create_text_box_frame()
   edit_box:SetScript("OnTextChanged",
                      function(_) scroll_frame:UpdateScrollChildRect() end)
   create_close_button(frame, 'TOPRIGHT', -2, -2)
+
+  local check_box = CreateFrame('CheckButton', 'FrameAutoClose', frame,
+                                'UICheckButtonTemplate')
+  check_box:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 10, 10)
+  getglobal(check_box:GetName() .. 'Text'):SetText(
+    'Reset PO after importing SRs');
+  check_box.tooltip = 'Reset PO after importing SRs'
+  check_box:SetScript('OnClick', function()
+    ResetPOAfterImportingSR = check_box:GetChecked() == 1
+  end)
+
+  frame:RegisterEvent('OnShow')
+  frame:SetScript('OnShow',
+                  function() check_box:SetChecked(ResetPOAfterImportingSR) end)
+
   return frame
 end

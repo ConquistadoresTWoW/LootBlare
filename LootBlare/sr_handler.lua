@@ -85,6 +85,12 @@ function load_sr_from_csv()
   end
 
   SRList = items
+
+  if ResetPOAfterImportingSR then
+    PlusOneList = {}
+    lb_print('PO list cleared')
+  end
+
   lb_print('Loading SR from CSV')
 end
 
