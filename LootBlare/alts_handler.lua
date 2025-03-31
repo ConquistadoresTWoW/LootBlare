@@ -1,5 +1,5 @@
 function print_alts_list()
-  local alt_str = ''
+  local alt_str = 'Alts list:'
   for alt, _ in pairs(AltList) do alt_str = alt_str .. alt .. ', ' end
   lb_print(alt_str)
 end

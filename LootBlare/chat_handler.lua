@@ -267,6 +267,11 @@ function handle_config_command(msg)
       remove_alts_from_string(new_alts)
       lb_print('Alts removed')
     end)
+  elseif msg == 'ac' then
+    run_if_master_looter(function()
+      AltList = {}
+      lb_print('Alts list cleared')
+    end)
   elseif string.find(msg, 'po (%a)') then
     run_if_master_looter(function()
       local _, _, new_plus_one = string.find(msg, 'po (%a+)')
@@ -278,7 +283,10 @@ function handle_config_command(msg)
       reduce_plus_one(new_plus_one)
     end)
   elseif msg == 'poc' then
-    run_if_master_looter(function() clear_plus_one_list() end)
+    run_if_master_looter(function()
+      PlusOneList = {}
+      lb_print('Plus one list cleared')
+    end)
   else
     lb_print('Invalid command. Type /lb help for a list of commands.')
   end

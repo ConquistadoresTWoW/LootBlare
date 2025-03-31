@@ -1,5 +1,5 @@
 function print_plus_one_list()
-  local plus_one_str = ''
+  local plus_one_str = 'Plus one list: '
   for name, value in pairs(PlusOneList) do
     if value > 0 then
       plus_one_str = plus_one_str .. name .. ', ' .. value .. '; '
