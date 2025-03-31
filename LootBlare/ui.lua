@@ -53,7 +53,7 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   button:SetText(button_text)
   local font = button:GetFontString()
   font:SetFont(config.FONT_NAME, config.FONT_SIZE, config.FONT_OUTLINE)
-  font:SetPoint("CENTER", button, "CENTER", 0, -2) -- Move text down by 2 pixels
+  font:SetPoint("CENTER", button, "CENTER", 0, -4) -- Move text down by 2 pixels
 
   -- Add background
   local background = button:CreateTexture(nil, 'BACKGROUND')
@@ -152,19 +152,29 @@ end
 
 local function create_clickable_text(parent, text, player_name)
   local btn = CreateFrame("Button", nil, parent)
-  btn:SetWidth(config.FRAME_WIDTH)
+  btn:SetWidth(config.FRAME_WIDTH - 20)
   btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT * 2) -- Double height for two lines
-  
+
+  -- add button border
+  btn:SetBackdrop({
+    bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
+    edgeFile = 'Interface/Tooltips/UI-Tooltip-Border',
+    tile = true,
+    tileSize = 16,
+    edgeSize = 5
+  })
+  btn:SetBackdropColor(0, 0, 0, 0.5) -- Black background with 50% opacity
+  btn:SetBackdropBorderColor(0.4, 0.4, 0.4) -- Light
+
   -- Set button font
   local font_string = btn:CreateFontString(nil, "OVERLAY")
   font_string:SetFont(config.FONT_NAME, config.CLICKABLE_TEXT_FONT_SIZE,
                       config.FONT_OUTLINE)
-  font_string:SetPoint("LEFT", btn, "LEFT", 15, -1.5)
+  font_string:SetPoint("LEFT", btn, "LEFT", 5, -1.5)
   font_string:SetText(text)
   font_string:SetJustifyH("LEFT")
   font_string:SetJustifyV("TOP")
   btn:SetFontString(font_string)
-  
   -- Highlight effect when hovered
   btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
   btn:GetHighlightTexture():SetWidth(config.FRAME_WIDTH * 0.8)
@@ -213,7 +223,7 @@ function update_text_area(frame)
       local colored_text = create_color_message(msg)
 
       local btn = create_clickable_text(text_area, colored_text, msg.roller)
-      btn:SetPoint("TOPLEFT", text_area, "TOPLEFT", 0, -y_offset)
+      btn:SetPoint("TOPLEFT", text_area, "TOPLEFT", 10, -y_offset)
       btn:Show()
 
       table.insert(text_area.text_lines, btn)
@@ -224,10 +234,10 @@ function update_text_area(frame)
 
   -- Process different message categories
   process_messages(sr_ms_messages, 5)
-  process_messages(ms_roll_messages, 6)
-  process_messages(sr_os_messages, 7)
-  process_messages(os_roll_messages, 8)
-  process_messages(tmog_roll_messages, 9)
+  process_messages(ms_roll_messages, 5)
+  process_messages(sr_os_messages, 5)
+  process_messages(os_roll_messages, 5)
+  process_messages(tmog_roll_messages, 6)
 end
 
 local function init_item_info(frame)
