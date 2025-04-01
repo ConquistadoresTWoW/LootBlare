@@ -155,17 +155,6 @@ local function create_clickable_text(parent, text, player_name)
   btn:SetWidth(config.FRAME_WIDTH - 20)
   btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT * 2) -- Double height for two lines
 
-  -- add button border
-  btn:SetBackdrop({
-    bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
-    edgeFile = 'Interface/Tooltips/UI-Tooltip-Border',
-    tile = true,
-    tileSize = 16,
-    edgeSize = 5
-  })
-  btn:SetBackdropColor(0, 0, 0, 0.5) -- Black background with 50% opacity
-  btn:SetBackdropBorderColor(0.4, 0.4, 0.4) -- Light
-
   -- Set button font
   local font_string = btn:CreateFontString(nil, "OVERLAY")
   font_string:SetFont(config.FONT_NAME, config.CLICKABLE_TEXT_FONT_SIZE,
@@ -174,6 +163,9 @@ local function create_clickable_text(parent, text, player_name)
   font_string:SetText(text)
   font_string:SetJustifyH("LEFT")
   font_string:SetJustifyV("TOP")
+  -- add shadow to the font
+  font_string:SetShadowOffset(2, -2)
+
   btn:SetFontString(font_string)
   -- Highlight effect when hovered
   btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
