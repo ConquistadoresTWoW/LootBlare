@@ -1,8 +1,16 @@
 ## Interface: 11200
-## Title: LootBlare 1.1.7
+## Title: LootBlare 2.0.0
 ## Author: Ehawne, Sivent, Gulolio
-## Version: 1.1.7
+## Version: 2.0.0
 ## Notes: Make loot rolls obvious
-## SavedVariables:FrameShownDuration, FrameAutoClose
+## SavedVariables:FrameShownDuration, FrameAutoClose, HideWhenUsingSpell, AltList, SRList, PlusOneList, ResetPOAfterImportingSR
 
-LootBlare.lua
+LootBlare\config.lua
+LootBlare\utils.lua
+LootBlare\roll_handler.lua
+LootBlare\sr_handler.lua
+LootBlare\plus_one_handler.lua
+LootBlare\alts_handler.lua
+LootBlare\ui.lua
+LootBlare\chat_handler.lua
+LootBlare\LootBlare.lua
