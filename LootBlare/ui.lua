@@ -116,18 +116,55 @@ function create_item_roll_frame()
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
   create_top_button(frame)
-  -- settings button
-  create_top_button(frame, 'TOPRIGHT', -27, -7,
-                    "Interface\\AddOns\\LootBlare\\assets\\settings.tga",
-                    "Interface\\AddOns\\LootBlare\\assets\\settings.tga",
-                    "Interface\\AddOns\\LootBlare\\assets\\settings.tga",
-                    function() settings_frame:Show() end)
-  -- import button
-  create_top_button(frame, 'TOPRIGHT', -47, -7,
-                    "Interface\\AddOns\\LootBlare\\assets\\import.tga",
-                    "Interface\\AddOns\\LootBlare\\assets\\import.tga",
-                    "Interface\\AddOns\\LootBlare\\assets\\import.tga",
-                    function() import_sr_frame:Show() end)
+  local main_over_alts_button = CreateFrame('Button', nil, frame,
+                                            'UIPanelButtonTemplate')
+
+  local ICON_ENABLED = 'Interface\\AddOns\\LootBlare\\assets\\moa_on.tga'
+  local ICON_DISABLED = 'Interface\\AddOns\\LootBlare\\assets\\moa_off.tga'
+
+  main_over_alts_button:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -27, -7)
+  main_over_alts_button:SetWidth(16) -- Button size
+  main_over_alts_button:SetHeight(16) -- Button size
+
+  local moa = true
+  if Settings ~= nil then moa = Settings.PrioMainOverAlts end
+
+  local normal_texture = main_over_alts_button:CreateTexture(nil, 'BACKGROUND')
+  normal_texture:SetTexture(moa and ICON_ENABLED or ICON_DISABLED)
+  normal_texture:SetAllPoints(main_over_alts_button)
+  main_over_alts_button:SetNormalTexture(normal_texture)
+
+  function update_moa_button_texture()
+    -- change the texture of the button to show current state
+    local normal_texture =
+      main_over_alts_button:CreateTexture(nil, 'BACKGROUND')
+    normal_texture:SetTexture(Settings.PrioMainOverAlts and ICON_ENABLED or
+                                ICON_DISABLED)
+    normal_texture:SetAllPoints(main_over_alts_button)
+    main_over_alts_button:SetNormalTexture(normal_texture)
+  end
+
+  -- set highlight texture
+  local highlight_texture =
+    main_over_alts_button:CreateTexture(nil, 'HIGHLIGHT')
+  highlight_texture:SetTexture(moa and ICON_ENABLED or ICON_DISABLED)
+  highlight_texture:SetAllPoints(main_over_alts_button)
+  main_over_alts_button:SetHighlightTexture(highlight_texture)
+
+  main_over_alts_button:SetScript('OnClick', function()
+    if master_looter == UnitName('player') then
+      Settings.PrioMainOverAlts = not Settings.PrioMainOverAlts
+      send_ml_settings()
+      update_moa_button_texture()
+      update_text_area(item_roll_frame)
+    else
+      lb_print('You are not the master looter')
+    end
+
+  end)
+
+  -- on show update the button texture
+  frame:SetScript('OnShow', function() update_moa_button_texture() end)
 
   local action_button_settings = {
     {

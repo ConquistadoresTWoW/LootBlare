@@ -171,4 +171,6 @@ function load_ml_settings_from_string(settings_str)
   Settings.RollDuration = tonumber(settings[1])
   Settings.PrioMainOverAlts = settings[2] == 'true'
   master_looter = settings[3]
+  update_moa_button_texture()
+  update_text_area(item_roll_frame)
 end
