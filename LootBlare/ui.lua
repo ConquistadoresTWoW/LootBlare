@@ -1,40 +1,50 @@
 total_button_width = 0
 
-local function create_close_button(frame, position, xOffset, yOffset)
+local function create_top_button(frame, position, xOffset, yOffset,
+                                 normal_texture_path, pushed_texture_path,
+                                 highlight_texture_path, action)
   -- Default values if not provided
   position = position or 'TOPRIGHT'
   xOffset = xOffset or -7
   yOffset = yOffset or -7
+  normal_texture_path = normal_texture_path or
+                          "Interface\\AddOns\\LootBlare\\assets\\close.tga"
+  pushed_texture_path = pushed_texture_path or
+                          "Interface\\AddOns\\LootBlare\\assets\\close2.tga"
+  highlight_texture_path = highlight_texture_path or
+                             "Interface\\AddOns\\LootBlare\\assets\\close2.tga"
+  action = action or function() frame:Hide() end
+  -- default texture_color to red
+  texture_color = texture_color or {1, 0, 0, 1}
 
   -- Add a custom close button
-  local close_button = CreateFrame('Button', nil, frame)
-  close_button:SetWidth(16) -- Button size
-  close_button:SetHeight(16) -- Button size
-  close_button:SetPoint(position, frame, position, xOffset, yOffset) -- Custom position
+  local button = CreateFrame('Button', nil, frame)
+  button:SetWidth(16) -- Button size
+  button:SetHeight(16) -- Button size
+  button:SetPoint(position, frame, position, xOffset, yOffset) -- Custom position
 
   -- Set normal texture
-  local normal_texture = close_button:CreateTexture(nil, 'BACKGROUND')
-  normal_texture:SetTexture("Interface\\AddOns\\LootBlare\\assets\\close.tga")
-  normal_texture:SetAllPoints(close_button)
-  close_button:SetNormalTexture(normal_texture)
+  local normal_texture = button:CreateTexture(nil, 'BACKGROUND')
+  normal_texture:SetTexture(normal_texture_path)
+  normal_texture:SetAllPoints(button)
+  button:SetNormalTexture(normal_texture)
 
   -- Set pushed texture
-  local pushed_texture = close_button:CreateTexture(nil, 'BACKGROUND')
-  pushed_texture:SetTexture("Interface\\AddOns\\LootBlare\\assets\\close2.tga")
-  pushed_texture:SetAllPoints(close_button)
-  close_button:SetPushedTexture(pushed_texture)
+  local pushed_texture = button:CreateTexture(nil, 'BACKGROUND')
+  pushed_texture:SetTexture(pushed_texture_path)
+  pushed_texture:SetAllPoints(button)
+  button:SetPushedTexture(pushed_texture)
 
   -- Set highlight texture
-  local highlight_texture = close_button:CreateTexture(nil, 'HIGHLIGHT')
-  highlight_texture:SetTexture(
-    "Interface\\AddOns\\LootBlare\\assets\\close2.tga")
-  highlight_texture:SetAllPoints(close_button)
-  close_button:SetHighlightTexture(highlight_texture)
+  local highlight_texture = button:CreateTexture(nil, 'HIGHLIGHT')
+  highlight_texture:SetTexture(highlight_texture_path)
+  highlight_texture:SetAllPoints(button)
+  button:SetHighlightTexture(highlight_texture)
 
   -- Hide the frame when the button is clicked
-  close_button:SetScript('OnClick', function() frame:Hide() end)
+  button:SetScript('OnClick', action)
 
-  return close_button
+  return button
 end
 
 local function create_action_button(frame, button_text, tooltip_text, index,
