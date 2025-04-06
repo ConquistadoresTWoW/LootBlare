@@ -36,12 +36,20 @@ minimap_button:SetScript("OnDragStart",
 minimap_button:SetScript("OnDragStop",
                          function() minimap_button:StopMovingOrSizing() end)
 
--- open or close the main frame
+minimap_button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 minimap_button:SetScript("OnClick", function()
-  if item_roll_frame:IsShown() then
-    item_roll_frame:Hide()
-  else
-    item_roll_frame:Show()
+  if arg1 == "LeftButton" then
+    if item_roll_frame:IsShown() then
+      item_roll_frame:Hide()
+    else
+      item_roll_frame:Show()
+    end
+  elseif arg1 == "RightButton" then
+    if settings_frame:IsShown() then
+      settings_frame:Hide()
+    else
+      settings_frame:Show()
+    end
   end
 end)
 
