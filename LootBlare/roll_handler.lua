@@ -28,9 +28,10 @@ function sort_rolls()
     local b_alt = AltList[b.roller] or false
     local a_plus_one = PlusOneList[a.roller] or 0
     local b_plus_one = PlusOneList[b.roller] or 0
+    local prio_mains = Settings.PrioMainOverAlts
 
-    if a_alt and not b_alt then return false end
-    if not a_alt and b_alt then return true end
+    if prio_mains and (a_alt and not b_alt) then return false end
+    if prio_mains and (not a_alt and b_alt) then return true end
     if a_plus_one == b_plus_one then return a.roll > b.roll end
     return a_plus_one < b_plus_one
   end)
@@ -39,9 +40,10 @@ function sort_rolls()
     local b_alt = AltList[b.roller] or false
     local a_plus_one = PlusOneList[a.roller] or 0
     local b_plus_one = PlusOneList[b.roller] or 0
-
-    if a_alt and not b_alt then return false end
-    if not a_alt and b_alt then return true end
+    local prio_mains = Settings.PrioMainOverAlts
+    
+    if prio_mains and (a_alt and not b_alt) then return false end
+    if prio_mains and (not a_alt and b_alt) then return true end
     if a_plus_one == b_plus_one then return a.roll > b.roll end
     return a_plus_one < b_plus_one
   end)

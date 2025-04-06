@@ -152,12 +152,13 @@ end
 
 local function create_clickable_text(parent, text, player_name)
   local btn = CreateFrame("Button", nil, parent)
+  config.CLICKABLE_TEXT_HEIGHT = Settings.CustomFontSize + 3
   btn:SetWidth(config.FRAME_WIDTH - 20)
   btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT * 2) -- Double height for two lines
 
   -- Set button font
   local font_string = btn:CreateFontString(nil, "OVERLAY")
-  font_string:SetFont(config.FONT_NAME, config.CLICKABLE_TEXT_FONT_SIZE,
+  font_string:SetFont(config.FONT_NAME, Settings.CustomFontSize,
                       config.FONT_OUTLINE)
   font_string:SetPoint("LEFT", btn, "LEFT", 5, -1.5)
   font_string:SetText(text)
@@ -209,6 +210,7 @@ function update_text_area(frame)
 
   -- helper function to process each category of messages
   local function process_messages(messages, max_count)
+    config.CLICKABLE_TEXT_HEIGHT = Settings.CustomFontSize + 3
     for _, msg in ipairs(messages) do
       if count >= max_count then break end
       create_roller_message(msg)
@@ -321,6 +323,7 @@ local function set_item_info(frame, item_link_arg)
 end
 
 function show_frame(frame, duration, item)
+  duration = tonumber(duration)
   frame:SetScript('OnUpdate', function()
     time_elapsed = time_elapsed + arg1
     item_query = item_query - arg1
@@ -334,7 +337,7 @@ function show_frame(frame, duration, item)
       times = 3
       roll_messages = {}
       is_rolling = false
-      if FrameAutoClose then frame:Hide() end
+      if Settings.FrameAutoClose then frame:Hide() end
     end
     if times > 0 and item_query < 0 and not check_item(item) then
       times = times - 1
@@ -482,19 +485,171 @@ function create_text_box_frame()
                      function(_) scroll_frame:UpdateScrollChildRect() end)
   create_close_button(frame, 'TOPRIGHT', -2, -2)
 
-  local check_box = CreateFrame('CheckButton', 'FrameAutoClose', frame,
-                                'UICheckButtonTemplate')
-  check_box:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 10, 10)
-  getglobal(check_box:GetName() .. 'Text'):SetText(
+  return frame
+end
+
+function create_settings_frame()
+  local frame = CreateFrame('Frame', 'settings_frame', UIParent)
+  frame:SetWidth(300)
+  frame:SetHeight(320)
+  frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
+  frame:SetBackdrop({
+    bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
+    tile = true,
+    tileSize = 16,
+    edgeSize = 16,
+    insets = {left = 4, right = 4, top = 4, bottom = 4}
+  })
+  frame:SetBackdropColor(0, 0, 0, 1)
+  frame:SetMovable(true)
+  frame:EnableMouse(true)
+  frame:RegisterForDrag('LeftButton') -- Only start dragging with the left mouse button
+  frame:SetScript('OnDragStart', function() frame:StartMoving() end)
+  frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
+
+  -- local settings
+  -- add edit box to set font size
+  local font_size_edit_box = CreateFrame('EditBox', nill, frame,
+                                         'InputBoxTemplate')
+  font_size_edit_box:SetPoint('TOPLEFT', frame, 'TOPLEFT', 20, -20)
+  font_size_edit_box:SetWidth(20)
+  font_size_edit_box:SetHeight(15)
+  font_size_edit_box:SetAutoFocus(false)
+  font_size_edit_box:SetFontObject('ChatFontNormal')
+  font_size_edit_box:SetAutoFocus(false)
+  font_size_edit_box:SetNumeric(true)
+  local font_size_label = frame:CreateFontString(nil, 'OVERLAY',
+                                                 'GameFontNormal')
+  font_size_label:SetPoint('LEFT', font_size_edit_box, 'RIGHT', 5, 0)
+  font_size_label:SetText('Font size')
+  -- add edit box to set frame auto close
+  local frame_auto_close_cb = CreateFrame('CheckButton', 'ac_cb', frame,
+                                          'UICheckButtonTemplate')
+  frame_auto_close_cb:SetPoint('TOPLEFT', font_size_edit_box, 'BOTTOMLEFT', -10,
+                               -15)
+
+  getglobal(frame_auto_close_cb:GetName() .. 'Text'):SetText('Auto close frame');
+  frame_auto_close_cb.tooltip = 'Auto close frame'
+  frame_auto_close_cb:SetScript('OnClick', function()
+    Settings.FrameAutoClose = frame_auto_close_cb:GetChecked() == 1
+  end)
+
+  -- hide when using spell
+  local hwus_cb = CreateFrame('CheckButton', 'hwus_cb', frame,
+                              'UICheckButtonTemplate')
+  hwus_cb:SetPoint('TOPLEFT', frame_auto_close_cb, 'BOTTOMLEFT', 0, -10)
+  getglobal(hwus_cb:GetName() .. 'Text'):SetText('Hide when using spell');
+  hwus_cb.tooltip = 'Hide when using spell'
+  hwus_cb:SetScript('OnClick', function()
+    Settings.HideWhenUsingSpell = hwus_cb:GetChecked() == 1
+  end)
+
+  -- ML settings
+  -- Add label roll settings (master looter)
+  local ml_label = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+  ml_label:SetPoint('TOPLEFT', hwus_cb, 'BOTTOMLEFT', 0, -15)
+  ml_label:SetFont(ml_label:GetFont(), 12)
+  ml_label:SetText('====Master Looter Settings====')
+  ml_label:SetTextColor(1, 1, 0) -- Yellow color
+
+  -- show current master looter read Only
+  local ml_text = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+  ml_text:SetPoint('TOPLEFT', ml_label, 'BOTTOMLEFT', 0, -15)
+
+  ml_text:SetFont(ml_text:GetFont(), 12)
+  ml_text:SetText('Current ML: Unknown')
+
+  -- roll duration 
+  local frame_duration_edit_box = CreateFrame('EditBox', nill, frame,
+                                              'InputBoxTemplate')
+  frame_duration_edit_box:SetPoint('TOPLEFT', ml_text, 'BOTTOMLEFT', 10, -15)
+  frame_duration_edit_box:SetWidth(20)
+  frame_duration_edit_box:SetHeight(15)
+  frame_duration_edit_box:SetAutoFocus(false)
+  frame_duration_edit_box:SetFontObject('ChatFontNormal')
+  frame_duration_edit_box:SetAutoFocus(false)
+  frame_duration_edit_box:SetNumeric(true)
+  local frame_duration_label = frame:CreateFontString(nil, 'OVERLAY',
+                                                      'GameFontNormal')
+  frame_duration_label:SetPoint('LEFT', frame_duration_edit_box, 'RIGHT', 5, 0)
+  frame_duration_label:SetText('Frame shown duration (s)')
+
+  -- prio mains over alts
+  local prio_main_over_alts_cb = CreateFrame('CheckButton', 'pmoa_cb', frame,
+                                             'UICheckButtonTemplate')
+  prio_main_over_alts_cb:SetPoint('TOPLEFT', frame_duration_edit_box,
+                                  'BOTTOMLEFT', -10, -10)
+  getglobal(prio_main_over_alts_cb:GetName() .. 'Text'):SetText(
+    'Prioritize main over alts');
+  prio_main_over_alts_cb.tooltip = 'Prioritize mains over alts'
+  prio_main_over_alts_cb:SetScript('OnClick', function()
+    Settings.PrioMainOverAlts = prio_main_over_alts_cb:GetChecked() == 1
+  end)
+
+  -- reset after importing SRs
+  local reset_po_after_importing_sr_cb =
+    CreateFrame('CheckButton', 'rpoasr_cb', frame, 'UICheckButtonTemplate')
+  reset_po_after_importing_sr_cb:SetPoint('TOPLEFT', prio_main_over_alts_cb,
+                                          'BOTTOMLEFT', 0, -10)
+  getglobal(reset_po_after_importing_sr_cb:GetName() .. 'Text'):SetText(
     'Reset PO after importing SRs');
-  check_box.tooltip = 'Reset PO after importing SRs'
-  check_box:SetScript('OnClick', function()
-    ResetPOAfterImportingSR = check_box:GetChecked() == 1
+  reset_po_after_importing_sr_cb.tooltip = 'Reset PO after importing SRs'
+  reset_po_after_importing_sr_cb:SetScript('OnClick', function()
+    Settings.ResetPOAfterImportingSR =
+      reset_po_after_importing_sr_cb:GetChecked() == 1
   end)
 
   frame:RegisterEvent('OnShow')
-  frame:SetScript('OnShow',
-                  function() check_box:SetChecked(ResetPOAfterImportingSR) end)
+  frame:SetScript('OnShow', function()
+    if master_looter ~= UnitName('player') then
+      prio_main_over_alts_cb:Disable()
+      reset_po_after_importing_sr_cb:Disable()
+      reset_po_after_importing_sr_cb:Hide()
+    else
+      prio_main_over_alts_cb:Enable()
+      reset_po_after_importing_sr_cb:Enable()
+      reset_po_after_importing_sr_cb:Show()
+    end
+
+    local current_ml = master_looter or 'unknown'
+    font_size_edit_box:SetText(Settings.CustomFontSize)
+    frame_auto_close_cb:SetChecked(Settings.FrameAutoClose)
+    hwus_cb:SetChecked(Settings.HideWhenUsingSpell)
+    ml_text:SetText('Current ML: ' .. current_ml)
+    frame_duration_edit_box:SetText(Settings.FrameShownDuration)
+    reset_po_after_importing_sr_cb:SetChecked(Settings.ResetPOAfterImportingSR)
+    prio_main_over_alts_cb:SetChecked(Settings.PrioMainOverAlts)
+  end)
+
+  local save_button = CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
+  save_button:SetScript('OnClick', function()
+    -- Save the settings
+    Settings.CustomFontSize = font_size_edit_box:GetText()
+    Settings.FrameAutoClose = frame_auto_close_cb:GetChecked() == 1
+    Settings.HideWhenUsingSpell = hwus_cb:GetChecked() == 1
+
+    -- master looter actions
+    if master_looter == UnitName('player') then
+      Settings.FrameShownDuration = frame_duration_edit_box:GetText()
+      Settings.ResetPOAfterImportingSR =
+        reset_po_after_importing_sr_cb:GetChecked() == 1
+      Settings.PrioMainOverAlts = prio_main_over_alts_cb:GetChecked() == 1
+      send_ml_settings()
+    end
+
+    lb_print('Settings saved!')
+    frame:Hide()
+  end)
+  save_button:SetPoint('BOTTOM', frame, 'BOTTOM', 0, 10)
+  save_button:SetHeight(20)
+  save_button:SetWidth(100)
+  save_button:SetText('Save Settings!')
+
+  -- Close button
+  create_close_button(frame, 'TOPRIGHT', -10, -10)
+
+  frame:Hide()
 
   return frame
+
 end

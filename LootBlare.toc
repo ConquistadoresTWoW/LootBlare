@@ -3,7 +3,7 @@
 ## Author: Ehawne, Sivent, Gulolio
 ## Version: 2.0.0
 ## Notes: Make loot rolls obvious
-## SavedVariables:FrameShownDuration, FrameAutoClose, HideWhenUsingSpell, AltList, SRList, PlusOneList, ResetPOAfterImportingSR
+## SavedVariables: AltList, SRList, PlusOneList, Settings
 
 LootBlare\config.lua
 LootBlare\utils.lua
