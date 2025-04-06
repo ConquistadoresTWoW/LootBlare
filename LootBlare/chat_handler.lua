@@ -124,9 +124,9 @@ function handle_chat_message(event, message, sender)
     if Settings == nil then
       Settings = {
         RollDuration = 15,
-        FrameAutoClose = true,
+        FrameAutoClose = false,
         HideWhenUsingSpell = false,
-        ResetPOAfterImportingSR = false,
+        ResetPOAfterImportingSR = true,
         CustomFontSize = config.CLICKABLE_TEXT_FONT_SIZE,
         PrioMainOverAlts = true
       }
