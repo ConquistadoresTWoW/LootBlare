@@ -163,16 +163,15 @@ end
 
 function send_ml_settings()
   local master_looter = master_looter or 'unknown'
-  local message = config.LB_SET_ML_SETTINGS .. Settings.FrameShownDuration ..
-                    ',' .. tostring(Settings.PrioMainOverAlts) .. ',' ..
-                    master_looter
+  local message = config.LB_SET_ML_SETTINGS .. Settings.RollDuration .. ',' ..
+                    tostring(Settings.PrioMainOverAlts) .. ',' .. master_looter
   SendAddonMessage(config.LB_PREFIX, message, 'RAID')
 end
 
 function load_ml_settings_from_string(settings_str)
   local settings = string_split(settings_str, ',')
 
-  Settings.FrameShownDuration = tonumber(settings[1])
+  Settings.RollDuration = tonumber(settings[1])
   Settings.PrioMainOverAlts = settings[2] == 'true'
   master_looter = settings[3]
 end

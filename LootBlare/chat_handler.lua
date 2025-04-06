@@ -93,7 +93,7 @@ function handle_chat_message(event, message, sender)
       update_text_area(item_roll_frame)
       time_elapsed = 0
       is_rolling = true
-      show_frame(item_roll_frame, Settings.FrameShownDuration, current_link)
+      show_frame(item_roll_frame, Settings.RollDuration, current_link)
     end
 
     -- ML is reseting the SR list for the current item
@@ -123,7 +123,7 @@ function handle_chat_message(event, message, sender)
   elseif event == 'ADDON_LOADED' then
     if Settings == nil then
       Settings = {
-        FrameShownDuration = 15,
+        RollDuration = 15,
         FrameAutoClose = true,
         HideWhenUsingSpell = false,
         ResetPOAfterImportingSR = false,

@@ -603,7 +603,7 @@ function create_settings_frame()
     frame_auto_close_cb:SetChecked(Settings.FrameAutoClose)
     hwus_cb:SetChecked(Settings.HideWhenUsingSpell)
     ml_text:SetText('Current ML: ' .. current_ml)
-    frame_duration_edit_box:SetText(Settings.FrameShownDuration)
+    frame_duration_edit_box:SetText(Settings.RollDuration)
     reset_po_after_importing_sr_cb:SetChecked(Settings.ResetPOAfterImportingSR)
     prio_main_over_alts_cb:SetChecked(Settings.PrioMainOverAlts)
   end)
@@ -617,7 +617,7 @@ function create_settings_frame()
 
     -- master looter actions
     if master_looter == UnitName('player') then
-      Settings.FrameShownDuration = frame_duration_edit_box:GetText()
+      Settings.RollDuration = frame_duration_edit_box:GetText()
       Settings.ResetPOAfterImportingSR =
         reset_po_after_importing_sr_cb:GetChecked() == 1
       Settings.PrioMainOverAlts = prio_main_over_alts_cb:GetChecked() == 1
