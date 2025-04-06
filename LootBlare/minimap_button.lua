@@ -39,10 +39,14 @@ minimap_button:SetScript("OnDragStop",
 minimap_button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 minimap_button:SetScript("OnClick", function()
   if arg1 == "LeftButton" and IsShiftKeyDown() then
-    if import_sr_frame:IsShown() then
-      import_sr_frame:Hide()
+    if master_looter == UnitName("player") then
+      if import_sr_frame:IsShown() then
+        import_sr_frame:Hide()
+      else
+        import_sr_frame:Show()
+      end
     else
-      import_sr_frame:Show()
+      lb_print('You are not the master looter.')
     end
   elseif arg1 == "LeftButton" then
     if item_roll_frame:IsShown() then
@@ -63,7 +67,9 @@ end)
 minimap_button:SetScript("OnEnter", function()
   GameTooltip:SetOwner(minimap_button, "ANCHOR_LEFT")
   GameTooltip:SetText("LootBlare", 1, 1, 1)
-  GameTooltip:AddLine("Click to toggle main frame", nil, nil, nil, 1)
+  GameTooltip:AddLine(
+    "Left click to open main frame.\nRight click to open settings.\nShift+Left click to open SR menu (ML only)",
+    nil, nil, nil, 1)
   GameTooltip:Show()
 end)
 
