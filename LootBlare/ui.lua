@@ -588,7 +588,7 @@ function create_settings_frame()
   local frame_duration_label = frame:CreateFontString(nil, 'OVERLAY',
                                                       'GameFontNormal')
   frame_duration_label:SetPoint('LEFT', frame_duration_edit_box, 'RIGHT', 5, 0)
-  frame_duration_label:SetText('Frame shown duration (s)')
+  frame_duration_label:SetText('Roll duration (s)')
 
   -- prio mains over alts
   local prio_main_over_alts_cb = CreateFrame('CheckButton', 'pmoa_cb', frame,
