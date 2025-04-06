@@ -54,7 +54,6 @@ function handle_chat_message(event, message, sender)
     end
   elseif event == 'CHAT_MSG_RAID_WARNING' and sender == master_looter then
     local links = extract_item_links_from_message(message)
-    lb_print('Links: ' .. links[1])
 
     if len(links) == 1 then
       current_link = links[1]
