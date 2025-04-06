@@ -11,6 +11,7 @@ LootBlare\roll_handler.lua
 LootBlare\sr_handler.lua
 LootBlare\plus_one_handler.lua
 LootBlare\alts_handler.lua
+LootBlare\minimap_button.lua
 LootBlare\ui.lua
 LootBlare\chat_handler.lua
 LootBlare\LootBlare.lua
