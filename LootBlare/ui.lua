@@ -118,15 +118,15 @@ function create_item_roll_frame()
   create_top_button(frame)
   -- settings button
   create_top_button(frame, 'TOPRIGHT', -27, -7,
-                    "Interface\\AddOns\\LootBlare\\assets\\settings_y.tga",
-                    "Interface\\AddOns\\LootBlare\\assets\\settings_y.tga",
-                    "Interface\\AddOns\\LootBlare\\assets\\settings_y.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\settings.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\settings.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\settings.tga",
                     function() settings_frame:Show() end)
   -- import button
   create_top_button(frame, 'TOPRIGHT', -47, -7,
-                    "Interface\\AddOns\\LootBlare\\assets\\import_b.tga",
-                    "Interface\\AddOns\\LootBlare\\assets\\import_b.tga",
-                    "Interface\\AddOns\\LootBlare\\assets\\import_b.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\import.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\import.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\import.tga",
                     function() import_sr_frame:Show() end)
 
   local action_button_settings = {
