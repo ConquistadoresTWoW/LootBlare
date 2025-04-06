@@ -530,9 +530,6 @@ function create_settings_frame()
 
   getglobal(frame_auto_close_cb:GetName() .. 'Text'):SetText('Auto close frame');
   frame_auto_close_cb.tooltip = 'Auto close frame'
-  frame_auto_close_cb:SetScript('OnClick', function()
-    Settings.FrameAutoClose = frame_auto_close_cb:GetChecked() == 1
-  end)
 
   -- hide when using spell
   local hwus_cb = CreateFrame('CheckButton', 'hwus_cb', frame,
@@ -540,9 +537,6 @@ function create_settings_frame()
   hwus_cb:SetPoint('TOPLEFT', frame_auto_close_cb, 'BOTTOMLEFT', 0, -10)
   getglobal(hwus_cb:GetName() .. 'Text'):SetText('Hide when using spell');
   hwus_cb.tooltip = 'Hide when using spell'
-  hwus_cb:SetScript('OnClick', function()
-    Settings.HideWhenUsingSpell = hwus_cb:GetChecked() == 1
-  end)
 
   -- ML settings
   -- Add label roll settings (master looter)
@@ -582,9 +576,6 @@ function create_settings_frame()
   getglobal(prio_main_over_alts_cb:GetName() .. 'Text'):SetText(
     'Prioritize main over alts');
   prio_main_over_alts_cb.tooltip = 'Prioritize mains over alts'
-  prio_main_over_alts_cb:SetScript('OnClick', function()
-    Settings.PrioMainOverAlts = prio_main_over_alts_cb:GetChecked() == 1
-  end)
 
   -- reset after importing SRs
   local reset_po_after_importing_sr_cb =
@@ -594,10 +585,6 @@ function create_settings_frame()
   getglobal(reset_po_after_importing_sr_cb:GetName() .. 'Text'):SetText(
     'Reset PO after importing SRs');
   reset_po_after_importing_sr_cb.tooltip = 'Reset PO after importing SRs'
-  reset_po_after_importing_sr_cb:SetScript('OnClick', function()
-    Settings.ResetPOAfterImportingSR =
-      reset_po_after_importing_sr_cb:GetChecked() == 1
-  end)
 
   frame:RegisterEvent('OnShow')
   frame:SetScript('OnShow', function()
