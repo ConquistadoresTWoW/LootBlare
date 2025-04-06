@@ -146,10 +146,7 @@ function is_member_in_raid(member_name)
 end
 
 function play_sound(path)
-  lb_print('Playing sound ')
-  if path == nil then
-    path = 'Interface\\AddOns\\LootBlare\\assets\\conxale.mp3'
-  end
+  if path == nil then path = 'Interface\\AddOns\\LootBlare\\assets\\sound.mp3' end
   PlaySoundFile(path, 'Master')
 end
 
