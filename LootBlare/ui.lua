@@ -115,7 +115,19 @@ function create_item_roll_frame()
   frame:SetScript('OnDragStart', function() frame:StartMoving() end)
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
-  create_close_button(frame)
+  create_top_button(frame)
+  -- settings button
+  create_top_button(frame, 'TOPRIGHT', -27, -7,
+                    "Interface\\AddOns\\LootBlare\\assets\\settings_y.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\settings_y.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\settings_y.tga",
+                    function() settings_frame:Show() end)
+  -- import button
+  create_top_button(frame, 'TOPRIGHT', -47, -7,
+                    "Interface\\AddOns\\LootBlare\\assets\\import_b.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\import_b.tga",
+                    "Interface\\AddOns\\LootBlare\\assets\\import_b.tga",
+                    function() import_sr_frame:Show() end)
 
   local action_button_settings = {
     {
@@ -380,7 +392,7 @@ function extract_item_links_from_message(message)
   return item_links
 end
 
-function create_text_box_frame()
+function create_import_sr_frame()
   local frame_backdrop = {
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
     tile = true,
@@ -493,7 +505,7 @@ function create_text_box_frame()
 
   edit_box:SetScript("OnTextChanged",
                      function(_) scroll_frame:UpdateScrollChildRect() end)
-  create_close_button(frame, 'TOPRIGHT', -2, -2)
+  create_top_button(frame, 'TOPRIGHT', -2, -2)
 
   return frame
 end
@@ -643,7 +655,7 @@ function create_settings_frame()
   save_button:SetText('Save Settings!')
 
   -- Close button
-  create_close_button(frame, 'TOPRIGHT', -10, -10)
+  create_top_button(frame, 'TOPRIGHT', -10, -10)
 
   frame:Hide()
 
