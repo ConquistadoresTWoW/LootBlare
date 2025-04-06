@@ -193,7 +193,7 @@ function handle_config_command(msg)
   elseif msg == 'pol' then
     print_plus_one_list()
   elseif msg == 'sr' then
-    run_if_master_looter(function() text_box_frame:Show() end)
+    run_if_master_looter(function() import_sr_frame:Show() end)
   elseif msg == 'src' then
     run_if_master_looter(function() clear_sr_list() end)
   elseif string.find(msg, 'aa (%a+)') then
