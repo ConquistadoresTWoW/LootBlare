@@ -38,7 +38,13 @@ minimap_button:SetScript("OnDragStop",
 
 minimap_button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 minimap_button:SetScript("OnClick", function()
-  if arg1 == "LeftButton" then
+  if arg1 == "LeftButton" and IsShiftKeyDown() then
+    if import_sr_frame:IsShown() then
+      import_sr_frame:Hide()
+    else
+      import_sr_frame:Show()
+    end
+  elseif arg1 == "LeftButton" then
     if item_roll_frame:IsShown() then
       item_roll_frame:Hide()
     else
