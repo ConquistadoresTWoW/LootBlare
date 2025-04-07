@@ -20,17 +20,19 @@ function create_color_message(message)
   local text_color = config.DEFAULT_TEXT_COLOR
 
   -- First line: Character name (class colored) + "rolls XX" (yellow)
-  local line1 = '|c' .. class_color .. message.alt_roller .. '|r |c' .. 
-                config.DEFAULT_TEXT_COLOR .. 'rolls ' .. message.roll .. '|r'
-  
+  local line1 = '|c' .. class_color .. message.alt_roller .. '|r |c' ..
+                  config.DEFAULT_TEXT_COLOR .. 'rolls ' .. message.roll .. '|r'
+
   -- Second line: Roll type and additional info
   local line2_parts = {}
-  
+
   -- Add roll type info
   if message.roll_type == RollType.SR_MS then
-    table.insert(line2_parts, '|c' .. config.SR_MS_TEXT_COLOR .. 'SR-MS: ' .. message.sr .. '|r')
+    table.insert(line2_parts, '|c' .. config.SR_MS_TEXT_COLOR .. 'SR-MS: ' ..
+                   message.sr .. '|r')
   elseif message.roll_type == RollType.SR_OS then
-    table.insert(line2_parts, '|c' .. config.SR_OS_TEXT_COLOR .. 'SR-OS: ' .. message.sr .. '|r')
+    table.insert(line2_parts, '|c' .. config.SR_OS_TEXT_COLOR .. 'SR-OS: ' ..
+                   message.sr .. '|r')
   elseif message.roll_type == RollType.MS then
     table.insert(line2_parts, '|c' .. config.MS_TEXT_COLOR .. 'MS|r')
   elseif message.roll_type == RollType.OS then
@@ -38,16 +40,17 @@ function create_color_message(message)
   elseif message.roll_type == RollType.TM then
     table.insert(line2_parts, '|c' .. config.TM_TEXT_COLOR .. 'TM|r')
   end
-  
+
   -- Add plus one info if applicable
   if PlusOneList[message.roller] and PlusOneList[message.roller] > 0 then
-    table.insert(line2_parts, '|c' .. config.CHAT_COLORS.NEUTRAL .. 
-                '+ ' .. PlusOneList[message.roller] .. '|r')
+    table.insert(line2_parts,
+                 '|c' .. config.CHAT_COLORS.NEUTRAL .. '+ ' ..
+                   PlusOneList[message.roller] .. '|r')
   end
-  
+
   -- Combine all parts of line 2
   local line2 = table.concat(line2_parts, ' ')
-  
+
   -- Combine both lines with newline
   return line1 .. '\n' .. line2
 end
@@ -143,10 +146,7 @@ function is_member_in_raid(member_name)
 end
 
 function play_sound(path)
-  lb_print('Playing sound ')
-  if path == nil then
-    path = 'Interface\\AddOns\\LootBlare\\assets\\conxale.mp3'
-  end
+  if path == nil then path = 'Interface\\AddOns\\LootBlare\\assets\\sound.mp3' end
   PlaySoundFile(path, 'Master')
 end
 
@@ -156,4 +156,21 @@ function run_if_master_looter(callback)
   else
     lb_print('You are not the master looter')
   end
+end
+
+function send_ml_settings()
+  local master_looter = master_looter or 'unknown'
+  local message = config.LB_SET_ML_SETTINGS .. Settings.RollDuration .. ',' ..
+                    tostring(Settings.PrioMainOverAlts) .. ',' .. master_looter
+  SendAddonMessage(config.LB_PREFIX, message, 'RAID')
+end
+
+function load_ml_settings_from_string(settings_str)
+  local settings = string_split(settings_str, ',')
+
+  Settings.RollDuration = tonumber(settings[1])
+  Settings.PrioMainOverAlts = settings[2] == 'true'
+  master_looter = settings[3]
+  update_moa_button_texture()
+  update_text_area(item_roll_frame)
 end

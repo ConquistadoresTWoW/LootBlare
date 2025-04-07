@@ -1,40 +1,50 @@
 total_button_width = 0
 
-local function create_close_button(frame, position, xOffset, yOffset)
+local function create_top_button(frame, position, xOffset, yOffset,
+                                 normal_texture_path, pushed_texture_path,
+                                 highlight_texture_path, action)
   -- Default values if not provided
   position = position or 'TOPRIGHT'
   xOffset = xOffset or -7
   yOffset = yOffset or -7
+  normal_texture_path = normal_texture_path or
+                          "Interface\\AddOns\\LootBlare\\assets\\close.tga"
+  pushed_texture_path = pushed_texture_path or
+                          "Interface\\AddOns\\LootBlare\\assets\\close2.tga"
+  highlight_texture_path = highlight_texture_path or
+                             "Interface\\AddOns\\LootBlare\\assets\\close2.tga"
+  action = action or function() frame:Hide() end
+  -- default texture_color to red
+  texture_color = texture_color or {1, 0, 0, 1}
 
   -- Add a custom close button
-  local close_button = CreateFrame('Button', nil, frame)
-  close_button:SetWidth(16) -- Button size
-  close_button:SetHeight(16) -- Button size
-  close_button:SetPoint(position, frame, position, xOffset, yOffset) -- Custom position
+  local button = CreateFrame('Button', nil, frame)
+  button:SetWidth(16) -- Button size
+  button:SetHeight(16) -- Button size
+  button:SetPoint(position, frame, position, xOffset, yOffset) -- Custom position
 
   -- Set normal texture
-  local normal_texture = close_button:CreateTexture(nil, 'BACKGROUND')
-  normal_texture:SetTexture("Interface\\AddOns\\LootBlare\\assets\\close.tga")
-  normal_texture:SetAllPoints(close_button)
-  close_button:SetNormalTexture(normal_texture)
+  local normal_texture = button:CreateTexture(nil, 'BACKGROUND')
+  normal_texture:SetTexture(normal_texture_path)
+  normal_texture:SetAllPoints(button)
+  button:SetNormalTexture(normal_texture)
 
   -- Set pushed texture
-  local pushed_texture = close_button:CreateTexture(nil, 'BACKGROUND')
-  pushed_texture:SetTexture("Interface\\AddOns\\LootBlare\\assets\\close2.tga")
-  pushed_texture:SetAllPoints(close_button)
-  close_button:SetPushedTexture(pushed_texture)
+  local pushed_texture = button:CreateTexture(nil, 'BACKGROUND')
+  pushed_texture:SetTexture(pushed_texture_path)
+  pushed_texture:SetAllPoints(button)
+  button:SetPushedTexture(pushed_texture)
 
   -- Set highlight texture
-  local highlight_texture = close_button:CreateTexture(nil, 'HIGHLIGHT')
-  highlight_texture:SetTexture(
-    "Interface\\AddOns\\LootBlare\\assets\\close2.tga")
-  highlight_texture:SetAllPoints(close_button)
-  close_button:SetHighlightTexture(highlight_texture)
+  local highlight_texture = button:CreateTexture(nil, 'HIGHLIGHT')
+  highlight_texture:SetTexture(highlight_texture_path)
+  highlight_texture:SetAllPoints(button)
+  button:SetHighlightTexture(highlight_texture)
 
   -- Hide the frame when the button is clicked
-  close_button:SetScript('OnClick', function() frame:Hide() end)
+  button:SetScript('OnClick', action)
 
-  return close_button
+  return button
 end
 
 local function create_action_button(frame, button_text, tooltip_text, index,
@@ -105,7 +115,56 @@ function create_item_roll_frame()
   frame:SetScript('OnDragStart', function() frame:StartMoving() end)
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
-  create_close_button(frame)
+  create_top_button(frame)
+  local main_over_alts_button = CreateFrame('Button', nil, frame,
+                                            'UIPanelButtonTemplate')
+
+  local ICON_ENABLED = 'Interface\\AddOns\\LootBlare\\assets\\moa_on.tga'
+  local ICON_DISABLED = 'Interface\\AddOns\\LootBlare\\assets\\moa_off.tga'
+
+  main_over_alts_button:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -27, -7)
+  main_over_alts_button:SetWidth(16) -- Button size
+  main_over_alts_button:SetHeight(16) -- Button size
+
+  local moa = true
+  if Settings ~= nil then moa = Settings.PrioMainOverAlts end
+
+  local normal_texture = main_over_alts_button:CreateTexture(nil, 'BACKGROUND')
+  normal_texture:SetTexture(moa and ICON_ENABLED or ICON_DISABLED)
+  normal_texture:SetAllPoints(main_over_alts_button)
+  main_over_alts_button:SetNormalTexture(normal_texture)
+
+  function update_moa_button_texture()
+    -- change the texture of the button to show current state
+    local normal_texture =
+      main_over_alts_button:CreateTexture(nil, 'BACKGROUND')
+    normal_texture:SetTexture(Settings.PrioMainOverAlts and ICON_ENABLED or
+                                ICON_DISABLED)
+    normal_texture:SetAllPoints(main_over_alts_button)
+    main_over_alts_button:SetNormalTexture(normal_texture)
+  end
+
+  -- set highlight texture
+  local highlight_texture =
+    main_over_alts_button:CreateTexture(nil, 'HIGHLIGHT')
+  highlight_texture:SetTexture(moa and ICON_ENABLED or ICON_DISABLED)
+  highlight_texture:SetAllPoints(main_over_alts_button)
+  main_over_alts_button:SetHighlightTexture(highlight_texture)
+
+  main_over_alts_button:SetScript('OnClick', function()
+    if master_looter == UnitName('player') then
+      Settings.PrioMainOverAlts = not Settings.PrioMainOverAlts
+      send_ml_settings()
+      update_moa_button_texture()
+      update_text_area(item_roll_frame)
+    else
+      lb_print('You are not the master looter')
+    end
+
+  end)
+
+  -- on show update the button texture
+  frame:SetScript('OnShow', function() update_moa_button_texture() end)
 
   local action_button_settings = {
     {
@@ -152,19 +211,20 @@ end
 
 local function create_clickable_text(parent, text, player_name)
   local btn = CreateFrame("Button", nil, parent)
+  config.CLICKABLE_TEXT_HEIGHT = Settings.CustomFontSize + 3
   btn:SetWidth(config.FRAME_WIDTH - 20)
   btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT * 2) -- Double height for two lines
 
   -- Set button font
   local font_string = btn:CreateFontString(nil, "OVERLAY")
-  font_string:SetFont(config.FONT_NAME, config.CLICKABLE_TEXT_FONT_SIZE,
+  font_string:SetFont(config.FONT_NAME, Settings.CustomFontSize,
                       config.FONT_OUTLINE)
   font_string:SetPoint("LEFT", btn, "LEFT", 5, -1.5)
   font_string:SetText(text)
   font_string:SetJustifyH("LEFT")
   font_string:SetJustifyV("TOP")
   -- add shadow to the font
-  font_string:SetShadowOffset(2, -2)
+  font_string:SetShadowOffset(1, -1)
 
   btn:SetFontString(font_string)
   -- Highlight effect when hovered
@@ -209,6 +269,7 @@ function update_text_area(frame)
 
   -- helper function to process each category of messages
   local function process_messages(messages, max_count)
+    config.CLICKABLE_TEXT_HEIGHT = Settings.CustomFontSize + 3
     for _, msg in ipairs(messages) do
       if count >= max_count then break end
       create_roller_message(msg)
@@ -321,6 +382,7 @@ local function set_item_info(frame, item_link_arg)
 end
 
 function show_frame(frame, duration, item)
+  duration = tonumber(duration)
   frame:SetScript('OnUpdate', function()
     time_elapsed = time_elapsed + arg1
     item_query = item_query - arg1
@@ -334,7 +396,7 @@ function show_frame(frame, duration, item)
       times = 3
       roll_messages = {}
       is_rolling = false
-      if FrameAutoClose then frame:Hide() end
+      if Settings.FrameAutoClose then frame:Hide() end
     end
     if times > 0 and item_query < 0 and not check_item(item) then
       times = times - 1
@@ -367,7 +429,7 @@ function extract_item_links_from_message(message)
   return item_links
 end
 
-function create_text_box_frame()
+function create_import_sr_frame()
   local frame_backdrop = {
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
     tile = true,
@@ -480,21 +542,166 @@ function create_text_box_frame()
 
   edit_box:SetScript("OnTextChanged",
                      function(_) scroll_frame:UpdateScrollChildRect() end)
-  create_close_button(frame, 'TOPRIGHT', -2, -2)
-
-  local check_box = CreateFrame('CheckButton', 'FrameAutoClose', frame,
-                                'UICheckButtonTemplate')
-  check_box:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 10, 10)
-  getglobal(check_box:GetName() .. 'Text'):SetText(
-    'Reset PO after importing SRs');
-  check_box.tooltip = 'Reset PO after importing SRs'
-  check_box:SetScript('OnClick', function()
-    ResetPOAfterImportingSR = check_box:GetChecked() == 1
-  end)
-
-  frame:RegisterEvent('OnShow')
-  frame:SetScript('OnShow',
-                  function() check_box:SetChecked(ResetPOAfterImportingSR) end)
+  create_top_button(frame, 'TOPRIGHT', -2, -2)
 
   return frame
+end
+
+function create_settings_frame()
+  local frame = CreateFrame('Frame', 'settings_frame', UIParent)
+  frame:SetWidth(300)
+  frame:SetHeight(330)
+  frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
+  frame:SetBackdrop({
+    bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
+    tile = true,
+    tileSize = 16,
+    edgeSize = 16,
+    insets = {left = 4, right = 4, top = 4, bottom = 4}
+  })
+  frame:SetBackdropColor(0, 0, 0, 1)
+  frame:SetMovable(true)
+  frame:EnableMouse(true)
+  frame:RegisterForDrag('LeftButton') -- Only start dragging with the left mouse button
+  frame:SetScript('OnDragStart', function() frame:StartMoving() end)
+  frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
+
+  -- add titel to the frame
+  local title = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+  title:SetPoint('CENTER', frame, 'TOP', 0, -20)
+  title:SetFont(title:GetFont(), 12)
+  title:SetText('General Settings')
+
+  -- local settings
+  -- add edit box to set font size
+  local font_size_edit_box = CreateFrame('EditBox', nill, frame,
+                                         'InputBoxTemplate')
+  font_size_edit_box:SetPoint('TOPLEFT', frame, 'TOPLEFT', 30, -35)
+  font_size_edit_box:SetWidth(20)
+  font_size_edit_box:SetHeight(15)
+  font_size_edit_box:SetAutoFocus(false)
+  font_size_edit_box:SetFontObject('ChatFontNormal')
+  font_size_edit_box:SetAutoFocus(false)
+  font_size_edit_box:SetNumeric(true)
+  local font_size_label = frame:CreateFontString(nil, 'OVERLAY',
+                                                 'GameFontNormal')
+  font_size_label:SetPoint('LEFT', font_size_edit_box, 'RIGHT', 5, 0)
+  font_size_label:SetText('Font size')
+  -- add edit box to set frame auto close
+  local frame_auto_close_cb = CreateFrame('CheckButton', 'ac_cb', frame,
+                                          'UICheckButtonTemplate')
+  frame_auto_close_cb:SetPoint('TOPLEFT', font_size_edit_box, 'BOTTOMLEFT', -10,
+                               -10)
+
+  getglobal(frame_auto_close_cb:GetName() .. 'Text'):SetText('Auto close frame');
+  frame_auto_close_cb.tooltip = 'Auto close frame'
+
+  -- hide when using spell
+  local hwus_cb = CreateFrame('CheckButton', 'hwus_cb', frame,
+                              'UICheckButtonTemplate')
+  hwus_cb:SetPoint('TOPLEFT', frame_auto_close_cb, 'BOTTOMLEFT', 0, 0)
+  getglobal(hwus_cb:GetName() .. 'Text'):SetText('Hide when using spell');
+  hwus_cb.tooltip = 'Hide when using spell'
+
+  -- ML settings
+  -- Add label roll settings (master looter)
+  local ml_label = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+  ml_label:SetPoint('CENTER', frame, 'TOP', 0, -150)
+  ml_label:SetFont(ml_label:GetFont(), 12)
+  ml_label:SetText('Master Looter Settings')
+
+  -- show current master looter read Only
+  local ml_text = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+  ml_text:SetPoint('TOPLEFT', frame, 'TOPLEFT', 20, -170)
+
+  ml_text:SetFont(ml_text:GetFont(), 12)
+  ml_text:SetText('Current ML: Unknown')
+
+  -- roll duration 
+  local frame_duration_edit_box = CreateFrame('EditBox',
+                                              'frame_duration_edit_box', frame,
+                                              'InputBoxTemplate')
+  frame_duration_edit_box:SetPoint('TOPLEFT', ml_text, 'BOTTOMLEFT', 10, -15)
+  frame_duration_edit_box:SetWidth(20)
+  frame_duration_edit_box:SetHeight(15)
+  frame_duration_edit_box:SetAutoFocus(false)
+  frame_duration_edit_box:SetFontObject('ChatFontNormal')
+  frame_duration_edit_box:SetAutoFocus(false)
+  frame_duration_edit_box:SetNumeric(true)
+  local frame_duration_label = frame:CreateFontString(nil, 'OVERLAY',
+                                                      'GameFontNormal')
+  frame_duration_label:SetPoint('LEFT', frame_duration_edit_box, 'RIGHT', 5, 0)
+  frame_duration_label:SetText('Roll duration (s)')
+
+  -- prio mains over alts
+  local prio_main_over_alts_cb = CreateFrame('CheckButton', 'pmoa_cb', frame,
+                                             'UICheckButtonTemplate')
+  prio_main_over_alts_cb:SetPoint('TOPLEFT', frame_duration_edit_box,
+                                  'BOTTOMLEFT', -10, -10)
+  getglobal(prio_main_over_alts_cb:GetName() .. 'Text'):SetText(
+    'Prioritize main over alts');
+  prio_main_over_alts_cb.tooltip = 'Prioritize mains over alts'
+
+  -- reset after importing SRs
+  local reset_po_after_importing_sr_cb =
+    CreateFrame('CheckButton', 'rpoasr_cb', frame, 'UICheckButtonTemplate')
+  reset_po_after_importing_sr_cb:SetPoint('TOPLEFT', prio_main_over_alts_cb,
+                                          'BOTTOMLEFT', 0, 0)
+  getglobal(reset_po_after_importing_sr_cb:GetName() .. 'Text'):SetText(
+    'Reset PO after importing SRs');
+  reset_po_after_importing_sr_cb.tooltip = 'Reset PO after importing SRs'
+
+  frame:RegisterEvent('OnShow')
+  frame:SetScript('OnShow', function()
+    if master_looter ~= UnitName('player') then
+      prio_main_over_alts_cb:Disable()
+      reset_po_after_importing_sr_cb:Disable()
+      reset_po_after_importing_sr_cb:Hide()
+    else
+      prio_main_over_alts_cb:Enable()
+      reset_po_after_importing_sr_cb:Enable()
+      reset_po_after_importing_sr_cb:Show()
+    end
+
+    local current_ml = master_looter or 'unknown'
+    font_size_edit_box:SetText(Settings.CustomFontSize)
+    frame_auto_close_cb:SetChecked(Settings.FrameAutoClose)
+    hwus_cb:SetChecked(Settings.HideWhenUsingSpell)
+    ml_text:SetText('Current ML: ' .. current_ml)
+    frame_duration_edit_box:SetText(Settings.RollDuration)
+    reset_po_after_importing_sr_cb:SetChecked(Settings.ResetPOAfterImportingSR)
+    prio_main_over_alts_cb:SetChecked(Settings.PrioMainOverAlts)
+  end)
+
+  local save_button = CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
+  save_button:SetScript('OnClick', function()
+    -- Save the settings
+    Settings.CustomFontSize = font_size_edit_box:GetText()
+    Settings.FrameAutoClose = frame_auto_close_cb:GetChecked() == 1
+    Settings.HideWhenUsingSpell = hwus_cb:GetChecked() == 1
+
+    -- master looter actions
+    if master_looter == UnitName('player') then
+      Settings.RollDuration = frame_duration_edit_box:GetText()
+      Settings.ResetPOAfterImportingSR =
+        reset_po_after_importing_sr_cb:GetChecked() == 1
+      Settings.PrioMainOverAlts = prio_main_over_alts_cb:GetChecked() == 1
+      send_ml_settings()
+    end
+
+    lb_print('Settings saved!')
+    frame:Hide()
+  end)
+  save_button:SetPoint('BOTTOM', frame, 'BOTTOM', 0, 10)
+  save_button:SetHeight(20)
+  save_button:SetWidth(100)
+  save_button:SetText('Save Settings!')
+
+  -- Close button
+  create_top_button(frame, 'TOPRIGHT', -10, -10)
+
+  frame:Hide()
+
+  return frame
+
 end
