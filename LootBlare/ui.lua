@@ -224,7 +224,7 @@ local function create_clickable_text(parent, text, player_name)
   font_string:SetJustifyH("LEFT")
   font_string:SetJustifyV("TOP")
   -- add shadow to the font
-  font_string:SetShadowOffset(2, -2)
+  font_string:SetShadowOffset(1, -1)
 
   btn:SetFontString(font_string)
   -- Highlight effect when hovered
@@ -550,7 +550,7 @@ end
 function create_settings_frame()
   local frame = CreateFrame('Frame', 'settings_frame', UIParent)
   frame:SetWidth(300)
-  frame:SetHeight(320)
+  frame:SetHeight(330)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -566,11 +566,17 @@ function create_settings_frame()
   frame:SetScript('OnDragStart', function() frame:StartMoving() end)
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
+  -- add titel to the frame
+  local title = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+  title:SetPoint('CENTER', frame, 'TOP', 0, -20)
+  title:SetFont(title:GetFont(), 12)
+  title:SetText('General Settings')
+
   -- local settings
   -- add edit box to set font size
   local font_size_edit_box = CreateFrame('EditBox', nill, frame,
                                          'InputBoxTemplate')
-  font_size_edit_box:SetPoint('TOPLEFT', frame, 'TOPLEFT', 20, -20)
+  font_size_edit_box:SetPoint('TOPLEFT', frame, 'TOPLEFT', 30, -35)
   font_size_edit_box:SetWidth(20)
   font_size_edit_box:SetHeight(15)
   font_size_edit_box:SetAutoFocus(false)
@@ -585,7 +591,7 @@ function create_settings_frame()
   local frame_auto_close_cb = CreateFrame('CheckButton', 'ac_cb', frame,
                                           'UICheckButtonTemplate')
   frame_auto_close_cb:SetPoint('TOPLEFT', font_size_edit_box, 'BOTTOMLEFT', -10,
-                               -15)
+                               -10)
 
   getglobal(frame_auto_close_cb:GetName() .. 'Text'):SetText('Auto close frame');
   frame_auto_close_cb.tooltip = 'Auto close frame'
@@ -593,27 +599,27 @@ function create_settings_frame()
   -- hide when using spell
   local hwus_cb = CreateFrame('CheckButton', 'hwus_cb', frame,
                               'UICheckButtonTemplate')
-  hwus_cb:SetPoint('TOPLEFT', frame_auto_close_cb, 'BOTTOMLEFT', 0, -10)
+  hwus_cb:SetPoint('TOPLEFT', frame_auto_close_cb, 'BOTTOMLEFT', 0, 0)
   getglobal(hwus_cb:GetName() .. 'Text'):SetText('Hide when using spell');
   hwus_cb.tooltip = 'Hide when using spell'
 
   -- ML settings
   -- Add label roll settings (master looter)
   local ml_label = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-  ml_label:SetPoint('TOPLEFT', hwus_cb, 'BOTTOMLEFT', 0, -15)
+  ml_label:SetPoint('CENTER', frame, 'TOP', 0, -150)
   ml_label:SetFont(ml_label:GetFont(), 12)
-  ml_label:SetText('====Master Looter Settings====')
-  ml_label:SetTextColor(1, 1, 0) -- Yellow color
+  ml_label:SetText('Master Looter Settings')
 
   -- show current master looter read Only
   local ml_text = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-  ml_text:SetPoint('TOPLEFT', ml_label, 'BOTTOMLEFT', 0, -15)
+  ml_text:SetPoint('TOPLEFT', frame, 'TOPLEFT', 20, -170)
 
   ml_text:SetFont(ml_text:GetFont(), 12)
   ml_text:SetText('Current ML: Unknown')
 
   -- roll duration 
-  local frame_duration_edit_box = CreateFrame('EditBox', nill, frame,
+  local frame_duration_edit_box = CreateFrame('EditBox',
+                                              'frame_duration_edit_box', frame,
                                               'InputBoxTemplate')
   frame_duration_edit_box:SetPoint('TOPLEFT', ml_text, 'BOTTOMLEFT', 10, -15)
   frame_duration_edit_box:SetWidth(20)
@@ -640,7 +646,7 @@ function create_settings_frame()
   local reset_po_after_importing_sr_cb =
     CreateFrame('CheckButton', 'rpoasr_cb', frame, 'UICheckButtonTemplate')
   reset_po_after_importing_sr_cb:SetPoint('TOPLEFT', prio_main_over_alts_cb,
-                                          'BOTTOMLEFT', 0, -10)
+                                          'BOTTOMLEFT', 0, 0)
   getglobal(reset_po_after_importing_sr_cb:GetName() .. 'Text'):SetText(
     'Reset PO after importing SRs');
   reset_po_after_importing_sr_cb.tooltip = 'Reset PO after importing SRs'
