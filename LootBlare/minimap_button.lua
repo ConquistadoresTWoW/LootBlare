@@ -66,9 +66,9 @@ end)
 -- tooltip 
 minimap_button:SetScript("OnEnter", function()
   GameTooltip:SetOwner(minimap_button, "ANCHOR_LEFT")
-  GameTooltip:SetText("LootBlare", 1, 1, 1)
+  GameTooltip:SetText("LootBlare 2.1.0", 1, 1, 1)
   GameTooltip:AddLine(
-    "Left click to open main frame.\nRight click to open settings.\nShift+Left click to open SR menu (ML only)",
+    "Left-click to open main frame.\nRight-click to open settings.\nShift + Left-click to open SR menu (ML only)",
     nil, nil, nil, 1)
   GameTooltip:Show()
 end)

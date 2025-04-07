@@ -61,6 +61,15 @@ Alts are marked with an `*` in their names. When rolling an item the alts will a
 - **Plus One System**  
 The plus one system helps manage loot distribution by tracking a player's "Plus One" count. When a player receives an item, they can be given a plus one using `/lb po <player>` (or clicking their name in the roll frame), which decrease their priority for future loot distribution. If needed, the count can be reduced using `/lb mo <player>` (or right clicking the name in the roll frame), or the entire list can be cleared with `/lb poc`.
 
+- **Prioritize mains over alts toggle button**  
+In the roll frame the master looter can choose if mains will get prio over alts. This toggle value is sent to all the raiders and the roll list is sorted accordingly for everyone
+
+- **Minimap button shortcuts**  
+The minimap button has the following shortcuts:  
+`Left-click`: opens the roll frame  
+`Right-Click`: opens the settings frame  
+`Shift + Left-Click (for ML only)`: opens the import SR frame
+
 - **Communication**: The addon uses the addon channel to update data about settings, SRs, alts and plus one for all the members of the raid  
 
 ### The (moveable) frame in game:
