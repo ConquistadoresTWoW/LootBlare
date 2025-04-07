@@ -77,7 +77,8 @@ The minimap button has the following shortcuts:
 ![LootBlare Frame](./assets/lootblareframe.png)
 
 Changelog:
-- **1.2.0**: Refactor the whole addon. Added SR, alts, and +1 logic.
+- **2.1.0**: Added settings panel and minimap button.
+- **2.0.0**: Refactor the whole addon. Added SR, alts, and +1 logic.
 - **1.1.9**: Add communication using CHAT_MSG_ADDON events
 - **1.1.8**: Remove announce message after each roll. Added time announce message after changing master loot
 - **1.1.7**: Added class colors, autoClose option, and config commands. Only show frame if the sender is the ML. Ignore rolls after the time has elapsed. Get FrameShowDuration from the ML.
