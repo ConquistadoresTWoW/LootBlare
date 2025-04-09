@@ -134,6 +134,17 @@ function create_item_roll_frame()
   normal_texture:SetAllPoints(main_over_alts_button)
   main_over_alts_button:SetNormalTexture(normal_texture)
 
+  -- add moa_button tooltip
+  main_over_alts_button:SetScript('OnEnter', function(self)
+    GameTooltip:SetOwner(main_over_alts_button, 'ANCHOR_RIGHT')
+    local text = Settings.PrioMainOverAlts and 'Enabled' or 'Disabled'
+    GameTooltip:AddLine('Prioritize main over alts: ' .. text, nil, nil, nil,
+                        true)
+    GameTooltip:Show()
+  end)
+  main_over_alts_button:SetScript('OnLeave',
+                                  function(self) GameTooltip:Hide() end)
+
   function update_moa_button_texture()
     -- change the texture of the button to show current state
     local normal_texture =
