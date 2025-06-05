@@ -5,6 +5,7 @@
 ## Notes: Make loot rolls obvious
 ## SavedVariables: AltList, SRList, PlusOneList, Settings
 
+LootBlare\prices_list.lua
 LootBlare\config.lua
 LootBlare\utils.lua
 LootBlare\roll_handler.lua

@@ -31,6 +31,43 @@ function increase_plus_one(player_name)
   report_plus_one_list()
 end
 
+function create_gold_string(money)
+  if type(money) ~= "number" then return "-" end
+
+  local gold = floor(money / 100 / 100)
+  local silver = floor(mod((money / 100), 100))
+  local copper = floor(mod(money, 100))
+
+  local string = ""
+  if gold > 0 then string = string .. gold .. "g " end
+  if silver > 0 or gold > 0 then string = string .. " " .. silver .. "s" end
+  string = string .. " " .. copper .. "c"
+
+  return string
+end
+
+function increase_plus_one_and_whisper_os_payment(player_name, current_link)
+  increase_plus_one(player_name)
+
+  local item_name, item_link, _, _, _, _, _, _, _ = GetItemInfo(current_link)
+
+  local item_id = tonumber(string_match(item_link, 'item:(%d+):'))
+
+  local sell_buy_str = pfui_sell_data[item_id] or ''
+
+  if sell_buy_str == '' then
+    lb_print('No sell price found for ' .. item_name)
+    return
+  end
+
+  local _, _, sell, buy = string.find(sell_buy_str, "(.*),(.*)")
+  sell = create_gold_string(tonumber(sell))
+
+  local message = 'OS Price: ' .. sell .. '. Pay to bank/ML'
+
+  SendChatMessage(message, 'WHISPER', nil, player_name)
+end
+
 function reduce_plus_one(player_name)
   if not is_master_looter(UnitName('player')) then
     lb_print('You are not the master looter')

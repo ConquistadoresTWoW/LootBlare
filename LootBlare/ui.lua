@@ -245,7 +245,9 @@ local function create_clickable_text(parent, text, player_name)
   btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
   btn:SetScript("OnMouseUp", function()
-    if arg1 == "LeftButton" then
+    if arg1 == "LeftButton" and IsShiftKeyDown() then
+      increase_plus_one_and_whisper_os_payment(player_name, current_link)
+    elseif arg1 == "LeftButton" then
       increase_plus_one(player_name)
     elseif arg1 == "RightButton" then
       reduce_plus_one(player_name)
