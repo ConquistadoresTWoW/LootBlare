@@ -63,7 +63,8 @@ function increase_plus_one_and_whisper_os_payment(player_name, current_link)
   local _, _, sell, buy = string.find(sell_buy_str, "(.*),(.*)")
   sell = create_gold_string(tonumber(sell))
 
-  local message = 'OS Price: ' .. sell .. '. Pay to bank/ML'
+  -- local message = 'OS Price: ' .. sell .. '. Pay to bank/ML'
+  local message = 'Precio OS: ' .. sell .. '. Pagar al banco/ML'
 
   SendChatMessage(message, 'WHISPER', nil, player_name)
 end
