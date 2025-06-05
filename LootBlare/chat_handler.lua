@@ -217,6 +217,11 @@ function handle_config_command(msg)
       local _, _, new_plus_one = string.find(msg, 'po (%a+)')
       increase_plus_one(new_plus_one)
     end)
+  elseif string.find(msg, 'poos (%a)') then
+    run_if_master_looter(function()
+      local _, _, new_plus_one = string.find(msg, 'poos (%a+)')
+      increase_plus_one_and_whisper_os_payment(new_plus_one, current_link)
+    end)
   elseif string.find(msg, 'mo (%a)') then
     run_if_master_looter(function()
       local _, _, new_plus_one = string.find(msg, 'mo (%a+)')
