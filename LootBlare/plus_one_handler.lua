@@ -47,6 +47,11 @@ function create_gold_string(money)
 end
 
 function increase_plus_one_and_whisper_os_payment(player_name, current_link)
+  if not is_master_looter(UnitName('player')) then
+    lb_print('You are not the master looter')
+    return
+  end
+
   increase_plus_one(player_name)
 
   local item_name, item_link, _, _, _, _, _, _, _ = GetItemInfo(current_link)
