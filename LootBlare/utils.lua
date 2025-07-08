@@ -150,10 +150,11 @@ function play_sound(path)
   PlaySoundFile(path, 'Master')
 end
 
-function run_if_master_looter(callback)
+function run_if_master_looter(callback, notify)
+  if notify == nil then notify = true end
   if is_master_looter(UnitName('player')) then
     callback()
-  else
+  elseif notify then
     lb_print('You are not the master looter')
   end
 end

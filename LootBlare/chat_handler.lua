@@ -144,6 +144,8 @@ function handle_chat_message(event, message, sender)
     end
   elseif event == 'ZONE_CHANGED_NEW_AREA' then
     reset_plus_one_when_entering_raid()
+  elseif event == 'LOOT_OPENED' then
+    run_if_master_looter(function() loot_announce_handler() end, false)
   end
 end
 
