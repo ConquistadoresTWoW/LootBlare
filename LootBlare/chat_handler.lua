@@ -134,6 +134,7 @@ function handle_chat_message(event, message, sender)
     if AltList == nil then AltList = {} end
     if SRList == nil then SRList = {} end
     if PlusOneList == nil then PlusOneList = {} end
+    if LastRaidData == nil then LastRaidData = {RaidName = '', RaidTime = 0} end
 
     if is_master_looter(UnitName('player')) then
       master_looter = UnitName('player')
@@ -141,6 +142,8 @@ function handle_chat_message(event, message, sender)
     else
       SendAddonMessage(config.LB_PREFIX, config.LB_GET_ML_SETTINGS, 'RAID')
     end
+  elseif event == 'ZONE_CHANGED_NEW_AREA' then
+    reset_plus_one_when_entering_raid()
   end
 end
 

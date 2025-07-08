@@ -3,7 +3,7 @@
 ## Author: Ehawne, Sivent, Gulolio
 ## Version: 2.1.0
 ## Notes: Make loot rolls obvious
-## SavedVariables: AltList, SRList, PlusOneList, Settings
+## SavedVariables: AltList, SRList, PlusOneList, Settings, LastRaidData
 
 LootBlare\prices_list.lua
 LootBlare\config.lua
@@ -12,6 +12,7 @@ LootBlare\roll_handler.lua
 LootBlare\sr_handler.lua
 LootBlare\plus_one_handler.lua
 LootBlare\alts_handler.lua
+LootBlare\change_zone_handler.lua
 LootBlare\minimap_button.lua
 LootBlare\ui.lua
 LootBlare\chat_handler.lua
