@@ -18,11 +18,12 @@ function reset_plus_one_when_entering_raid()
   local time_difference = current_time - last_raid_time
   local is_a_new_raid = false
 
-  if TWOW_RAID_NAMES[current_zone] and current_zone ~= LastRaidData.RaidName then
-    is_a_new_raid = true
-  elseif not TWOW_RAID_NAMES[current_zone] and current_zone ==
-    LastRaidData.RaidName and time_difference > THREE_DAYS_IN_SECONDS then
-    is_a_new_raid = true
+  if TWOW_RAID_NAMES[current_zone] then
+    if current_zone ~= LastRaidData.RaidName then
+      is_a_new_raid = true
+    elseif time_difference > THREE_DAYS_IN_SECONDS then
+      is_a_new_raid = true
+    end
   end
 
   if is_a_new_raid then
