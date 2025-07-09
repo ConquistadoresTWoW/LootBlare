@@ -139,7 +139,9 @@ function handle_chat_message(event, message, sender)
     if AltList == nil then AltList = {} end
     if SRList == nil then SRList = {} end
     if PlusOneList == nil then PlusOneList = {} end
-    if LastRaidData == nil then LastRaidData = {RaidName = '', RaidTime = 0} end
+    if LastRaidData == nil then
+      LastRaidData = {RaidName = '', RaidTime = 0, AlreadyLooted = {}}
+    end
 
     if is_master_looter(UnitName('player')) then
       master_looter = UnitName('player')

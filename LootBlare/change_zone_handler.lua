@@ -28,6 +28,7 @@ function reset_plus_one_when_entering_raid()
 
   if is_a_new_raid then
     PlusOneList = {}
+    LastRaidData.AlreadyLooted = {}
     LastRaidData.RaidName = current_zone
     LastRaidData.RaidTime = current_time
     lb_print('Plus one list cleared for entering a new raid: ' .. current_zone)

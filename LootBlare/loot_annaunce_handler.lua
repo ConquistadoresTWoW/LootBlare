@@ -1,5 +1,3 @@
-already_looted = {}
-
 local function getGuid()
   local _, guid = UnitExists("target")
   return guid
@@ -7,10 +5,10 @@ end
 
 function loot_announce_handler()
   local unit_guid = getGuid()
-  if already_looted[unit_guid] then
+  if LastRaidData.AlreadyLooted[unit_guid] then
     return -- If this unit has already been looted, do nothing
   end
-  already_looted[unit_guid] = true -- Mark this unit as looted to avoid duplicate announcements
+  LastRaidData.AlreadyLooted[unit_guid] = true -- Mark this unit as looted to avoid duplicate announcements
 
   local announcestring = "Items inside:"
 
