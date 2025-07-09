@@ -7,7 +7,7 @@ TWOW_RAID_NAMES = {
   ["Blackwing Lair"] = true,
   ["Ahn'Qiraj"] = true,
   ["Naxxramas"] = true,
-  ["Tower of Kharazhan"] = true
+  ["Tower of Karazhan"] = true
 }
 
 function reset_plus_one_when_entering_raid()
