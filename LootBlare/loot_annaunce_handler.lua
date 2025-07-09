@@ -14,7 +14,6 @@ function loot_announce_handler()
 
   for lootedindex = 1, GetNumLootItems() do
     local min_quality = tonumber(Settings.LootAnnounceMinQuality)
-    lb_print(tostring(min_quality))
     local item_link = GetLootSlotLink(lootedindex)
     if item_link then
       local item_id = tonumber(string.match(item_link, "item:(%d+):"))
