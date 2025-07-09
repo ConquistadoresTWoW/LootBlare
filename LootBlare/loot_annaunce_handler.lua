@@ -3,6 +3,19 @@ local function getGuid()
   return guid
 end
 
+EXCLUDED_ITEMS_TABLE = {
+  ["Sulfuron Ingot"] = true,
+  ["Elementium Ore"] = true,
+  ["Fading Dream Fragment"] = true,
+  ["Wartorn Cloth Scrap"] = true,
+  ["Wartorn Leather Scrap"] = true,
+  ["Wartorn Chain Scrap"] = true,
+  ["Wartorn Plate Scrap"] = true,
+  ["Pristine Lay Crytstal"] = true
+}
+
+IDOL_PREFIX = "Idol"
+
 function loot_announce_handler()
   local unit_guid = getGuid()
   if LastRaidData.AlreadyLooted[unit_guid] then
@@ -14,11 +27,14 @@ function loot_announce_handler()
 
   for lootedindex = 1, GetNumLootItems() do
     local min_quality = tonumber(Settings.LootAnnounceMinQuality)
+    lb_print(tostring(min_quality))
     local item_link = GetLootSlotLink(lootedindex)
     if item_link then
       local item_id = tonumber(string.match(item_link, "item:(%d+):"))
-      local item_quality = select(3, GetItemInfo(item_id))
-      if item_quality and item_quality >= min_quality then
+      local item_name, _, item_quality = GetItemInfo(item_id)
+      if item_quality and item_quality >= min_quality and
+        not EXCLUDED_ITEMS_TABLE[item_name] and
+        not string.find(item_name, IDOL_PREFIX) then
         announcestring = announcestring .. " " .. item_link
       end
     end
