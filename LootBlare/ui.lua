@@ -546,6 +546,9 @@ function create_import_sr_frame()
                                      'UIPanelButtonTemplate')
   reset_plus_one:SetScript('OnClick', function()
     PlusOneList = {}
+    LastRaidData.AlreadyLooted = {}
+    LastRaidData.RaidName = ''
+    LastRaidData.RaidTime = 0
     edit_box:SetText('')
   end)
   reset_plus_one:SetPoint('RIGHT', import_button, 'LEFT', -10, 0)
