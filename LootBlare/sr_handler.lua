@@ -122,6 +122,11 @@ function find_soft_reservers_for_item(item_link)
   -- Filter out members not in the raid
   for i = len(current_item_sr), 1, -1 do
     if not is_member_in_raid(current_item_sr[i]["Attendee"]) then
+      -- if ML announce if someone SRed but is not in raid
+      run_if_master_looter(function()
+        SendChatMessage(current_item_sr[i]["Attendee"] ..
+                          ' reservó pero no está en raid!', 'RAID')
+      end, false)
       table.remove(current_item_sr, i)
     end
   end
