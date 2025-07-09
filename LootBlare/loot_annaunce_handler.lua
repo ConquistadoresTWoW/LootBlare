@@ -17,17 +17,20 @@ EXCLUDED_ITEMS_TABLE = {
 IDOL_PREFIX = "Idol"
 
 function loot_announce_handler()
-  local unit_guid = getGuid()
-  if LastRaidData.AlreadyLooted[unit_guid] then
-    return -- If this unit has already been looted, do nothing
+  local has_superwow = SetAutoloot and true or false
+
+  if has_superwow then
+    local unit_guid = getGuid()
+    if LastRaidData.AlreadyLooted[unit_guid] then
+      return -- If this unit has already been looted, do nothing
+    end
+    LastRaidData.AlreadyLooted[unit_guid] = true -- Mark this unit as looted to avoid duplicate announcements
   end
-  LastRaidData.AlreadyLooted[unit_guid] = true -- Mark this unit as looted to avoid duplicate announcements
 
   local announcestring = "Items inside:"
 
   for lootedindex = 1, GetNumLootItems() do
     local min_quality = tonumber(Settings.LootAnnounceMinQuality)
-    lb_print(tostring(min_quality))
     local item_link = GetLootSlotLink(lootedindex)
     if item_link then
       local item_id = tonumber(string.match(item_link, "item:(%d+):"))
