@@ -17,6 +17,10 @@ EXCLUDED_ITEMS_TABLE = {
 IDOL_PREFIX = "Idol"
 
 function loot_announce_handler()
+  if not Settings.LootAnnounceActive then
+    return -- If loot announcements are disabled, do nothing
+  end
+
   local has_superwow = SetAutoloot and true or false
 
   if has_superwow then

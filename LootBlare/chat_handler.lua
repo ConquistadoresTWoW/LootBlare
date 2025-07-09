@@ -128,8 +128,12 @@ function handle_chat_message(event, message, sender)
         ResetPOAfterImportingSR = true,
         CustomFontSize = config.CLICKABLE_TEXT_FONT_SIZE,
         PrioMainOverAlts = true,
+        LootAnnounceActive = true,
         LootAnnounceMinQuality = 4 -- Epic
       }
+    end
+    if Settings.LootAnnounceActive == nil then
+      Settings.LootAnnounceActive = true
     end
 
     if Settings.LootAnnounceMinQuality == nil then

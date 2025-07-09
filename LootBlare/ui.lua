@@ -587,7 +587,7 @@ end
 function create_settings_frame()
   local frame = CreateFrame('Frame', 'settings_frame', UIParent)
   frame:SetWidth(300)
-  frame:SetHeight(360)
+  frame:SetHeight(390)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -687,12 +687,20 @@ function create_settings_frame()
     'Reset PO after importing SRs');
   reset_po_after_importing_sr_cb.tooltip = 'Reset PO after importing SRs'
 
+  -- loot announce on or off
+  local loot_announce_cb = CreateFrame('CheckButton', 'loot_announce_cb', frame,
+                                       'UICheckButtonTemplate')
+  loot_announce_cb:SetPoint('TOPLEFT', reset_po_after_importing_sr_cb,
+                            'BOTTOMLEFT', 0, 0)
+  getglobal(loot_announce_cb:GetName() .. 'Text'):SetText(
+    'Loot announce on or off');
+  loot_announce_cb.tooltip = 'Loot announce on or off'
+
   -- min quality for items to announce in chat
   local loot_announce_min_quality_edit_box =
     CreateFrame('EditBox', 'loot_announce_min_quality_edit_box', frame,
                 'InputBoxTemplate')
-  loot_announce_min_quality_edit_box:SetPoint('TOPLEFT',
-                                              reset_po_after_importing_sr_cb,
+  loot_announce_min_quality_edit_box:SetPoint('TOPLEFT', loot_announce_cb,
                                               'BOTTOMLEFT', 10, -10)
   loot_announce_min_quality_edit_box:SetWidth(20)
   loot_announce_min_quality_edit_box:SetHeight(15)
@@ -714,11 +722,15 @@ function create_settings_frame()
       reset_po_after_importing_sr_cb:Hide()
       loot_announce_min_quality_edit_box:Hide()
       loot_announce_min_quality_label:Hide()
+      loot_announce_cb:Disable()
+      loot_announce_cb:Hide()
     else
       prio_main_over_alts_cb:Enable()
       reset_po_after_importing_sr_cb:Enable()
       reset_po_after_importing_sr_cb:Show()
       loot_announce_min_quality_edit_box:Show()
+      loot_announce_cb:Enable()
+      loot_announce_cb:Show()
       loot_announce_min_quality_label:Show()
     end
 
@@ -730,6 +742,7 @@ function create_settings_frame()
     frame_duration_edit_box:SetText(Settings.RollDuration)
     reset_po_after_importing_sr_cb:SetChecked(Settings.ResetPOAfterImportingSR)
     prio_main_over_alts_cb:SetChecked(Settings.PrioMainOverAlts)
+    loot_announce_cb:SetChecked(Settings.LootAnnounceActive)
     loot_announce_min_quality_edit_box:SetText(
       Settings.LootAnnounceMinQuality or 4)
   end)
@@ -747,6 +760,7 @@ function create_settings_frame()
       Settings.ResetPOAfterImportingSR =
         reset_po_after_importing_sr_cb:GetChecked() == 1
       Settings.PrioMainOverAlts = prio_main_over_alts_cb:GetChecked() == 1
+      Settings.LootAnnounceActive = loot_announce_cb:GetChecked() == 1
       Settings.LootAnnounceMinQuality =
         loot_announce_min_quality_edit_box:GetText()
       send_ml_settings()
