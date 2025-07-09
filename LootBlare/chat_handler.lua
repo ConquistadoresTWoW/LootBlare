@@ -127,8 +127,13 @@ function handle_chat_message(event, message, sender)
         HideWhenUsingSpell = false,
         ResetPOAfterImportingSR = true,
         CustomFontSize = config.CLICKABLE_TEXT_FONT_SIZE,
-        PrioMainOverAlts = true
+        PrioMainOverAlts = true,
+        LootAnnounceMinQuality = 4 -- Epic
       }
+    end
+
+    if Settings.LootAnnounceMinQuality == nil then
+      Settings.LootAnnounceMinQuality = 4 -- Epic
     end
 
     if AltList == nil then AltList = {} end

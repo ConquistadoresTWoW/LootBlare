@@ -15,12 +15,13 @@ function loot_announce_handler()
   local announcestring = "Items inside:"
 
   for lootedindex = 1, GetNumLootItems() do
-    local MINIMUN_QUALITY_TO_ANNOUNCE = 4 -- 4 is the rarity for epic items
+    local min_quality = tonumber(Settings.LootAnnounceMinQuality)
+    lb_print(tostring(min_quality))
     local item_link = GetLootSlotLink(lootedindex)
     if item_link then
       local item_id = tonumber(string.match(item_link, "item:(%d+):"))
       local item_quality = select(3, GetItemInfo(item_id))
-      if item_quality and item_quality >= MINIMUN_QUALITY_TO_ANNOUNCE then
+      if item_quality and item_quality >= min_quality then
         announcestring = announcestring .. " " .. item_link
       end
     end
