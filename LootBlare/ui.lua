@@ -402,13 +402,34 @@ function show_frame(frame, duration, item)
     if frame.timerText then
       frame.timerText:SetText(format('%.1f', duration - time_elapsed))
     end
+
+    if time_elapsed >= duration - 3 and time_elapsed < duration - 2 and
+      not seconds_3 then
+      seconds_3 = true
+      run_if_master_looter(function() SendChatMessage('3', 'RAID') end)
+    elseif time_elapsed >= duration - 2 and time_elapsed < duration - 1 and
+      not seconds_2 then
+      seconds_2 = true
+      run_if_master_looter(function() SendChatMessage('2', 'RAID') end)
+    elseif time_elapsed >= duration - 1 and time_elapsed < duration and
+      not seconds_1 then
+      seconds_1 = true
+      run_if_master_looter(function() SendChatMessage('1', 'RAID') end)
+    end
+
     if time_elapsed >= duration then
+      run_if_master_looter(function()
+        SendChatMessage('Roll time ended!', 'RAID')
+      end)
       frame:SetScript('OnUpdate', nil)
       time_elapsed = 0
       item_query = 1.5
       times = 3
       roll_messages = {}
       is_rolling = false
+      seconds_3 = false
+      seconds_2 = false
+      seconds_1 = false
       if Settings.FrameAutoClose then frame:Hide() end
     end
     if times > 0 and item_query < 0 and not check_item(item) then
