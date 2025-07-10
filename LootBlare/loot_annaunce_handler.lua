@@ -37,7 +37,7 @@ function loot_announce_handler()
     local min_quality = tonumber(Settings.LootAnnounceMinQuality)
     local item_link = GetLootSlotLink(lootedindex)
     if item_link then
-      local item_id = tonumber(string.match(item_link, "item:(%d+):"))
+      local item_id = tonumber(string_match(item_link, "item:(%d+):"))
       local item_name, _, item_quality = GetItemInfo(item_id)
       if item_quality and item_quality >= min_quality and
         not EXCLUDED_ITEMS_TABLE[item_name] and
