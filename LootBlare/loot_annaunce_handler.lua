@@ -25,7 +25,7 @@ function loot_announce_handler()
 
   if has_superwow then
     local unit_guid = getGuid()
-    if LastRaidData.AlreadyLooted[unit_guid] then
+    if unit_guid == nil or LastRaidData.AlreadyLooted[unit_guid] then
       return -- If this unit has already been looted, do nothing
     end
     LastRaidData.AlreadyLooted[unit_guid] = true -- Mark this unit as looted to avoid duplicate announcements
