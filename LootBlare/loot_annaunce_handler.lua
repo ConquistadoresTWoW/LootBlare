@@ -11,7 +11,25 @@ EXCLUDED_ITEMS_TABLE = {
   ["Wartorn Leather Scrap"] = true,
   ["Wartorn Chain Scrap"] = true,
   ["Wartorn Plate Scrap"] = true,
-  ["Pristine Lay Crytstal"] = true
+  ["Pristine Lay Crytstal"] = true,
+
+  -- enchanting stuff
+  ["Nexus Crystal"] = true,
+  ["Large Brilliant Shard"] = true,
+  ["Small Brilliant Shard"] = true,
+  ["Large Radiant Shard"] = true,
+  ["Small Radiant Shard"] = true,
+  ["Large Glimmering Shard"] = true,
+  ["Small Glimmering Shard"] = true,
+  ["Lesser Eternal Essence"] = true,
+  ["Greater Eternal Essence"] = true,
+  ["Lesser Nether Essence"] = true,
+  ["Greater Nether Essence"] = true,
+  ["Lesser Mystic Essence"] = true,
+  ["Greater Mystic Essence"] = true,
+  ["Dream Dust"] = true,
+  ["Illusion Dust"] = true,
+  ["Arcane Dust"] = true
 }
 
 IDOL_PREFIX = "Idol"
