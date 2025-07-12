@@ -1,4 +1,4 @@
-# Loot Blare 2.0.0
+# Loot Blare 2.2.0
 
 Loot Blare is a World of Warcraft addon originally designed **Turtle WoW**. The original version of this addon can be found [here](https://github.com/MarcelineVQ/LootBlare). This version of Loot Blare was completely updated by and for the **Conquistadores** guild.
 
@@ -64,19 +64,27 @@ The plus one system helps manage loot distribution by tracking a player's "Plus 
 - **Prioritize mains over alts toggle button**  
 In the roll frame the master looter can choose if mains will get prio over alts. This toggle value is sent to all the raiders and the roll list is sorted accordingly for everyone
 
+- **Loot announce**  
+When looting a corpse, the ML announces the loot in raid chat. This can be turned on and off in the settings panel. Also, in the settings panel, the minimum quality of items to announce can be configured. Some items (listed in `EXCLUDED_ITEMS_TABLE`) will never be announced.
+
+- **Auto reset data**  
+When entering a raid, the addon automatically resets data from the previous raid (**PlusOne** and **AlreadyLootedCorpses**). It does this by saving the last raid you entered and resetting if you change raids or re-enter the same raid after 3 days.  
+This may cause issues with **Kara10** and **Kara40**, since both share the same name. In such cases, the ML should manually delete the PlusOne list.
+
 - **Minimap button shortcuts**  
 The minimap button has the following shortcuts:  
 `Left-click`: opens the roll frame  
 `Right-Click`: opens the settings frame  
 `Shift + Left-Click (for ML only)`: opens the import SR frame
 
-- **Communication**: The addon uses the addon channel to update data about settings, SRs, alts and plus one for all the members of the raid  
+- **Communication**: The addon uses the addon channel to update data about settings, SRs, alts and plus one, etc for all the members of the raid  
 
 ### The (moveable) frame in game:
 
 ![LootBlare Frame](./assets/lootblareframe.png)
 
 Changelog:
+- **2.2.0**: Added auto reset raid data and loot announce
 - **2.1.0**: Added settings panel and minimap button.
 - **2.0.0**: Refactor the whole addon. Added SR, alts, and +1 logic.
 - **1.1.9**: Add communication using CHAT_MSG_ADDON events
