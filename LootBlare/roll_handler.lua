@@ -11,6 +11,9 @@ item_query = 0.5
 times = 5
 master_looter = nil
 RollType = {SR_MS = 102, SR_OS = 101, MS = 100, OS = 99, TM = 50}
+seconds_3 = false
+seconds_2 = false
+seconds_1 = false
 
 function reset_rolls()
   ms_roll_messages = {}
@@ -41,7 +44,7 @@ function sort_rolls()
     local a_plus_one = PlusOneList[a.roller] or 0
     local b_plus_one = PlusOneList[b.roller] or 0
     local prio_mains = Settings.PrioMainOverAlts
-    
+
     if prio_mains and (a_alt and not b_alt) then return false end
     if prio_mains and (not a_alt and b_alt) then return true end
     if a_plus_one == b_plus_one then return a.roll > b.roll end

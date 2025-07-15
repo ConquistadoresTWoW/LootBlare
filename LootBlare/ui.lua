@@ -402,13 +402,34 @@ function show_frame(frame, duration, item)
     if frame.timerText then
       frame.timerText:SetText(format('%.1f', duration - time_elapsed))
     end
+
+    if time_elapsed >= duration - 3 and time_elapsed < duration - 2 and
+      not seconds_3 then
+      seconds_3 = true
+      run_if_master_looter(function() SendChatMessage('3', 'RAID') end, false)
+    elseif time_elapsed >= duration - 2 and time_elapsed < duration - 1 and
+      not seconds_2 then
+      seconds_2 = true
+      run_if_master_looter(function() SendChatMessage('2', 'RAID') end, false)
+    elseif time_elapsed >= duration - 1 and time_elapsed < duration and
+      not seconds_1 then
+      seconds_1 = true
+      run_if_master_looter(function() SendChatMessage('1', 'RAID') end, false)
+    end
+
     if time_elapsed >= duration then
+      run_if_master_looter(function()
+        SendChatMessage('Roll time ended!', 'RAID')
+      end, false)
       frame:SetScript('OnUpdate', nil)
       time_elapsed = 0
       item_query = 1.5
       times = 3
       roll_messages = {}
       is_rolling = false
+      seconds_3 = false
+      seconds_2 = false
+      seconds_1 = false
       if Settings.FrameAutoClose then frame:Hide() end
     end
     if times > 0 and item_query < 0 and not check_item(item) then
@@ -546,6 +567,9 @@ function create_import_sr_frame()
                                      'UIPanelButtonTemplate')
   reset_plus_one:SetScript('OnClick', function()
     PlusOneList = {}
+    LastRaidData.AlreadyLooted = {}
+    LastRaidData.RaidName = ''
+    LastRaidData.RaidTime = 0
     edit_box:SetText('')
   end)
   reset_plus_one:SetPoint('RIGHT', import_button, 'LEFT', -10, 0)
@@ -563,7 +587,7 @@ end
 function create_settings_frame()
   local frame = CreateFrame('Frame', 'settings_frame', UIParent)
   frame:SetWidth(300)
-  frame:SetHeight(330)
+  frame:SetHeight(390)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -639,7 +663,6 @@ function create_settings_frame()
   frame_duration_edit_box:SetHeight(15)
   frame_duration_edit_box:SetAutoFocus(false)
   frame_duration_edit_box:SetFontObject('ChatFontNormal')
-  frame_duration_edit_box:SetAutoFocus(false)
   frame_duration_edit_box:SetNumeric(true)
   local frame_duration_label = frame:CreateFontString(nil, 'OVERLAY',
                                                       'GameFontNormal')
@@ -664,16 +687,51 @@ function create_settings_frame()
     'Reset PO after importing SRs');
   reset_po_after_importing_sr_cb.tooltip = 'Reset PO after importing SRs'
 
+  -- loot announce on or off
+  local loot_announce_cb = CreateFrame('CheckButton', 'loot_announce_cb', frame,
+                                       'UICheckButtonTemplate')
+  loot_announce_cb:SetPoint('TOPLEFT', reset_po_after_importing_sr_cb,
+                            'BOTTOMLEFT', 0, 0)
+  getglobal(loot_announce_cb:GetName() .. 'Text'):SetText(
+    'Loot announce on or off');
+  loot_announce_cb.tooltip = 'Loot announce on or off'
+
+  -- min quality for items to announce in chat
+  local loot_announce_min_quality_edit_box =
+    CreateFrame('EditBox', 'loot_announce_min_quality_edit_box', frame,
+                'InputBoxTemplate')
+  loot_announce_min_quality_edit_box:SetPoint('TOPLEFT', loot_announce_cb,
+                                              'BOTTOMLEFT', 10, -10)
+  loot_announce_min_quality_edit_box:SetWidth(20)
+  loot_announce_min_quality_edit_box:SetHeight(15)
+  loot_announce_min_quality_edit_box:SetAutoFocus(false)
+  loot_announce_min_quality_edit_box:SetFontObject('ChatFontNormal')
+  loot_announce_min_quality_edit_box:SetNumeric(true)
+  local loot_announce_min_quality_label =
+    frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+  loot_announce_min_quality_label:SetPoint('LEFT',
+                                           loot_announce_min_quality_edit_box,
+                                           'RIGHT', 5, 0)
+  loot_announce_min_quality_label:SetText('Loot announce min quality (0-4)')
+
   frame:RegisterEvent('OnShow')
   frame:SetScript('OnShow', function()
     if master_looter ~= UnitName('player') then
       prio_main_over_alts_cb:Disable()
       reset_po_after_importing_sr_cb:Disable()
       reset_po_after_importing_sr_cb:Hide()
+      loot_announce_min_quality_edit_box:Hide()
+      loot_announce_min_quality_label:Hide()
+      loot_announce_cb:Disable()
+      loot_announce_cb:Hide()
     else
       prio_main_over_alts_cb:Enable()
       reset_po_after_importing_sr_cb:Enable()
       reset_po_after_importing_sr_cb:Show()
+      loot_announce_min_quality_edit_box:Show()
+      loot_announce_cb:Enable()
+      loot_announce_cb:Show()
+      loot_announce_min_quality_label:Show()
     end
 
     local current_ml = master_looter or 'unknown'
@@ -684,6 +742,9 @@ function create_settings_frame()
     frame_duration_edit_box:SetText(Settings.RollDuration)
     reset_po_after_importing_sr_cb:SetChecked(Settings.ResetPOAfterImportingSR)
     prio_main_over_alts_cb:SetChecked(Settings.PrioMainOverAlts)
+    loot_announce_cb:SetChecked(Settings.LootAnnounceActive)
+    loot_announce_min_quality_edit_box:SetText(
+      Settings.LootAnnounceMinQuality or 4)
   end)
 
   local save_button = CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
@@ -699,6 +760,9 @@ function create_settings_frame()
       Settings.ResetPOAfterImportingSR =
         reset_po_after_importing_sr_cb:GetChecked() == 1
       Settings.PrioMainOverAlts = prio_main_over_alts_cb:GetChecked() == 1
+      Settings.LootAnnounceActive = loot_announce_cb:GetChecked() == 1
+      Settings.LootAnnounceMinQuality =
+        loot_announce_min_quality_edit_box:GetText()
       send_ml_settings()
     end
 

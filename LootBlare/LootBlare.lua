@@ -6,6 +6,8 @@ item_roll_frame:RegisterEvent('CHAT_MSG_RAID')
 item_roll_frame:RegisterEvent('CHAT_MSG_RAID_LEADER')
 item_roll_frame:RegisterEvent('CHAT_MSG_ADDON')
 item_roll_frame:RegisterEvent('CURRENT_SPELL_CAST_CHANGED')
+item_roll_frame:RegisterEvent('ZONE_CHANGED_NEW_AREA')
+item_roll_frame:RegisterEvent('LOOT_OPENED')
 item_roll_frame:SetScript('OnEvent',
                           function() handle_chat_message(event, arg1, arg2) end)
 

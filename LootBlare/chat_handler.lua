@@ -127,13 +127,25 @@ function handle_chat_message(event, message, sender)
         HideWhenUsingSpell = false,
         ResetPOAfterImportingSR = true,
         CustomFontSize = config.CLICKABLE_TEXT_FONT_SIZE,
-        PrioMainOverAlts = true
+        PrioMainOverAlts = true,
+        LootAnnounceActive = true,
+        LootAnnounceMinQuality = 4 -- Epic
       }
+    end
+    if Settings.LootAnnounceActive == nil then
+      Settings.LootAnnounceActive = true
+    end
+
+    if Settings.LootAnnounceMinQuality == nil then
+      Settings.LootAnnounceMinQuality = 4 -- Epic
     end
 
     if AltList == nil then AltList = {} end
     if SRList == nil then SRList = {} end
     if PlusOneList == nil then PlusOneList = {} end
+    if LastRaidData == nil then
+      LastRaidData = {RaidName = '', RaidTime = 0, AlreadyLooted = {}}
+    end
 
     if is_master_looter(UnitName('player')) then
       master_looter = UnitName('player')
@@ -141,6 +153,10 @@ function handle_chat_message(event, message, sender)
     else
       SendAddonMessage(config.LB_PREFIX, config.LB_GET_ML_SETTINGS, 'RAID')
     end
+  elseif event == 'ZONE_CHANGED_NEW_AREA' then
+    reset_plus_one_when_entering_raid()
+  elseif event == 'LOOT_OPENED' then
+    run_if_master_looter(function() loot_announce_handler() end, false)
   end
 end
 
