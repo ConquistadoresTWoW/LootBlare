@@ -49,7 +49,8 @@ function loot_announce_handler()
     LastRaidData.AlreadyLooted[unit_guid] = true -- Mark this unit as looted to avoid duplicate announcements
   end
 
-  local announcestring = "Items inside:"
+  local announcestring = "- Items inside:"
+  local item_link_list = {}
 
   for lootedindex = 1, GetNumLootItems() do
     local min_quality = tonumber(Settings.LootAnnounceMinQuality)
@@ -60,12 +61,15 @@ function loot_announce_handler()
       if item_quality and item_quality >= min_quality and
         not EXCLUDED_ITEMS_TABLE[item_name] and
         not string.find(item_name, IDOL_PREFIX) then
-        announcestring = announcestring .. " " .. item_link
+        table.insert(item_link_list, item_link)
       end
     end
   end
 
-  if announcestring ~= "Items inside:" then
+  if len(item_link_list) > 0 then
     SendChatMessage(announcestring, "RAID", nil, nil)
+    for _, item_link in ipairs(item_link_list) do
+      SendChatMessage("- " .. item_link, "RAID", nil, nil)
+    end
   end
 end
