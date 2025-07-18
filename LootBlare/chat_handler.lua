@@ -129,7 +129,8 @@ function handle_chat_message(event, message, sender)
         CustomFontSize = config.CLICKABLE_TEXT_FONT_SIZE,
         PrioMainOverAlts = true,
         LootAnnounceActive = true,
-        LootAnnounceMinQuality = 4 -- Epic
+        LootAnnounceMinQuality = 4, -- Epic
+        DNDMode = false
       }
     end
     if Settings.LootAnnounceActive == nil then

@@ -587,7 +587,7 @@ end
 function create_settings_frame()
   local frame = CreateFrame('Frame', 'settings_frame', UIParent)
   frame:SetWidth(300)
-  frame:SetHeight(390)
+  frame:SetHeight(420)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -714,6 +714,14 @@ function create_settings_frame()
                                            'RIGHT', 5, 0)
   loot_announce_min_quality_label:SetText('Loot announce min quality (0-4)')
 
+  -- do not disturb while being master looter cb
+  local dnd_cb = CreateFrame('CheckButton', 'dnd_cb', frame,
+                             'UICheckButtonTemplate')
+  dnd_cb:SetPoint('TOPLEFT', loot_announce_min_quality_edit_box, 'BOTTOMLEFT',
+                  -10, -10)
+  getglobal(dnd_cb:GetName() .. 'Text'):SetText('Block whispers while being ML');
+  dnd_cb.tooltip = 'Block whispers while being ML'
+
   frame:RegisterEvent('OnShow')
   frame:SetScript('OnShow', function()
     if master_looter ~= UnitName('player') then
@@ -724,6 +732,8 @@ function create_settings_frame()
       loot_announce_min_quality_label:Hide()
       loot_announce_cb:Disable()
       loot_announce_cb:Hide()
+      dnd_cb:Disable()
+      dnd_cb:Hide()
     else
       prio_main_over_alts_cb:Enable()
       reset_po_after_importing_sr_cb:Enable()
@@ -732,6 +742,8 @@ function create_settings_frame()
       loot_announce_cb:Enable()
       loot_announce_cb:Show()
       loot_announce_min_quality_label:Show()
+      dnd_cb:Enable()
+      dnd_cb:Show()
     end
 
     local current_ml = master_looter or 'unknown'
@@ -745,6 +757,7 @@ function create_settings_frame()
     loot_announce_cb:SetChecked(Settings.LootAnnounceActive)
     loot_announce_min_quality_edit_box:SetText(
       Settings.LootAnnounceMinQuality or 4)
+    dnd_cb:SetChecked(Settings.DNDMode or false)
   end)
 
   local save_button = CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
@@ -764,6 +777,7 @@ function create_settings_frame()
       Settings.LootAnnounceMinQuality =
         loot_announce_min_quality_edit_box:GetText()
       send_ml_settings()
+      Settings.DNDMode = dnd_cb:GetChecked() == 1
     end
 
     lb_print('Settings saved!')
