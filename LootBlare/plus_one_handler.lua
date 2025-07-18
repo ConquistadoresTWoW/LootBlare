@@ -14,6 +14,11 @@ function increase_plus_one(player_name)
     return
   end
 
+  -- allow lowercase names
+  player_name = string.lower(player_name)
+  player_name = string.upper(string.sub(player_name, 1, 1)) ..
+                  string.sub(player_name, 2)
+
   local class = get_class_of_roller(player_name)
   local colored_name = create_color_name_by_class(player_name, class)
 
@@ -29,6 +34,8 @@ function increase_plus_one(player_name)
                     'RAID')
   end
   report_plus_one_list()
+
+  return player_name
 end
 
 function create_gold_string(money)
@@ -52,7 +59,7 @@ function increase_plus_one_and_whisper_os_payment(player_name, current_link)
     return
   end
 
-  increase_plus_one(player_name)
+  player_name = increase_plus_one(player_name)
 
   local item_name, item_link, _, _, _, _, _, _, _ = GetItemInfo(current_link)
 
@@ -79,6 +86,11 @@ function reduce_plus_one(player_name)
     lb_print('You are not the master looter')
     return
   end
+
+  -- allow lowercase names
+  player_name = string.lower(player_name)
+  player_name = string.upper(string.sub(player_name, 1, 1)) ..
+                  string.sub(player_name, 2)
 
   local class = get_class_of_roller(player_name)
   local colored_name = create_color_name_by_class(player_name, class)
