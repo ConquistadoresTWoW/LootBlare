@@ -102,7 +102,7 @@ function create_item_roll_frame()
   frame:SetHeight(config.FRAME_HEIGHT)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
   
-  -- Create backdrop with border that we can modify later
+  -- Create backdrop with border
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
     edgeFile = 'Interface/Tooltips/UI-Tooltip-Border',
@@ -128,10 +128,7 @@ function create_item_roll_frame()
   frame.statusBar.bg = frame.statusBar:CreateTexture(nil, "BACKGROUND")
   frame.statusBar.bg:SetTexture("Interface\\AddOns\\LootBlare\\assets\\bar_tukui.tga")
   frame.statusBar.bg:SetAllPoints(true)
-  frame.statusBar.bg:SetVertexColor(0.2, 0.2, 0.2, 0.6)  -- Darker background
-  
-  -- Set status bar color (will change based on time remaining)
-  frame.statusBar:SetStatusBarColor(0, 1, 0) -- Start with green
+  frame.statusBar.bg:SetVertexColor(0.2, 0.2, 0.2, 0.6)
   
   -- Add spark to status bar
   frame.statusBar.spark = frame.statusBar:CreateTexture(nil, "OVERLAY")
