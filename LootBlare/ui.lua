@@ -101,7 +101,7 @@ function create_item_roll_frame()
   frame:SetWidth(config.FRAME_WIDTH)
   frame:SetHeight(config.FRAME_HEIGHT)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
-  
+
   -- Create backdrop with border
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -113,10 +113,11 @@ function create_item_roll_frame()
   })
   frame:SetBackdropColor(0, 0, 0, 1) -- Black background with full opacity
   frame:SetBackdropBorderColor(0, 0, 0, 0) -- Start with transparent border
-  
+
   -- Create status bar with custom texture
   frame.statusBar = CreateFrame("StatusBar", nil, frame)
-  frame.statusBar:SetStatusBarTexture("Interface\\AddOns\\LootBlare\\assets\\bar_tukui.tga")
+  frame.statusBar:SetStatusBarTexture(
+    "Interface\\AddOns\\LootBlare\\assets\\bar_tukui.tga")
   frame.statusBar:SetMinMaxValues(0, 100)
   frame.statusBar:SetValue(100)
   frame.statusBar:SetWidth(config.FRAME_WIDTH - 10)
@@ -126,13 +127,14 @@ function create_item_roll_frame()
 
   -- Custom background texture
   frame.statusBar.bg = frame.statusBar:CreateTexture(nil, "BACKGROUND")
-  frame.statusBar.bg:SetTexture("Interface\\AddOns\\LootBlare\\assets\\bar_tukui.tga")
+  frame.statusBar.bg:SetTexture(
+    "Interface\\AddOns\\LootBlare\\assets\\bar_tukui.tga")
   frame.statusBar.bg:SetAllPoints(true)
   frame.statusBar.bg:SetVertexColor(0.2, 0.2, 0.2, 0.6)
-  
+
   -- Set status bar color (will change based on time remaining)
   frame.statusBar:SetStatusBarColor(0, 1, 0) -- green timer bar
-  
+
   -- Add spark to status bar
   frame.statusBar.spark = frame.statusBar:CreateTexture(nil, "OVERLAY")
   frame.statusBar.spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
@@ -414,6 +416,7 @@ local function set_item_info(frame, item_link_arg)
     frame.name:SetText('Unknown item, attempting to query...')
     -- Set border to gray for unknown items
     frame:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+    frame.statusBar:SetStatusBarColor(0.5, 0.5, 0.5) -- green timer bar
     return true
   end
 
@@ -421,11 +424,11 @@ local function set_item_info(frame, item_link_arg)
   frame.iconButton:SetNormalTexture(item_icon)
   frame.name:SetText(get_colored_text_by_quality(item_name, item_quality))
   frame.itemLink = item_link
-  
+
   -- Set the border color based on item quality
   local r, g, b = GetItemQualityColor(item_quality)
   frame:SetBackdropBorderColor(r, g, b, 1)
-  
+  frame.statusBar:SetStatusBarColor(r, g, b)
   return true
 end
 
@@ -434,29 +437,23 @@ function show_frame(frame, duration, item)
   frame.statusBar:SetMinMaxValues(0, duration)
   frame.statusBar:SetValue(duration)
   frame.statusBar:SetPoint("BOTTOM", frame, "TOP", 0, 1)
-  frame.statusBar:Show()  -- Show the bar when showing frame
-  
-  frame:SetScript('OnShow', function()
-    frame.statusBar:Show()
-  end)
-  
-  frame:SetScript('OnHide', function()
-    frame.statusBar:Hide()
-  end)
-  
+  frame.statusBar:Show() -- Show the bar when showing frame
+
+  frame:SetScript('OnShow', function() frame.statusBar:Show() end)
+  frame:SetScript('OnHide', function() frame.statusBar:Hide() end)
   frame:SetScript('OnUpdate', function()
     time_elapsed = time_elapsed + arg1
     item_query = item_query - arg1
-    
+
     -- Update timer text
     if frame.timerText then
       frame.timerText:SetText(format('%.1f', duration - time_elapsed))
     end
-    
+
     -- Update status bar
     local remaining = duration - time_elapsed
     frame.statusBar:SetValue(remaining)
-    
+
     if time_elapsed >= duration - 3 and time_elapsed < duration - 2 and
       not seconds_3 then
       seconds_3 = true
