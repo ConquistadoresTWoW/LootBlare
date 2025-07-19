@@ -130,6 +130,9 @@ function create_item_roll_frame()
   frame.statusBar.bg:SetAllPoints(true)
   frame.statusBar.bg:SetVertexColor(0.2, 0.2, 0.2, 0.6)
   
+  -- Set status bar color (will change based on time remaining)
+  frame.statusBar:SetStatusBarColor(0, 1, 0) -- green timer bar
+  
   -- Add spark to status bar
   frame.statusBar.spark = frame.statusBar:CreateTexture(nil, "OVERLAY")
   frame.statusBar.spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
