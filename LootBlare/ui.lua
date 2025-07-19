@@ -101,17 +101,49 @@ function create_item_roll_frame()
   frame:SetWidth(config.FRAME_WIDTH)
   frame:SetHeight(config.FRAME_HEIGHT)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
+  
+  -- Create backdrop with border
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
+    edgeFile = 'Interface/Tooltips/UI-Tooltip-Border',
     tile = true,
     tileSize = 16,
     edgeSize = 16,
     insets = {left = 4, right = 4, top = 4, bottom = 4}
   })
   frame:SetBackdropColor(0, 0, 0, 1) -- Black background with full opacity
+  frame:SetBackdropBorderColor(0, 0, 0, 0) -- Start with transparent border
+  
+  -- Create status bar with custom texture
+  frame.statusBar = CreateFrame("StatusBar", nil, frame)
+  frame.statusBar:SetStatusBarTexture("Interface\\AddOns\\LootBlare\\assets\\bar_tukui.tga")
+  frame.statusBar:SetMinMaxValues(0, 100)
+  frame.statusBar:SetValue(100)
+  frame.statusBar:SetWidth(config.FRAME_WIDTH - 10)
+  frame.statusBar:SetHeight(12)
+  frame.statusBar:SetPoint("BOTTOM", frame, "TOP", 0, 1)
+  frame.statusBar:Hide()
+
+  -- Custom background texture
+  frame.statusBar.bg = frame.statusBar:CreateTexture(nil, "BACKGROUND")
+  frame.statusBar.bg:SetTexture("Interface\\AddOns\\LootBlare\\assets\\bar_tukui.tga")
+  frame.statusBar.bg:SetAllPoints(true)
+  frame.statusBar.bg:SetVertexColor(0.2, 0.2, 0.2, 0.6)
+  
+  -- Set status bar color (will change based on time remaining)
+  frame.statusBar:SetStatusBarColor(0, 1, 0) -- green timer bar
+  
+  -- Add spark to status bar
+  frame.statusBar.spark = frame.statusBar:CreateTexture(nil, "OVERLAY")
+  frame.statusBar.spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
+  frame.statusBar.spark:SetWidth(16)
+  frame.statusBar.spark:SetHeight(32)
+  frame.statusBar.spark:SetBlendMode("ADD")
+  frame.statusBar.spark:SetPoint("CENTER", frame.statusBar, "RIGHT", 0, 0)
+
   frame:SetMovable(true)
   frame:EnableMouse(true)
-  frame:RegisterForDrag('LeftButton') -- Only start dragging with the left mouse button
+  frame:RegisterForDrag('LeftButton')
   frame:SetScript('OnDragStart', function() frame:StartMoving() end)
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
@@ -171,7 +203,6 @@ function create_item_roll_frame()
     else
       lb_print('You are not the master looter')
     end
-
   end)
 
   -- on show update the button texture
@@ -381,28 +412,51 @@ local function set_item_info(frame, item_link_arg)
   if not item_icon then
     frame.icon:SetTexture('Interface\\Icons\\INV_Misc_QuestionMark')
     frame.name:SetText('Unknown item, attempting to query...')
-    -- could be an item we want to see, try to show it
+    -- Set border to gray for unknown items
+    frame:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
     return true
   end
 
   frame.icon:SetTexture(item_icon)
-  frame.iconButton:SetNormalTexture(item_icon) -- Sets the same texture as the icon
-
+  frame.iconButton:SetNormalTexture(item_icon)
   frame.name:SetText(get_colored_text_by_quality(item_name, item_quality))
-
   frame.itemLink = item_link
+  
+  -- Set the border color based on item quality
+  local r, g, b = GetItemQualityColor(item_quality)
+  frame:SetBackdropBorderColor(r, g, b, 1)
+  
   return true
 end
 
 function show_frame(frame, duration, item)
   duration = tonumber(duration)
+  frame.statusBar:SetMinMaxValues(0, duration)
+  frame.statusBar:SetValue(duration)
+  frame.statusBar:SetPoint("BOTTOM", frame, "TOP", 0, 1)
+  frame.statusBar:Show()  -- Show the bar when showing frame
+  
+  frame:SetScript('OnShow', function()
+    frame.statusBar:Show()
+  end)
+  
+  frame:SetScript('OnHide', function()
+    frame.statusBar:Hide()
+  end)
+  
   frame:SetScript('OnUpdate', function()
     time_elapsed = time_elapsed + arg1
     item_query = item_query - arg1
+    
+    -- Update timer text
     if frame.timerText then
       frame.timerText:SetText(format('%.1f', duration - time_elapsed))
     end
-
+    
+    -- Update status bar
+    local remaining = duration - time_elapsed
+    frame.statusBar:SetValue(remaining)
+    
     if time_elapsed >= duration - 3 and time_elapsed < duration - 2 and
       not seconds_3 then
       seconds_3 = true
@@ -422,6 +476,7 @@ function show_frame(frame, duration, item)
         SendChatMessage('Roll time ended!', 'RAID')
       end, false)
       frame:SetScript('OnUpdate', nil)
+      frame.statusBar:Hide()
       time_elapsed = 0
       item_query = 1.5
       times = 3
@@ -794,5 +849,4 @@ function create_settings_frame()
   frame:Hide()
 
   return frame
-
 end
