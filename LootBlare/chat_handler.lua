@@ -95,6 +95,9 @@ function handle_chat_message(event, message, sender)
       show_frame(item_roll_frame, Settings.RollDuration, current_link)
     end
 
+    if sender == master_looter and message == config.LB_STOP_ROLL then
+      time_elapsed = Settings.RollDuration
+    end
     -- ML is reseting the SR list for the current item
     if sender == master_looter and sender ~= UnitName('player') then
 

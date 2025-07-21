@@ -248,6 +248,22 @@ function create_item_roll_frame()
                          settings.button_space_before)
   end
 
+  frame.timer_button = CreateFrame('Button', nil, frame)
+  frame.timer_button:SetWidth(50)
+  frame.timer_button:SetHeight(20)
+  frame.timer_button:SetPoint('CENTER', frame, 'TOPLEFT', 35, -32)
+  local timer_font_string = frame.timer_button:CreateFontString(nil, 'OVERLAY',
+                                                                'GameFontNormal')
+  timer_font_string:SetFont(timer_font_string:GetFont(), 20)
+  timer_font_string:SetPoint('CENTER', frame.timer_button, 'CENTER', 0, 0)
+  frame.timer_button:SetFontString(timer_font_string)
+  frame.timer_button:SetText('0')
+  frame.timer_button:SetScript('OnClick', function()
+    run_if_master_looter(function()
+      SendAddonMessage(config.LB_PREFIX, config.LB_STOP_ROLL, 'RAID')
+    end, false)
+    time_elapsed = Settings.RollDuration
+  end)
   frame:Hide()
 
   return frame
@@ -352,18 +368,12 @@ local function init_item_info(frame)
   icon_button:SetHeight(40) -- Size of the icon
   icon_button:SetPoint('TOP', frame, 'TOP', 0, -10)
 
-  -- Create a FontString for the frame hide timer
-  local timer_text = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-  timer_text:SetPoint('CENTER', frame, 'TOPLEFT', 30, -32)
-  timer_text:SetFont(timer_text:GetFont(), 20)
-
   -- Create a FontString for the item name
   local name = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
   name:SetPoint('TOP', icon, 'BOTTOM', 0, -10)
 
   frame.icon = icon
   frame.iconButton = icon_button
-  frame.timerText = timer_text
   frame.name = name
   frame.itemLink = ''
 
@@ -446,8 +456,9 @@ function show_frame(frame, duration, item)
     item_query = item_query - arg1
 
     -- Update timer text
-    if frame.timerText then
-      frame.timerText:SetText(format('%.1f', duration - time_elapsed))
+    if frame.timer_button then
+      -- frame.timerText:SetText(format('%.1f', duration - time_elapsed))
+      frame.timer_button:SetText(format('%.1f', duration - time_elapsed))
     end
 
     -- Update status bar
@@ -470,7 +481,11 @@ function show_frame(frame, duration, item)
 
     if time_elapsed >= duration then
       run_if_master_looter(function()
-        SendChatMessage('Roll time ended!', 'RAID')
+        if seconds_1 and seconds_2 and seconds_3 then
+          SendChatMessage('Roll time ended!', 'RAID')
+        else
+          SendChatMessage('Roll finished by ML', 'RAID')
+        end
       end, false)
       frame:SetScript('OnUpdate', nil)
       frame.statusBar:Hide()

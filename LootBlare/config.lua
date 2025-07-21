@@ -45,6 +45,7 @@ config = {
   LB_CLEAR_SR = 'clear sr',
   LB_ADD_SR = 'add sr:',
   LB_START_ROLL = 'start roll',
+  LB_STOP_ROLL = 'stop roll',
   LB_ADD_ALTS = 'add alts:',
   LB_CLEAR_ALTS = 'clear alts',
   LB_ADD_PLUS_ONE = 'add plus:',
