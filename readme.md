@@ -1,4 +1,4 @@
-# Loot Blare 2.3.0
+# Loot Blare 2.4.0
 
 Loot Blare is a World of Warcraft addon originally designed **Turtle WoW**. The original version of this addon can be found [here](https://github.com/MarcelineVQ/LootBlare). This version of Loot Blare was completely updated by and for the **Conquistadores** guild.
 
@@ -71,6 +71,9 @@ When looting a corpse, the ML announces the loot in raid chat. This can be turne
 When entering a raid, the addon automatically resets data from the previous raid (**PlusOne** and **AlreadyLootedCorpses**). It does this by saving the last raid you entered and resetting if you change raids or re-enter the same raid after 3 days.  
 This may cause issues with **Kara10** and **Kara40**, since both share the same name. In such cases, the ML should manually delete the PlusOne list.
 
+- **Finish rolls earlier**  
+The ML can finish the roll earlier by left clicking the timer on the roll frame
+
 - **Minimap button shortcuts**  
 The minimap button has the following shortcuts:  
 `Left-click`: opens the roll frame  
@@ -84,6 +87,7 @@ The minimap button has the following shortcuts:
 ![LootBlare Frame](./assets/lootblareframe.png)
 
 Changelog:
+- **2.4.0**: Added stop roll functionality for the ML (clicking the time)
 - **2.3.0**: Added colors to the UI and DND mode for the ML
 - **2.2.0**: Added auto reset raid data and loot announce
 - **2.1.0**: Added settings panel and minimap button.
