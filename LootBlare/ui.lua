@@ -261,8 +261,9 @@ function create_item_roll_frame()
   frame.timer_button:SetScript('OnClick', function()
     run_if_master_looter(function()
       SendAddonMessage(config.LB_PREFIX, config.LB_STOP_ROLL, 'RAID')
+      is_rolling = false
+      time_elapsed = Settings.RollDuration
     end, false)
-    time_elapsed = Settings.RollDuration
   end)
   frame:Hide()
 
