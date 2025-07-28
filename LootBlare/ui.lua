@@ -485,7 +485,7 @@ function show_frame(frame, duration, item)
         if seconds_1 and seconds_2 and seconds_3 then
           SendChatMessage('Roll time ended!', 'RAID')
         else
-          SendChatMessage('Roll finished by ML', 'RAID')
+          SendChatMessage('Roll finished by ML', 'RAID_WARNING')
         end
       end, false)
       frame:SetScript('OnUpdate', nil)
