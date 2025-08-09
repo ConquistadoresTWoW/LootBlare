@@ -1,6 +1,6 @@
 function handle_chat_message(event, message, sender)
   if event == 'CURRENT_SPELL_CAST_CHANGED' and Settings.HideWhenUsingSpell and
-    time_elapsed == 0 then
+    is_rolling == false then
     item_roll_frame:Hide()
   elseif event == 'CHAT_MSG_SYSTEM' then
     local _, _, new_ml = string.find(message, '(%S+) is now the loot master')
@@ -95,6 +95,10 @@ function handle_chat_message(event, message, sender)
       show_frame(item_roll_frame, Settings.RollDuration, current_link)
     end
 
+    if sender == master_looter and message == config.LB_STOP_ROLL then
+      is_rolling = false
+      time_elapsed = Settings.RollDuration
+    end
     -- ML is reseting the SR list for the current item
     if sender == master_looter and sender ~= UnitName('player') then
 

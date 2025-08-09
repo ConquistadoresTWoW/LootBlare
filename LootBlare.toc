@@ -1,7 +1,7 @@
 ## Interface: 11200
-## Title: LootBlare 2.3.0
+## Title: LootBlare 2.4.0
 ## Author: Ehawne, Sivent, Gulolio
-## Version: 2.3.0
+## Version: 2.4.0
 ## Notes: Make loot rolls obvious
 ## SavedVariables: AltList, SRList, PlusOneList, Settings, LastRaidData
 

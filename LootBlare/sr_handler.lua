@@ -90,8 +90,9 @@ function load_sr_from_csv()
     PlusOneList = {}
     lb_print('PO list cleared')
   end
-
-  lb_print('Loading SR from CSV')
+  Settings.PrioMainOverAlts = true
+  lb_print('Loading ' .. len(SRList) ..
+             ' SRs from CSV. Prio mains over alts activated')
 end
 
 function clear_sr_list()
