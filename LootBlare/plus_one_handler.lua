@@ -61,7 +61,8 @@ function increase_plus_one_and_whisper_os_payment(player_name, current_link)
 
   player_name = increase_plus_one(player_name)
 
-  local item_name, item_link, _, _, _, _, _, _, _ = GetItemInfo(current_link)
+  local item_name, item_link, item_quality, _, _, _, _, _, _ = GetItemInfo(
+                                                                 current_link)
 
   local item_id = tonumber(string_match(item_link, 'item:(%d+):'))
 
@@ -75,8 +76,12 @@ function increase_plus_one_and_whisper_os_payment(player_name, current_link)
   local _, _, sell, buy = string.find(sell_buy_str, "(.*),(.*)")
   sell = create_gold_string(tonumber(sell))
 
-  -- local message = 'OS Price: ' .. sell .. '. Pay to bank/ML'
-  local message = 'Precio OS: ' .. sell .. '. Pagar al banco/ML'
+  -- local message = item_link .. " ganado por OS. Pagar al banco/ML: " .. sell
+  local _, _, _, color, _ = GetItemQualityColor(item_quality) or "ffffff"
+  local r, g, b, hex_color = GetItemQualityColor(item_quality)
+  local message = string.format(
+                    "Precio OS: %s|Hitem:%d:0:0:0|h[%s]|h|r - %s >>>INGRESAR EN BANCO DE LA GUILD<<<",
+                    hex_color, item_id, item_name, sell)
 
   SendChatMessage(message, 'WHISPER', nil, player_name)
 end
