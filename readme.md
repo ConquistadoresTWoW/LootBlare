@@ -1,4 +1,4 @@
-# Loot Blare 2.4.0
+# Loot Blare 2.4.1
 
 Loot Blare is a World of Warcraft addon originally designed **Turtle WoW**. The original version of this addon can be found [here](https://github.com/MarcelineVQ/LootBlare). This version of Loot Blare was completely updated by and for the **Conquistadores** guild.
 
@@ -87,6 +87,7 @@ The minimap button has the following shortcuts:
 ![LootBlare Frame](./assets/lootblareframe.png)
 
 Changelog:
+- **2.4.1**: Update OS payment message with item link
 - **2.4.0**: Added stop roll functionality for the ML (clicking the time)
 - **2.3.0**: Added colors to the UI and DND mode for the ML
 - **2.2.0**: Added auto reset raid data and loot announce
