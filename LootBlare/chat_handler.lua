@@ -52,7 +52,8 @@ function handle_chat_message(event, message, sender)
         update_text_area(item_roll_frame)
       end
     end
-  elseif event == 'CHAT_MSG_RAID_WARNING' and sender == master_looter then
+  elseif event == 'CHAT_MSG_RAID_WARNING' and sender == master_looter and
+    not string.find(message, 'Random Rolling') then
     local links = extract_item_links_from_message(message)
 
     if len(links) == 1 then
