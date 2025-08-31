@@ -59,7 +59,16 @@ function increase_plus_one_and_whisper_os_payment(player_name, current_link)
     return
   end
 
-  player_name = increase_plus_one(player_name)
+  local is_tm_roll = false
+  for _, msg in ipairs(tmog_roll_messages) do
+    local roller = msg.roller
+    if roller == player_name then
+      is_tm_roll = true
+      break
+    end
+  end
+
+  if not is_tm_roll then player_name = increase_plus_one(player_name) end
 
   local item_name, item_link, item_quality, _, _, _, _, _, _ = GetItemInfo(
                                                                  current_link)
