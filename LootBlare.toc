@@ -1,5 +1,5 @@
 ## Interface: 11200
-## Title: LootBlare 2.4.2
+## Title:  [Conquistadores] |cff00ccff LootBlare 2.4.2|r
 ## Author: Ehawne, Sivent, Gulolio
 ## Version: 2.4.2
 ## Notes: Make loot rolls obvious
