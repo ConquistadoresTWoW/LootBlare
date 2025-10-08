@@ -124,7 +124,7 @@ function handle_chat_message(event, message, sender)
       end
     end
 
-  elseif event == 'ADDON_LOADED' then
+  elseif event == 'ADDON_LOADED' and arg1 == 'LootBlare' then
     if Settings == nil then
       Settings = {
         RollDuration = 15,
