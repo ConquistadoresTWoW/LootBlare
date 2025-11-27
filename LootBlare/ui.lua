@@ -172,8 +172,7 @@ function create_item_roll_frame()
   main_over_alts_button:SetScript('OnEnter', function(self)
     GameTooltip:SetOwner(main_over_alts_button, 'ANCHOR_RIGHT')
     local text = Settings.PrioMainOverAlts and 'Enabled' or 'Disabled'
-    GameTooltip:AddLine('Prioritize main over alts: ' .. text, nil, nil, nil,
-                        true)
+    GameTooltip:AddLine('Lootin mode: ' .. text, nil, nil, nil, true)
     GameTooltip:Show()
   end)
   main_over_alts_button:SetScript('OnLeave',
@@ -744,9 +743,9 @@ function create_settings_frame()
                                              'UICheckButtonTemplate')
   prio_main_over_alts_cb:SetPoint('TOPLEFT', frame_duration_edit_box,
                                   'BOTTOMLEFT', -10, -10)
-  getglobal(prio_main_over_alts_cb:GetName() .. 'Text'):SetText(
-    'Prioritize main over alts');
-  prio_main_over_alts_cb.tooltip = 'Prioritize mains over alts'
+  getglobal(prio_main_over_alts_cb:GetName() .. 'Text'):SetText('Lootin mode');
+  prio_main_over_alts_cb.tooltip =
+    'Prioritize mains over alts and high ranks over low ranks'
 
   -- reset after importing SRs
   local reset_po_after_importing_sr_cb =
@@ -847,6 +846,7 @@ function create_settings_frame()
       Settings.LootAnnounceMinQuality =
         loot_announce_min_quality_edit_box:GetText()
       send_ml_settings()
+      update_moa_button_texture()
       Settings.DNDMode = dnd_cb:GetChecked() == 1
     end
 
