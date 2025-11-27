@@ -21,10 +21,18 @@ function handle_chat_message(event, message, sender)
         if (has_ms_sr or has_os_sr) and max_roll ~= 100 then return end
         roll = tonumber(roll)
         rollers[roller] = 1
+
+        local d = 0
+        if HC_GetCurrentDebtData ~= nil then
+          local n, debt, t = HC_GetCurrentDebtData(roller)
+          d = debt
+        end
         message = {
           roller = roller,
           roll = roll,
-          class = get_class_of_roller(roller)
+          class = get_class_of_roller(roller),
+          is_high_rank = lb_is_high_rank(roller),
+          has_debt = d > 0
         }
 
         if has_ms_sr then
@@ -159,10 +167,14 @@ function handle_chat_message(event, message, sender)
     else
       SendAddonMessage(config.LB_PREFIX, config.LB_GET_ML_SETTINGS, 'RAID')
     end
+
+    if len(lb_guild_info) == 0 then lb_load_guild_info() end
   elseif event == 'ZONE_CHANGED_NEW_AREA' then
     reset_plus_one_when_entering_raid()
   elseif event == 'LOOT_OPENED' then
     run_if_master_looter(function() loot_announce_handler() end, false)
+  elseif event == 'GUILD_ROSTER_UPDATE' and len(lb_guild_info) == 0 then
+    lb_load_guild_info()
   end
 end
 

@@ -32,7 +32,12 @@ function sort_rolls()
     local a_plus_one = PlusOneList[a.roller] or 0
     local b_plus_one = PlusOneList[b.roller] or 0
     local prio_mains = Settings.PrioMainOverAlts
-
+    if prio_mains and (a.is_high_rank and not b.is_high_rank) then
+      return true
+    end
+    if prio_mains and (not a.is_high_rank and b.is_high_rank) then
+      return false
+    end
     if prio_mains and (a_alt and not b_alt) then return false end
     if prio_mains and (not a_alt and b_alt) then return true end
     if a_plus_one == b_plus_one then return a.roll > b.roll end
@@ -45,6 +50,12 @@ function sort_rolls()
     local b_plus_one = PlusOneList[b.roller] or 0
     local prio_mains = Settings.PrioMainOverAlts
 
+    if prio_mains and (a.is_high_rank and not b.is_high_rank) then
+      return true
+    end
+    if prio_mains and (not a.is_high_rank and b.is_high_rank) then
+      return false
+    end
     if prio_mains and (a_alt and not b_alt) then return false end
     if prio_mains and (not a_alt and b_alt) then return true end
     if a_plus_one == b_plus_one then return a.roll > b.roll end
@@ -65,6 +76,8 @@ function create_roller_message(message)
   local roller = message.roller
 
   if AltList[roller] then roller = '*' .. roller end
+  if message.has_debt then roller = '!' .. roller end
+  if message.is_high_rank then roller = roller .. '^' end
 
   local message_end = ' rolls ' .. message.roll
 
