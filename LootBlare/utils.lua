@@ -20,7 +20,7 @@ function create_color_message(message)
   local text_color = config.DEFAULT_TEXT_COLOR
 
   -- First line: Character name (class colored) + "rolls XX" (yellow)
-  local line1 = '|c' .. class_color .. message.alt_roller .. '|r |c' ..
+  local line1 = '|c' .. class_color .. message.roller_name .. '|r |c' ..
                   config.DEFAULT_TEXT_COLOR .. 'rolls ' .. message.roll .. '|r'
 
   -- Second line: Roll type and additional info
