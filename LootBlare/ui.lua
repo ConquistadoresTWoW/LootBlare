@@ -233,7 +233,6 @@ function create_item_roll_frame()
 
   for i, settings in ipairs(action_button_settings) do
     settings.button_space_before = button_space_before
-    lb_print(button_space_before)
     total_button_width = total_button_width +
                            (config.BUTTON_WIDTH * settings.width_multiplier)
 
@@ -251,14 +250,14 @@ function create_item_roll_frame()
   frame.timer_button:SetWidth(50)
   frame.timer_button:SetHeight(20)
   frame.timer_button:SetPoint('CENTER', frame, 'TOPLEFT', 35, -32)
-  
+
   local timer_font_string = frame.timer_button:CreateFontString(nil, 'OVERLAY')
   timer_font_string:SetFont(config.FONT_NAME, 20, config.FONT_OUTLINE)
   timer_font_string:SetPoint('CENTER', frame.timer_button, 'CENTER', 0, 0)
-  
+
   -- Set the text color to yellow using your config
-  timer_font_string:SetTextColor(1, 1, 0, 1)  -- RGB for yellow
-  
+  timer_font_string:SetTextColor(1, 1, 0, 1) -- RGB for yellow
+
   frame.timer_button:SetFontString(timer_font_string)
   frame.timer_button:SetText('0')
   frame.timer_button:SetScript('OnClick', function()
@@ -277,7 +276,7 @@ function create_clickable_text(parent, text, player_name)
   local btn = CreateFrame("Button", nil, parent)
   config.CLICKABLE_TEXT_HEIGHT = Settings.CustomFontSize + 3
   btn:SetWidth(config.FRAME_WIDTH - 20)
-  
+
   -- Keep the same height but adjust positioning
   btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT * 2)
 
@@ -288,7 +287,8 @@ function create_clickable_text(parent, text, player_name)
 
   -- Set button font
   btn.font_string = btn:CreateFontString(nil, "OVERLAY")
-  btn.font_string:SetFont(config.FONT_NAME, Settings.CustomFontSize, config.FONT_OUTLINE)
+  btn.font_string:SetFont(config.FONT_NAME, Settings.CustomFontSize,
+                          config.FONT_OUTLINE)
   btn.font_string:SetPoint("LEFT", btn.iconFrame, "RIGHT", 5, 0)
   btn.font_string:SetJustifyH("LEFT")
   btn.font_string:SetJustifyV("TOP")
@@ -296,7 +296,7 @@ function create_clickable_text(parent, text, player_name)
   btn.font_string:SetText(text)
 
   btn:SetFontString(btn.font_string)
-  
+
   -- Highlight effect when hovered
   btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
   btn:GetHighlightTexture():SetWidth(config.FRAME_WIDTH * 0.8)
@@ -349,10 +349,10 @@ function update_text_area(frame)
 
       local btn = create_clickable_text(text_area, colored_text, msg.roller)
       btn:SetPoint("TOPLEFT", text_area, "TOPLEFT", 10, -y_offset)
-      
+
       -- Set up icons for this button
       setup_roll_icons(btn, msg)
-      
+
       btn:Show()
 
       table.insert(text_area.text_lines, btn)
@@ -886,29 +886,25 @@ end
 
 function setup_roll_icons(button, message)
   -- Clear any existing icons
-  if button.icons then
-    for _, icon in ipairs(button.icons) do
-      icon:Hide()
-    end
-  end
+  if button.icons then for _, icon in ipairs(button.icons) do icon:Hide() end end
   button.icons = {}
-  
+
   local icon_x = 0
-  local icon_y = -8  -- Move icons up/down
+  local icon_y = -8 -- Move icons up/down
   local icon_size = 13
   local line_height = icon_size + 2
-  
+
   -- Count how many icons we'll have
   local icon_count = 0
   if message.has_debt_icon then icon_count = icon_count + 1 end
   if message.has_alt_icon then icon_count = icon_count + 1 end
   if message.has_rank_icon then icon_count = icon_count + 1 end
-  
+
   -- If we have 3 icons, put the third one on a second line
   local icons_per_line = icon_count == 3 and 2 or icon_count
-  
+
   local icons_placed = 0
-  
+
   -- Debt icon (shield) - replaces "!"
   if message.has_debt_icon then
     local debt_icon = button.iconFrame:CreateTexture(nil, "OVERLAY")
@@ -920,14 +916,14 @@ function setup_roll_icons(button, message)
     table.insert(button.icons, debt_icon)
     icon_x = icon_x + icon_size + 2
     icons_placed = icons_placed + 1
-    
+
     -- Move to second line if this is the third icon and we've placed 2 on first line
     if icons_placed == icons_per_line and icon_count == 3 then
       icon_x = 0
       icon_y = icon_y + line_height
     end
   end
-  
+
   -- Alt icon (leaf) - replaces "*"
   if message.has_alt_icon then
     local alt_icon = button.iconFrame:CreateTexture(nil, "OVERLAY")
@@ -939,14 +935,14 @@ function setup_roll_icons(button, message)
     table.insert(button.icons, alt_icon)
     icon_x = icon_x + icon_size + 2
     icons_placed = icons_placed + 1
-    
+
     -- Move to second line if this is the third icon and we've placed 2 on first line
     if icons_placed == icons_per_line and icon_count == 3 then
       icon_x = 0
       icon_y = icon_y + line_height
     end
   end
-  
+
   -- Rank icon (gold) - replaces "^"
   if message.has_rank_icon then
     local rank_icon = button.iconFrame:CreateTexture(nil, "OVERLAY")
@@ -957,9 +953,9 @@ function setup_roll_icons(button, message)
     rank_icon:Show()
     table.insert(button.icons, rank_icon)
   end
-  
+
   -- Adjust the icon frame height if we have multiple lines
-  if icon_y > 3 then  -- Changed from 0 to 3 since we start at 3
+  if icon_y > 3 then -- Changed from 0 to 3 since we start at 3
     button.iconFrame:SetHeight(line_height * 2)
   else
     button.iconFrame:SetHeight(icon_size)
