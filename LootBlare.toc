@@ -17,6 +17,6 @@ LootBlare\loot_annaunce_handler.lua
 LootBlare\minimap_button.lua
 LootBlare\dnd_mode_handler.lua
 LootBlare\ui.lua
-LootBlare\chat_handler.lua
 LootBlare\rank_handler.lua
+LootBlare\chat_handler.lua
 LootBlare\LootBlare.lua
