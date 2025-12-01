@@ -4,7 +4,7 @@ function lb_load_guild_info()
 
   for i = 1, GetNumGuildMembers(true) do
     local name, rank, rankIndex = GetGuildRosterInfo(i)
-    if not name then break end
+	if not name then break end
     -- ranks start at 0
     lb_guild_info[name] = rankIndex
   end

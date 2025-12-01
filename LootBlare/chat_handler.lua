@@ -214,9 +214,13 @@ function handle_config_command(msg)
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
                '/lb po <player>|r to increase the plus one count for a player.')
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb poos <player>|r to increase plus one and whisper OS payment.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
                '/lb mo <player>|r to reduce the plus one count for a player.')
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
                '/lb poc|r to clear the plus one list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb simloot <itemlinks>|r to simulate looting items (ML only).')
   elseif msg == 'settings' then
     settings_frame:Show()
   elseif msg == 'srl' then
@@ -266,7 +270,27 @@ function handle_config_command(msg)
       PlusOneList = {}
       lb_print('Plus one list cleared')
     end)
+  elseif string.find(msg, 'simloot') then
+    run_if_master_looter(function()
+      local _, _, item_links_str = string.find(msg, 'simloot (.+)')
+      if item_links_str then
+        simulate_loot_announcement(item_links_str)
+      else
+        lb_print('Usage: /lb simloot [itemlink1] [itemlink2] ...')
+        lb_print('Example: /lb simloot |cffa335ee|Hitem:18832:0:0:0|h[Brutality Blade]|h|r')
+        lb_print('Example with multiple: /lb simloot |cffa335ee|Hitem:18832|h[Brutality]|h|r |cffa335ee|Hitem:17076|h[Bonereaver]|h|r')
+      end
+    end)
   else
     lb_print('Invalid command. Type /lb help for a list of commands.')
   end
+end
+
+function extract_item_links_from_message(message)
+  local item_links = {}
+  -- This pattern matches the standard item link structure in WoW
+  for link in string.gfind(message, '|c.-|H(item:.-|h.-|h|r)') do
+    table.insert(item_links, link)
+  end
+  return item_links
 end
