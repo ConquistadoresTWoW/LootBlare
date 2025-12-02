@@ -14,6 +14,8 @@ RollType = {SR_MS = 102, SR_OS = 101, MS = 100, OS = 99, TM = 50}
 seconds_3 = false
 seconds_2 = false
 seconds_1 = false
+-- Add this new variable to track who has rolled for current item
+current_item_rollers = {}
 
 function reset_rolls()
   ms_roll_messages = {}
@@ -23,6 +25,11 @@ function reset_rolls()
   sr_ms_messages = {}
   sr_os_messages = {}
   greesil_sound_played = false
+  -- Clear the tracking for current item
+  current_item_rollers = {}
+  
+  -- Enable all roll buttons when a new item is being rolled for
+  enable_all_roll_buttons()
 end
 
 function sort_rolls()
