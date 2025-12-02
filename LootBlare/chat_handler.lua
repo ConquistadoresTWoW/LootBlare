@@ -9,11 +9,26 @@ function handle_chat_message(event, message, sender)
       player_name = UnitName('player')
       -- if the player is the new master looter, send settings
       if new_ml == player_name then send_ml_settings() end
-    elseif is_rolling and string.find(message, 'rolls') and
-      string.find(message, '(%d+)') then
-      local _, _, roller, roll, min_roll, max_roll =
-        string.find(message, '(%S+) rolls (%d+) %((%d+)%-(%d+)%)')
-      max_roll = tonumber(max_roll)
+	elseif is_rolling and string.find(message, 'rolls') and
+	string.find(message, '(%d+)') then
+	local _, _, roller, roll, min_roll, max_roll =
+		string.find(message, '(%S+) rolls (%d+) %((%d+)%-(%d+)%)')
+	max_roll = tonumber(max_roll)
+	
+	-- Check if this player has already rolled for the current item
+	if current_item_rollers[roller] then
+		-- Player has already rolled, silently ignore this roll
+		return
+	end
+	
+	-- Mark this player as having rolled for the current item
+	current_item_rollers[roller] = true
+	
+	-- If this is the current player, disable all roll buttons
+	if roller == UnitName('player') then
+		disable_all_roll_buttons()
+	end
+      
       if roller and roll and rollers[roller] == nil then
 
         local has_ms_sr = has_sr(sr_ms_messages, roller)

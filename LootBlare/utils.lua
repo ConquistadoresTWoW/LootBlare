@@ -159,6 +159,26 @@ function run_if_master_looter(callback, notify)
   end
 end
 
+function enable_all_roll_buttons()
+  if item_roll_frame and item_roll_frame.action_buttons then
+    for i, button in ipairs(item_roll_frame.action_buttons) do
+      if button.EnableButton then
+        button:EnableButton()
+      end
+    end
+  end
+end
+
+function disable_all_roll_buttons()
+  if item_roll_frame and item_roll_frame.action_buttons then
+    for i, button in ipairs(item_roll_frame.action_buttons) do
+      if button.DisableButton then
+        button:DisableButton()
+      end
+    end
+  end
+end
+
 local latest_version = '[2.5.1]'
 function send_ml_settings()
   local master_looter = master_looter or 'unknown'
