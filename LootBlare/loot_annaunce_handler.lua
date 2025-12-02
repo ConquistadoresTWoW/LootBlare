@@ -51,6 +51,7 @@ function loot_announce_handler()
 
   local announcestring = "- Items inside:"
   local item_link_list = {}
+  local sr_item_info = {} -- Store SR info for each item
 
   for lootedindex = 1, GetNumLootItems() do
     local min_quality = tonumber(Settings.LootAnnounceMinQuality)
@@ -62,6 +63,12 @@ function loot_announce_handler()
         not EXCLUDED_ITEMS_TABLE[item_name] and
         not string.find(item_name, IDOL_PREFIX) then
         table.insert(item_link_list, item_link)
+        
+        -- Get SR information for this item
+        local item_sr = find_soft_reservers_for_item(item_link)
+        if len(item_sr) > 0 then
+          sr_item_info[item_link] = item_sr
+        end
       end
     end
   end
@@ -69,7 +76,42 @@ function loot_announce_handler()
   if len(item_link_list) > 0 then
     SendChatMessage(announcestring, "RAID", nil, nil)
     for _, item_link in ipairs(item_link_list) do
+      -- Announce the item
       SendChatMessage("- " .. item_link, "RAID", nil, nil)
+      
+      -- If there are SRs for this item, announce them
+      if sr_item_info[item_link] then
+        local sr_names = {}
+        
+        for _, sr in ipairs(sr_item_info[item_link]) do
+          local attendee = sr["Attendee"]
+          local sr_plus = sr["SR+"] or 0
+          local ms_status = sr["MS"] and "MS" or "OS"
+          local alt_status = sr["Alt"] and " (Alt)" or ""
+          
+          -- Get player class and create colored name
+          local player_class = get_class_of_roller(attendee) or "unknown"
+          local colored_name = create_color_name_by_class(attendee, player_class)
+          
+          -- Format each SR entry with colored name
+          table.insert(sr_names, colored_name .. " (SR+" .. sr_plus .. ", " .. ms_status .. alt_status .. ")")
+        end
+        
+        -- Send SR info in chunks to avoid message length issues
+        local sr_count = len(sr_names)
+        local chunk_size = 3 -- Number of SRs per message
+        for i = 1, sr_count, chunk_size do
+          local chunk_end = math.min(i + chunk_size - 1, sr_count)
+          local chunk_message = "  "
+          
+          for j = i, chunk_end do
+            if j > i then chunk_message = chunk_message .. ", " end
+            chunk_message = chunk_message .. sr_names[j]
+          end
+          
+          SendChatMessage(chunk_message, "RAID", nil, nil)
+        end
+      end
     end
   end
 end
