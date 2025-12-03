@@ -238,3 +238,96 @@ function handle_chat_message(event, message, sender)
     lb_load_guild_info()
   end
 end
+
+function handle_config_command(msg)
+  if msg == '' then
+    if item_roll_frame:IsVisible() then
+      item_roll_frame:Hide()
+    else
+      item_roll_frame:Show()
+    end
+  elseif msg == 'help' then
+    lb_print('|c' .. config.CHAT_COLORS.INFO ..
+               'LootBlare|r is a simple addon that displays and sort item rolls in a frame.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb time <seconds>|r to set the duration the frame is shown. This value will be automatically set by the master looter after the first rolls.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb ac on/off|r to enable/disable auto closing the frame after the time has elapsed.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb hwus on/off|r (hide when using a spell) to enable/disable hiding the frame when using a spell.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb settings|r to see the current settings.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb srl|r to show the soft reserve list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb al|r to show the alts list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb pol|r to show the plus one list.')
+    lb_print('Master looter commands:')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb sr|r to show the soft reserve frame.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb src|r to clear the soft reserve list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb aa alt1,alt2,alt3,...,altN|r to add alts to the alts list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb ar alt1,alt2,alt3,...,altN|r to remove alts from the alts list.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb po <player>|r to increase the plus one count for a player.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb mo <player>|r to reduce the plus one count for a player.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb poc|r to clear the plus one list.')
+  elseif msg == 'settings' then
+    settings_frame:Show()
+  elseif msg == 'srl' then
+    print_sr_list()
+  elseif msg == 'al' then
+    print_alts_list()
+  elseif msg == 'pol' then
+    print_plus_one_list()
+  elseif msg == 'sr' then
+    run_if_master_looter(function() import_sr_frame:Show() end)
+  elseif msg == 'src' then
+    run_if_master_looter(function() clear_sr_list() end)
+  elseif string.find(msg, 'aa (%a+)') then
+    run_if_master_looter(function()
+      local _, _, new_alts = string.find(msg, 'aa (%a+)')
+      load_alts_from_string(new_alts)
+      lb_print('Alts added')
+    end)
+  elseif string.find(msg, 'ar (%a+)') then
+    run_if_master_looter(function()
+      local _, _, new_alts = string.find(msg, 'ar (%a+)')
+      remove_alts_from_string(new_alts)
+      lb_print('Alts removed')
+    end)
+  elseif msg == 'ac' then
+    run_if_master_looter(function()
+      AltList = {}
+      lb_print('Alts list cleared')
+    end)
+  elseif string.find(msg, 'po (%a)') then
+    run_if_master_looter(function()
+      local _, _, new_plus_one = string.find(msg, 'po (%a+)')
+      increase_plus_one(new_plus_one)
+    end)
+  elseif string.find(msg, 'poos (%a)') then
+    run_if_master_looter(function()
+      local _, _, new_plus_one = string.find(msg, 'poos (%a+)')
+      increase_plus_one_and_whisper_os_payment(new_plus_one, current_link)
+    end)
+  elseif string.find(msg, 'mo (%a)') then
+    run_if_master_looter(function()
+      local _, _, new_plus_one = string.find(msg, 'mo (%a+)')
+      reduce_plus_one(new_plus_one)
+    end)
+  elseif msg == 'poc' then
+    run_if_master_looter(function()
+      PlusOneList = {}
+      lb_print('Plus one list cleared')
+    end)
+  else
+    lb_print('Invalid command. Type /lb help for a list of commands.')
+  end
+end
