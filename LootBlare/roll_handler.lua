@@ -15,6 +15,10 @@ seconds_3 = false
 seconds_2 = false
 seconds_1 = false
 
+-- Add these new variables for roll tracking
+has_rolled_for_current_item = {}
+current_item_id = nil
+
 function reset_rolls()
   ms_roll_messages = {}
   os_roll_messages = {}
@@ -23,6 +27,16 @@ function reset_rolls()
   sr_ms_messages = {}
   sr_os_messages = {}
   greesil_sound_played = false
+  -- Reset the roll tracking for the new item
+  has_rolled_for_current_item = {}
+end
+
+function check_and_record_roll(roller)
+  -- Record that this player has rolled for the current item
+  has_rolled_for_current_item[roller] = true
+  if item_roll_frame and update_roll_buttons then
+    update_roll_buttons()
+  end
 end
 
 function sort_rolls()

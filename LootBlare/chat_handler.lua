@@ -21,19 +21,24 @@ function handle_chat_message(event, message, sender)
         if (has_ms_sr or has_os_sr) and max_roll ~= 100 then return end
         roll = tonumber(roll)
         rollers[roller] = 1
+        
+        -- Record that this player has rolled for current item
+        check_and_record_roll(roller)
 
-        local d = 0
-        if HC_GetCurrentDebtData ~= nil then
-          local n, debt, t = HC_GetCurrentDebtData(roller)
-          d = debt
-        end
-        message = {
-          roller = roller,
-          roll = roll,
-          class = get_class_of_roller(roller),
-          is_high_rank = lb_is_high_rank(roller),
-          has_debt = d > 0
-        }
+		local has_debt = false
+		if HC_GetCurrentDebtData ~= nil then
+		local n, debt, t = HC_GetCurrentDebtData(roller)
+		if debt and tonumber(debt) and tonumber(debt) > 0 then
+			has_debt = true
+		end
+		end
+		message = {
+		roller = roller,
+		roll = roll,
+		class = get_class_of_roller(roller),
+		is_high_rank = lb_is_high_rank(roller),
+		has_debt = has_debt
+		}
 
         if has_ms_sr then
           for i, sr in ipairs(sr_ms_messages) do
@@ -66,8 +71,59 @@ function handle_chat_message(event, message, sender)
 
     if len(links) == 1 then
       current_link = links[1]
+      
+      -- Find and announce soft reserves for this item (new functionality)
+      local sr_list = find_soft_reservers_for_item(current_link)
+      if sr_list and len(sr_list) > 0 then
+        -- Group SRs by type (MS/OS) and sort by SR+ value
+        local ms_srs = {}
+        local os_srs = {}
+        
+        for _, sr in ipairs(sr_list) do
+          if sr["MS"] then
+            table.insert(ms_srs, sr)
+          else
+            table.insert(os_srs, sr)
+          end
+        end
+        
+        -- Sort by SR+ value (descending)
+        table.sort(ms_srs, function(a, b) return a["SR+"] > b["SR+"] end)
+        table.sort(os_srs, function(a, b) return a["SR+"] > b["SR+"] end)
+        
+        -- Build SR announcement message
+        local sr_message = "- SR: "
+        local sr_entries = {}
+        
+        -- Add MS SRs
+        for _, sr in ipairs(ms_srs) do
+          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
+                             config.DEFAULT_TEXT_COLOR
+          local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
+          if sr["SR+"] > 1 then
+            entry = entry .. "(" .. sr["SR+"] .. ")"
+          end
+          table.insert(sr_entries, entry)
+        end
+        
+        -- Add OS SRs
+        for _, sr in ipairs(os_srs) do
+          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
+                             config.DEFAULT_TEXT_COLOR
+          local entry = "|c" .. class_color .. sr["Attendee"] .. "|r(OS)"
+          if sr["SR+"] > 1 then
+            entry = entry .. "(" .. sr["SR+"] .. ")"
+          end
+          table.insert(sr_entries, entry)
+        end
+        
+        -- Combine all entries
+        sr_message = sr_message .. table.concat(sr_entries, ", ")
+        SendChatMessage(sr_message, "RAID", nil, nil)
+      end
+      
       if is_master_looter(UnitName('player')) then
-        current_item_sr = find_soft_reservers_for_item(current_link)
+        current_item_sr = sr_list or {}
         SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_ALTS, 'RAID')
         report_alt_list()
         SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_PLUS_ONE, 'RAID')
@@ -102,6 +158,11 @@ function handle_chat_message(event, message, sender)
       time_elapsed = 0
       is_rolling = true
       show_frame(item_roll_frame, Settings.RollDuration, current_link)
+      -- Reset roll tracking
+      has_rolled_for_current_item = {}
+      if update_roll_buttons then
+        update_roll_buttons()
+      end
     end
 
     if sender == master_looter and message == config.LB_STOP_ROLL then
@@ -175,98 +236,5 @@ function handle_chat_message(event, message, sender)
     run_if_master_looter(function() loot_announce_handler() end, false)
   elseif event == 'GUILD_ROSTER_UPDATE' and len(lb_guild_info) == 0 then
     lb_load_guild_info()
-  end
-end
-
-function handle_config_command(msg)
-  if msg == '' then
-    if item_roll_frame:IsVisible() then
-      item_roll_frame:Hide()
-    else
-      item_roll_frame:Show()
-    end
-  elseif msg == 'help' then
-    lb_print('|c' .. config.CHAT_COLORS.INFO ..
-               'LootBlare|r is a simple addon that displays and sort item rolls in a frame.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb time <seconds>|r to set the duration the frame is shown. This value will be automatically set by the master looter after the first rolls.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb ac on/off|r to enable/disable auto closing the frame after the time has elapsed.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb hwus on/off|r (hide when using a spell) to enable/disable hiding the frame when using a spell.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb settings|r to see the current settings.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb srl|r to show the soft reserve list.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb al|r to show the alts list.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb pol|r to show the plus one list.')
-    lb_print('Master looter commands:')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb sr|r to show the soft reserve frame.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb src|r to clear the soft reserve list.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb aa alt1,alt2,alt3,...,altN|r to add alts to the alts list.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb ar alt1,alt2,alt3,...,altN|r to remove alts from the alts list.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb po <player>|r to increase the plus one count for a player.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb mo <player>|r to reduce the plus one count for a player.')
-    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
-               '/lb poc|r to clear the plus one list.')
-  elseif msg == 'settings' then
-    settings_frame:Show()
-  elseif msg == 'srl' then
-    print_sr_list()
-  elseif msg == 'al' then
-    print_alts_list()
-  elseif msg == 'pol' then
-    print_plus_one_list()
-  elseif msg == 'sr' then
-    run_if_master_looter(function() import_sr_frame:Show() end)
-  elseif msg == 'src' then
-    run_if_master_looter(function() clear_sr_list() end)
-  elseif string.find(msg, 'aa (%a+)') then
-    run_if_master_looter(function()
-      local _, _, new_alts = string.find(msg, 'aa (%a+)')
-      load_alts_from_string(new_alts)
-      lb_print('Alts added')
-    end)
-  elseif string.find(msg, 'ar (%a+)') then
-    run_if_master_looter(function()
-      local _, _, new_alts = string.find(msg, 'ar (%a+)')
-      remove_alts_from_string(new_alts)
-      lb_print('Alts removed')
-    end)
-  elseif msg == 'ac' then
-    run_if_master_looter(function()
-      AltList = {}
-      lb_print('Alts list cleared')
-    end)
-  elseif string.find(msg, 'po (%a)') then
-    run_if_master_looter(function()
-      local _, _, new_plus_one = string.find(msg, 'po (%a+)')
-      increase_plus_one(new_plus_one)
-    end)
-  elseif string.find(msg, 'poos (%a)') then
-    run_if_master_looter(function()
-      local _, _, new_plus_one = string.find(msg, 'poos (%a+)')
-      increase_plus_one_and_whisper_os_payment(new_plus_one, current_link)
-    end)
-  elseif string.find(msg, 'mo (%a)') then
-    run_if_master_looter(function()
-      local _, _, new_plus_one = string.find(msg, 'mo (%a+)')
-      reduce_plus_one(new_plus_one)
-    end)
-  elseif msg == 'poc' then
-    run_if_master_looter(function()
-      PlusOneList = {}
-      lb_print('Plus one list cleared')
-    end)
-  else
-    lb_print('Invalid command. Type /lb help for a list of commands.')
   end
 end
