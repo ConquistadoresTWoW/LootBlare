@@ -53,7 +53,7 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   local width_multiplier = width_multiplier or 1
   local panel_width = frame:GetWidth()
   local spacing = (panel_width - total_button_width) / (config.BUTTON_COUNT + 1)
-  local button = CreateFrame('Button', nil, frame, UIParent)
+  local button = CreateFrame('Button', 'item_roll_frame_button_' .. index, frame, UIParent)
   button:SetWidth(config.BUTTON_WIDTH * width_multiplier)
   button:SetHeight(config.BUTTON_WIDTH)
   button:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT',
@@ -70,30 +70,108 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   background:SetAllPoints(button)
   background:SetTexture(1, 1, 1, 1)
   background:SetVertexColor(0.2, 0.2, 0.2, 1)
+  button.background = background
+
+  -- Store original roll function
+  button.originalOnClick = on_click_action
+  
+  -- Store reference to the button for easy access
+  button.buttonIndex = index
+  button.buttonText = button_text
+  
+  -- Modified click handler that checks if player has already rolled
+  button:SetScript('OnClick', function(self)
+    local player_name = UnitName('player')
+    if has_rolled_for_current_item and has_rolled_for_current_item[player_name] then
+      lb_print("You have already rolled for this item!")
+      return
+    end
+    on_click_action()
+    -- Record the roll immediately
+    if not has_rolled_for_current_item then
+      has_rolled_for_current_item = {}
+    end
+    has_rolled_for_current_item[player_name] = true
+    update_roll_buttons()
+  end)
 
   button:SetScript('OnMouseDown', function(self)
-    background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
+    local player_name = UnitName('player')
+    if not (has_rolled_for_current_item and has_rolled_for_current_item[player_name]) then
+      background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
+    end
   end)
 
   button:SetScript('OnMouseUp', function(self)
-    background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on release
+    local player_name = UnitName('player')
+    if not (has_rolled_for_current_item and has_rolled_for_current_item[player_name]) then
+      background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on release
+    end
   end)
 
   -- Add tooltip
   button:SetScript('OnEnter', function(self)
     GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
     GameTooltip:SetText(tooltip_text, nil, nil, nil, nil, true)
-    background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
+    local player_name = UnitName('player')
+    if not (has_rolled_for_current_item and has_rolled_for_current_item[player_name]) then
+      background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
+    end
     GameTooltip:Show()
   end)
 
   button:SetScript('OnLeave', function(self)
-    background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
+    local player_name = UnitName('player')
+    if has_rolled_for_current_item and has_rolled_for_current_item[player_name] then
+      background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark when disabled
+    else
+      background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
+    end
     GameTooltip:Hide()
   end)
 
-  -- Add functionality to the button
-  button:SetScript('OnClick', function() on_click_action() end)
+  return button
+end
+
+function update_roll_buttons()
+  if not item_roll_frame then return end
+  
+  local player_name = UnitName('player')
+  local has_rolled = has_rolled_for_current_item and has_rolled_for_current_item[player_name] or false
+  
+  -- Update all roll buttons
+  for i = 1, config.BUTTON_COUNT do
+    local button_name = 'item_roll_frame_button_' .. i
+    local button = _G[button_name]
+    
+    if button then
+      local font = button:GetFontString()
+      if font then
+        if has_rolled then
+          -- Disable the button by setting text color and making it unclickable
+          button:Disable()
+          font:SetTextColor(0.5, 0.5, 0.5) -- Darken text
+          if button.background then
+            button.background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark background
+          end
+          -- Remove the highlight texture when disabled
+          button:SetHighlightTexture(nil)
+        else
+          -- Enable the button
+          button:Enable()
+          font:SetTextColor(1, 1, 1) -- Normal text color
+          if button.background then
+            button.background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Normal background
+          end
+          -- Restore highlight texture
+          local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
+          highlight:SetAllPoints(button)
+          highlight:SetTexture(0.2, 0.2, 0.2, 0.5)
+          button:SetHighlightTexture(highlight)
+        end
+      end
+    end
+  end
 end
 
 function create_item_roll_frame()
@@ -207,7 +285,10 @@ function create_item_roll_frame()
   end)
 
   -- on show update the button texture
-  frame:SetScript('OnShow', function() update_moa_button_texture() end)
+  frame:SetScript('OnShow', function() 
+    update_moa_button_texture()
+    update_roll_buttons()
+  end)
 
   local action_button_settings = {
     {
@@ -222,7 +303,7 @@ function create_item_roll_frame()
       width_multiplier = 1.2
     }, {
       text = 'TM',
-      tooltip = 'Roll for Trasmog',
+      tooltip = 'Roll for Transmog',
       roll = function() RandomRoll(1, 50) end,
       width_multiplier = 1.2
     }
@@ -457,13 +538,20 @@ local function set_item_info(frame, item_link_arg)
 end
 
 function show_frame(frame, duration, item)
+  -- Reset roll tracking for new item
+  has_rolled_for_current_item = {}
+  update_roll_buttons()
+  
   duration = tonumber(duration)
   frame.statusBar:SetMinMaxValues(0, duration)
   frame.statusBar:SetValue(duration)
   frame.statusBar:SetPoint("BOTTOM", frame, "TOP", 0, 1)
   frame.statusBar:Show() -- Show the bar when showing frame
 
-  frame:SetScript('OnShow', function() frame.statusBar:Show() end)
+  frame:SetScript('OnShow', function() 
+    frame.statusBar:Show()
+    update_roll_buttons()
+  end)
   frame:SetScript('OnHide', function() frame.statusBar:Hide() end)
   frame:SetScript('OnUpdate', function()
     time_elapsed = time_elapsed + arg1
@@ -905,14 +993,39 @@ function setup_roll_icons(button, message)
 
   local icons_placed = 0
 
-  -- Debt icon (shield) - replaces "!"
+  -- Helper function to create an icon with tooltip
+  local function create_icon_with_tooltip(parent, texture_path, tooltip_text, tooltip_color)
+    local icon_button = CreateFrame("Button", nil, parent)
+    icon_button:SetWidth(icon_size)
+    icon_button:SetHeight(icon_size)
+    icon_button:SetPoint("LEFT", parent, "LEFT", icon_x, -icon_y)
+    
+    local icon_texture = icon_button:CreateTexture(nil, "OVERLAY")
+    icon_texture:SetTexture(texture_path)
+    icon_texture:SetAllPoints(icon_button)
+    
+    -- Tooltip
+    icon_button:SetScript("OnEnter", function()
+      GameTooltip:SetOwner(icon_button, "ANCHOR_RIGHT")
+      GameTooltip:SetText(tooltip_text, unpack(tooltip_color or {1, 1, 1}))
+      GameTooltip:Show()
+    end)
+    icon_button:SetScript("OnLeave", function()
+      GameTooltip:Hide()
+    end)
+    
+    return icon_button
+  end
+
+  -- Debt icon (gold) - replaces "!"
   if message.has_debt_icon then
-    local debt_icon = button.iconFrame:CreateTexture(nil, "OVERLAY")
-    debt_icon:SetTexture("Interface\\AddOns\\LootBlare\\assets\\gold.tga")
-    debt_icon:SetWidth(icon_size)
-    debt_icon:SetHeight(icon_size)
-    debt_icon:SetPoint("LEFT", button.iconFrame, "LEFT", icon_x, -icon_y)
-    debt_icon:Show()
+    local debt_icon = create_icon_with_tooltip(
+      button.iconFrame,
+      "Interface\\AddOns\\LootBlare\\assets\\gold.tga",
+      "Deuda con Hacienda",
+      {1, 1, 0}
+    )
+    
     table.insert(button.icons, debt_icon)
     icon_x = icon_x + icon_size + 2
     icons_placed = icons_placed + 1
@@ -926,12 +1039,13 @@ function setup_roll_icons(button, message)
 
   -- Alt icon (leaf) - replaces "*"
   if message.has_alt_icon then
-    local alt_icon = button.iconFrame:CreateTexture(nil, "OVERLAY")
-    alt_icon:SetTexture("Interface\\AddOns\\LootBlare\\assets\\leaf.tga")
-    alt_icon:SetWidth(icon_size)
-    alt_icon:SetHeight(icon_size)
-    alt_icon:SetPoint("LEFT", button.iconFrame, "LEFT", icon_x, -icon_y)
-    alt_icon:Show()
+    local alt_icon = create_icon_with_tooltip(
+      button.iconFrame,
+      "Interface\\AddOns\\LootBlare\\assets\\leaf.tga",
+      "Alter",
+      {0.2, 1, 0.2}
+    )
+    
     table.insert(button.icons, alt_icon)
     icon_x = icon_x + icon_size + 2
     icons_placed = icons_placed + 1
@@ -943,14 +1057,15 @@ function setup_roll_icons(button, message)
     end
   end
 
-  -- Rank icon (gold) - replaces "^"
+  -- Rank icon (shield) - replaces "^"
   if message.has_rank_icon then
-    local rank_icon = button.iconFrame:CreateTexture(nil, "OVERLAY")
-    rank_icon:SetTexture("Interface\\AddOns\\LootBlare\\assets\\shield.tga")
-    rank_icon:SetWidth(icon_size)
-    rank_icon:SetHeight(icon_size)
-    rank_icon:SetPoint("LEFT", button.iconFrame, "LEFT", icon_x, -icon_y)
-    rank_icon:Show()
+    local rank_icon = create_icon_with_tooltip(
+      button.iconFrame,
+      "Interface\\AddOns\\LootBlare\\assets\\shield.tga",
+      "Rango Conquistador",
+      {0.5, 0.8, 1}
+    )
+    
     table.insert(button.icons, rank_icon)
   end
 
