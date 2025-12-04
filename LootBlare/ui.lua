@@ -53,7 +53,8 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   local width_multiplier = width_multiplier or 1
   local panel_width = frame:GetWidth()
   local spacing = (panel_width - total_button_width) / (config.BUTTON_COUNT + 1)
-  local button = CreateFrame('Button', 'item_roll_frame_button_' .. index, frame, UIParent)
+  local button = CreateFrame('Button', 'item_roll_frame_button_' .. index,
+                             frame, UIParent)
   button:SetWidth(config.BUTTON_WIDTH * width_multiplier)
   button:SetHeight(config.BUTTON_WIDTH)
   button:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT',
@@ -74,11 +75,11 @@ local function create_action_button(frame, button_text, tooltip_text, index,
 
   -- Store original roll function
   button.originalOnClick = on_click_action
-  
+
   -- Store reference to the button for easy access
   button.buttonIndex = index
   button.buttonText = button_text
-  
+
   -- Modified click handler that checks if player has already rolled
   button:SetScript('OnClick', function(self)
     local player_name = UnitName('player')
@@ -88,23 +89,23 @@ local function create_action_button(frame, button_text, tooltip_text, index,
     end
     on_click_action()
     -- Record the roll immediately
-    if not has_rolled_for_current_item then
-      has_rolled_for_current_item = {}
-    end
+    if not has_rolled_for_current_item then has_rolled_for_current_item = {} end
     has_rolled_for_current_item[player_name] = true
     update_roll_buttons()
   end)
 
   button:SetScript('OnMouseDown', function(self)
     local player_name = UnitName('player')
-    if not (has_rolled_for_current_item and has_rolled_for_current_item[player_name]) then
+    if not (has_rolled_for_current_item and
+      has_rolled_for_current_item[player_name]) then
       background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
     end
   end)
 
   button:SetScript('OnMouseUp', function(self)
     local player_name = UnitName('player')
-    if not (has_rolled_for_current_item and has_rolled_for_current_item[player_name]) then
+    if not (has_rolled_for_current_item and
+      has_rolled_for_current_item[player_name]) then
       background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on release
     end
   end)
@@ -114,7 +115,8 @@ local function create_action_button(frame, button_text, tooltip_text, index,
     GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
     GameTooltip:SetText(tooltip_text, nil, nil, nil, nil, true)
     local player_name = UnitName('player')
-    if not (has_rolled_for_current_item and has_rolled_for_current_item[player_name]) then
+    if not (has_rolled_for_current_item and
+      has_rolled_for_current_item[player_name]) then
       background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
     end
     GameTooltip:Show()
@@ -135,15 +137,16 @@ end
 
 function update_roll_buttons()
   if not item_roll_frame then return end
-  
+
   local player_name = UnitName('player')
-  local has_rolled = has_rolled_for_current_item and has_rolled_for_current_item[player_name] or false
-  
+  local has_rolled = has_rolled_for_current_item and
+                       has_rolled_for_current_item[player_name] or false
+
   -- Update all roll buttons
   for i = 1, config.BUTTON_COUNT do
     local button_name = 'item_roll_frame_button_' .. i
     local button = _G[button_name]
-    
+
     if button then
       local font = button:GetFontString()
       if font then
@@ -285,7 +288,7 @@ function create_item_roll_frame()
   end)
 
   -- on show update the button texture
-  frame:SetScript('OnShow', function() 
+  frame:SetScript('OnShow', function()
     update_moa_button_texture()
     update_roll_buttons()
   end)
@@ -370,7 +373,7 @@ function create_clickable_text(parent, text, player_name)
   btn.font_string = btn:CreateFontString(nil, "OVERLAY")
   btn.font_string:SetFont(config.FONT_NAME, Settings.CustomFontSize,
                           config.FONT_OUTLINE)
-  btn.font_string:SetPoint("LEFT", btn.iconFrame, "RIGHT", 5, 0)
+  btn.font_string:SetPoint("LEFT", btn.iconFrame, "RIGHT", 5, -2)
   btn.font_string:SetJustifyH("LEFT")
   btn.font_string:SetJustifyV("TOP")
   btn.font_string:SetShadowOffset(1, -1)
@@ -541,14 +544,14 @@ function show_frame(frame, duration, item)
   -- Reset roll tracking for new item
   has_rolled_for_current_item = {}
   update_roll_buttons()
-  
+
   duration = tonumber(duration)
   frame.statusBar:SetMinMaxValues(0, duration)
   frame.statusBar:SetValue(duration)
   frame.statusBar:SetPoint("BOTTOM", frame, "TOP", 0, 1)
   frame.statusBar:Show() -- Show the bar when showing frame
 
-  frame:SetScript('OnShow', function() 
+  frame:SetScript('OnShow', function()
     frame.statusBar:Show()
     update_roll_buttons()
   end)
@@ -984,89 +987,81 @@ function setup_roll_icons(button, message)
 
   -- Count how many icons we'll have
   local icon_count = 0
-  if message.has_debt_icon then icon_count = icon_count + 1 end
+  if message.has_debt then icon_count = icon_count + 1 end
   if message.has_alt_icon then icon_count = icon_count + 1 end
-  if message.has_rank_icon then icon_count = icon_count + 1 end
+  if message.is_high_rank then icon_count = icon_count + 1 end
+  if message.prio_os then icon_count = icon_count + 1 end
 
   -- If we have 3 icons, put the third one on a second line
-  local icons_per_line = icon_count == 3 and 2 or icon_count
-
+  local icons_per_line = 2
   local icons_placed = 0
 
   -- Helper function to create an icon with tooltip
-  local function create_icon_with_tooltip(parent, texture_path, tooltip_text, tooltip_color)
+  local function create_icon_with_tooltip(parent, texture_path, tooltip_text,
+                                          tooltip_color)
     local icon_button = CreateFrame("Button", nil, parent)
     icon_button:SetWidth(icon_size)
     icon_button:SetHeight(icon_size)
     icon_button:SetPoint("LEFT", parent, "LEFT", icon_x, -icon_y)
-    
+
     local icon_texture = icon_button:CreateTexture(nil, "OVERLAY")
     icon_texture:SetTexture(texture_path)
     icon_texture:SetAllPoints(icon_button)
-    
+
     -- Tooltip
     icon_button:SetScript("OnEnter", function()
       GameTooltip:SetOwner(icon_button, "ANCHOR_RIGHT")
       GameTooltip:SetText(tooltip_text, unpack(tooltip_color or {1, 1, 1}))
       GameTooltip:Show()
     end)
-    icon_button:SetScript("OnLeave", function()
-      GameTooltip:Hide()
-    end)
-    
+    icon_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+    -- fix icon_x and icon_y for next icon
+    icon_x = icon_x + icon_size + 2
+    icons_placed = icons_placed + 1
+    if icons_placed == icons_per_line and icon_count > icons_per_line then
+      icon_x = 0
+      icon_y = icon_y + line_height
+      icons_placed = 0
+    end
+
     return icon_button
   end
 
   -- Debt icon (gold) - replaces "!"
-  if message.has_debt_icon then
-    local debt_icon = create_icon_with_tooltip(
-      button.iconFrame,
-      "Interface\\AddOns\\LootBlare\\assets\\gold.tga",
-      "Deuda con Hacienda",
-      {1, 1, 0}
-    )
-    
+  if message.has_debt then
+    local debt_icon = create_icon_with_tooltip(button.iconFrame,
+                                               "Interface\\AddOns\\LootBlare\\assets\\gold.tga",
+                                               "Deuda con Hacienda", {1, 1, 0})
     table.insert(button.icons, debt_icon)
-    icon_x = icon_x + icon_size + 2
-    icons_placed = icons_placed + 1
-
-    -- Move to second line if this is the third icon and we've placed 2 on first line
-    if icons_placed == icons_per_line and icon_count == 3 then
-      icon_x = 0
-      icon_y = icon_y + line_height
-    end
   end
 
   -- Alt icon (leaf) - replaces "*"
   if message.has_alt_icon then
-    local alt_icon = create_icon_with_tooltip(
-      button.iconFrame,
-      "Interface\\AddOns\\LootBlare\\assets\\leaf.tga",
-      "Alter",
-      {0.2, 1, 0.2}
-    )
-    
+    local alt_icon = create_icon_with_tooltip(button.iconFrame,
+                                              "Interface\\AddOns\\LootBlare\\assets\\leaf.tga",
+                                              "Alter", {0.2, 1, 0.2})
     table.insert(button.icons, alt_icon)
-    icon_x = icon_x + icon_size + 2
-    icons_placed = icons_placed + 1
-
-    -- Move to second line if this is the third icon and we've placed 2 on first line
-    if icons_placed == icons_per_line and icon_count == 3 then
-      icon_x = 0
-      icon_y = icon_y + line_height
-    end
   end
 
   -- Rank icon (shield) - replaces "^"
-  if message.has_rank_icon then
-    local rank_icon = create_icon_with_tooltip(
-      button.iconFrame,
-      "Interface\\AddOns\\LootBlare\\assets\\shield.tga",
-      "Rango Conquistador",
-      {0.5, 0.8, 1}
-    )
-    
+  if message.is_high_rank then
+    local rank_icon = create_icon_with_tooltip(button.iconFrame,
+                                               "Interface\\AddOns\\LootBlare\\assets\\shield.tga",
+                                               "Rango Conquistador",
+                                               {0.5, 0.8, 1})
+
     table.insert(button.icons, rank_icon)
+  end
+
+  -- Prio OS icon 
+  if message.prio_os then
+    local prio_os_icon = create_icon_with_tooltip(button.iconFrame,
+                                                  "Interface\\AddOns\\LootBlare\\assets\\sword.tga",
+                                                  "OffSpec con Prioridad",
+                                                  {1, 0.5, 0})
+
+    table.insert(button.icons, prio_os_icon)
   end
 
   -- Adjust the icon frame height if we have multiple lines

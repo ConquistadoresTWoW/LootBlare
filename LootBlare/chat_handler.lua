@@ -21,24 +21,25 @@ function handle_chat_message(event, message, sender)
         if (has_ms_sr or has_os_sr) and max_roll ~= 100 then return end
         roll = tonumber(roll)
         rollers[roller] = 1
-        
+
         -- Record that this player has rolled for current item
         check_and_record_roll(roller)
 
-		local has_debt = false
-		if HC_GetCurrentDebtData ~= nil then
-		local n, debt, t = HC_GetCurrentDebtData(roller)
-		if debt and tonumber(debt) and tonumber(debt) > 0 then
-			has_debt = true
-		end
-		end
-		message = {
-		roller = roller,
-		roll = roll,
-		class = get_class_of_roller(roller),
-		is_high_rank = lb_is_high_rank(roller),
-		has_debt = has_debt
-		}
+        local has_debt = false
+        if HC_GetCurrentDebtData ~= nil then
+          local n, debt, t = HC_GetCurrentDebtData(roller)
+          if debt and tonumber(debt) and tonumber(debt) > 0 then
+            has_debt = true
+          end
+        end
+        message = {
+          roller = roller,
+          roll = roll,
+          class = get_class_of_roller(roller),
+          is_high_rank = lb_is_high_rank(roller),
+          has_debt = has_debt,
+          prio_os = lb_has_prio_os(roller)
+        }
 
         if has_ms_sr then
           for i, sr in ipairs(sr_ms_messages) do
@@ -71,14 +72,14 @@ function handle_chat_message(event, message, sender)
 
     if len(links) == 1 then
       current_link = links[1]
-      
+
       -- Find and announce soft reserves for this item (new functionality)
       local sr_list = find_soft_reservers_for_item(current_link)
       if sr_list and len(sr_list) > 0 then
         -- Group SRs by type (MS/OS) and sort by SR+ value
         local ms_srs = {}
         local os_srs = {}
-        
+
         for _, sr in ipairs(sr_list) do
           if sr["MS"] then
             table.insert(ms_srs, sr)
@@ -86,42 +87,42 @@ function handle_chat_message(event, message, sender)
             table.insert(os_srs, sr)
           end
         end
-        
+
         -- Sort by SR+ value (descending)
         table.sort(ms_srs, function(a, b) return a["SR+"] > b["SR+"] end)
         table.sort(os_srs, function(a, b) return a["SR+"] > b["SR+"] end)
-        
+
         -- Build SR announcement message
         local sr_message = "- SR: "
         local sr_entries = {}
-        
+
         -- Add MS SRs
         for _, sr in ipairs(ms_srs) do
-          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
-                             config.DEFAULT_TEXT_COLOR
+          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(
+                                sr["Attendee"])] or config.DEFAULT_TEXT_COLOR
           local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
           if sr["SR+"] > 1 then
             entry = entry .. "(" .. sr["SR+"] .. ")"
           end
           table.insert(sr_entries, entry)
         end
-        
+
         -- Add OS SRs
         for _, sr in ipairs(os_srs) do
-          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
-                             config.DEFAULT_TEXT_COLOR
+          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(
+                                sr["Attendee"])] or config.DEFAULT_TEXT_COLOR
           local entry = "|c" .. class_color .. sr["Attendee"] .. "|r(OS)"
           if sr["SR+"] > 1 then
             entry = entry .. "(" .. sr["SR+"] .. ")"
           end
           table.insert(sr_entries, entry)
         end
-        
+
         -- Combine all entries
         sr_message = sr_message .. table.concat(sr_entries, ", ")
         SendChatMessage(sr_message, "RAID", nil, nil)
       end
-      
+
       if is_master_looter(UnitName('player')) then
         current_item_sr = sr_list or {}
         SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_ALTS, 'RAID')
@@ -160,9 +161,7 @@ function handle_chat_message(event, message, sender)
       show_frame(item_roll_frame, Settings.RollDuration, current_link)
       -- Reset roll tracking
       has_rolled_for_current_item = {}
-      if update_roll_buttons then
-        update_roll_buttons()
-      end
+      if update_roll_buttons then update_roll_buttons() end
     end
 
     if sender == master_looter and message == config.LB_STOP_ROLL then

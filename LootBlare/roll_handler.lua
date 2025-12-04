@@ -34,9 +34,7 @@ end
 function check_and_record_roll(roller)
   -- Record that this player has rolled for the current item
   has_rolled_for_current_item[roller] = true
-  if item_roll_frame and update_roll_buttons then
-    update_roll_buttons()
-  end
+  if item_roll_frame and update_roll_buttons then update_roll_buttons() end
 end
 
 function sort_rolls()
@@ -91,8 +89,6 @@ function create_roller_message(message)
 
   -- Store icon information instead of text prefixes
   message.has_alt_icon = AltList[roller] or false
-  message.has_debt_icon = message.has_debt or false
-  message.has_rank_icon = message.is_high_rank or false
 
   local message_end = ' rolls ' .. message.roll
 
