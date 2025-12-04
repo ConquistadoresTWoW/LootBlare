@@ -9,8 +9,8 @@ function handle_chat_message(event, message, sender)
       player_name = UnitName('player')
       -- if the player is the new master looter, send settings
       if new_ml == player_name then send_ml_settings() end
-    elseif is_rolling and string.find(message, 'rolls') and
-      string.find(message, '(%d+)') then
+    elseif is_rolling and master_looter == UnitName('player') and
+      string.find(message, 'rolls') and string.find(message, '(%d+)') then
       local _, _, roller, roll, min_roll, max_roll =
         string.find(message, '(%S+) rolls (%d+) %((%d+)%-(%d+)%)')
       max_roll = tonumber(max_roll)
@@ -31,6 +31,11 @@ function handle_chat_message(event, message, sender)
           class = get_class_of_roller(roller),
           is_high_rank = lb_is_high_rank(roller),
           has_debt = lb_has_debt(roller),
+          prio_os = lb_has_prio_os(roller),
+          is_alt = AltList[roller] ~= nil,
+          plus_one = PlusOneList[roller] or 0,
+          has_ms_sr = has_ms_sr,
+          has_os_sr = has_os_sr
         }
 
         if has_ms_sr then
@@ -55,6 +60,7 @@ function handle_chat_message(event, message, sender)
             table.insert(tmog_roll_messages, message)
           end
         end
+        sort_rolls()
         update_text_area(item_roll_frame)
       end
     end
@@ -64,8 +70,11 @@ function handle_chat_message(event, message, sender)
 
     if len(links) == 1 then
       current_link = links[1]
-
+      reset_rolls()
       -- Find and announce soft reserves for this item (new functionality)
+
+      if master_looter ~= UnitName('player') then return end
+
       local sr_list = find_soft_reservers_for_item(current_link)
       if sr_list and len(sr_list) > 0 then
         -- Group SRs by type (MS/OS) and sort by SR+ value
@@ -113,17 +122,11 @@ function handle_chat_message(event, message, sender)
         -- Combine all entries
         sr_message = sr_message .. table.concat(sr_entries, ", ")
         SendChatMessage(sr_message, "RAID", nil, nil)
+        insert_sr_rolls(ms_srs, os_srs)
       end
-
-      if is_master_looter(UnitName('player')) then
-        current_item_sr = sr_list or {}
-        SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_ALTS, 'RAID')
-        report_alt_list()
-        SendAddonMessage(config.LB_PREFIX, config.LB_CLEAR_PLUS_ONE, 'RAID')
-        report_plus_one_list()
-        report_sr_list()
-        SendAddonMessage(config.LB_PREFIX, config.LB_START_ROLL, 'RAID')
-      end
+      sort_rolls()
+      update_text_area(item_roll_frame)
+      SendAddonMessage(config.LB_PREFIX, config.LB_START_ROLL, 'RAID')
     end
 
     -- item_roll_frame:UnregisterEvent('ADDON_LOADED')
@@ -144,9 +147,6 @@ function handle_chat_message(event, message, sender)
 
     -- ML is starting a roll
     if sender == master_looter and message == config.LB_START_ROLL then
-      reset_rolls()
-      sr_ms, sr_os = find_ms_and_os_sr_for_item()
-      insert_sr_rolls(sr_ms, sr_os)
       update_text_area(item_roll_frame)
       time_elapsed = 0
       is_rolling = true
@@ -162,24 +162,17 @@ function handle_chat_message(event, message, sender)
     end
     -- ML is reseting the SR list for the current item
     if sender == master_looter and sender ~= UnitName('player') then
-
-      if message == config.LB_CLEAR_SR then current_item_sr = {} end
-      if string.find(message, config.LB_ADD_SR) then
-        local _, _, sr_str = string.find(message, config.LB_ADD_SR .. '(.+)')
-        local row = built_sr_row_from_string(sr_str)
-        table.insert(current_item_sr, row)
+      if message == config.LB_CLEAR_ROLL_RESULTS then
+        lb_print("reset rolls")
+        reset_rolls()
+        update_text_area(item_roll_frame)
       end
-      if message == config.LB_CLEAR_ALTS then AltList = {} end
-      if string.find(message, config.LB_ADD_ALTS) then
-        local _, _, alts_str =
-          string.find(message, config.LB_ADD_ALTS .. '(.+)')
-        load_alts_from_string(alts_str)
-      end
-      if message == config.LB_CLEAR_PLUS_ONE then PlusOneList = {} end
-      if string.find(message, config.LB_ADD_PLUS_ONE) then
-        local _, _, plus_one_str = string.find(message,
-                                               config.LB_ADD_PLUS_ONE .. '(.+)')
-        load_plus_one_from_string(plus_one_str)
+      if string.find(message, config.LB_ADD_ROLL_RESULT) then
+        lb_print(message)
+        local _, _, roll_message_str = string.find(message,
+                                                   config.LB_ADD_ROLL_RESULT ..
+                                                     '(.+)')
+        lb_load_roll_message(roll_message_str)
         update_text_area(item_roll_frame)
       end
     end
