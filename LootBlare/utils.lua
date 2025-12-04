@@ -42,10 +42,9 @@ function create_color_message(message)
   end
 
   -- Add plus one info if applicable
-  if PlusOneList[message.roller] and PlusOneList[message.roller] > 0 then
-    table.insert(line2_parts,
-                 '|c' .. config.CHAT_COLORS.NEUTRAL .. '+ ' ..
-                   PlusOneList[message.roller] .. '|r')
+  if message.plus_one and message.plus_one > 0 then
+    table.insert(line2_parts, '|c' .. config.CHAT_COLORS.NEUTRAL .. '+ ' ..
+                   message.plus_one .. '|r')
   end
 
   -- Combine all parts of line 2

@@ -152,27 +152,34 @@ end
 
 function insert_sr_rolls(sr_ms, sr_os)
   for i, sr in ipairs(sr_ms) do
+    local roller = sr["Attendee"]
     local fake_roller = {
-      roller = sr["Attendee"],
+      roller = roller,
       roll = 1,
-      class = get_class_of_roller(sr["Attendee"]),
+      class = get_class_of_roller(roller),
+      is_high_rank = lb_is_high_rank(roller),
+      has_debt = lb_has_debt(roller),
+      prio_os = lb_has_prio_os(roller),
       sr = sr["SR+"],
       sr_type = 'SR-MS',
-      alt = AltList[sr["Attendee"]],
+      is_alt = AltList[roller] ~= nil,
       roll_type = RollType.SR_MS
     }
     table.insert(sr_ms_messages, fake_roller)
   end
 
   for i, sr in ipairs(sr_os) do
-    local alt_str = ''
+    local roller = sr["Attendee"]
     local fake_roller = {
-      roller = sr["Attendee"],
+      roller = roller,
       roll = 1,
-      class = get_class_of_roller(sr["Attendee"]),
+      class = get_class_of_roller(roller),
+      is_high_rank = lb_is_high_rank(roller),
+      has_debt = lb_has_debt(roller),
+      prio_os = lb_has_prio_os(roller),
       sr = sr["SR+"],
-      sr_type = 'SR-OS',
-      alt = AltList[sr["Attendee"]],
+      sr_type = 'SR-MS',
+      is_alt = AltList[roller] ~= nil,
       roll_type = RollType.SR_OS
     }
     table.insert(sr_os_messages, fake_roller)

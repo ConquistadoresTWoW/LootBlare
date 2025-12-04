@@ -395,6 +395,7 @@ function create_clickable_text(parent, text, player_name)
     elseif arg1 == "RightButton" then
       reduce_plus_one(player_name)
     end
+    sort_rolls()
     update_text_area(item_roll_frame)
   end)
 
@@ -410,6 +411,22 @@ local function create_text_area(frame)
   return text_area
 end
 
+local function debug_print_message(msg)
+  lb_print('Roller: ' .. msg.roller)
+  lb_print('Roll: ' .. msg.roll)
+  lb_print('Class: ' .. tostring(msg.class))
+  lb_print('Is High Rank: ' .. tostring(msg.is_high_rank))
+  lb_print('Has Debt: ' .. tostring(msg.has_debt))
+  lb_print('Prio OS: ' .. tostring(msg.prio_os))
+  lb_print('Is Alt: ' .. tostring(msg.is_alt))
+  lb_print('Plus One: ' .. tostring(msg.plus_one))
+  lb_print('Has MS SR: ' .. tostring(msg.has_ms_sr))
+  lb_print('Has OS SR: ' .. tostring(msg.has_os_sr))
+  lb_print('SR: ' .. tostring(msg.sr))
+  lb_print('SR Type: ' .. tostring(msg.sr_type))
+  lb_print('Roll Type: ' .. tostring(msg.roll_type))
+end
+
 function update_text_area(frame)
   if not frame.text_area then frame.text_area = create_text_area(frame) end
   local text_area = frame.text_area
@@ -421,13 +438,11 @@ function update_text_area(frame)
   local colored_msg = ''
   local count = 0
   local y_offset = 0
-  sort_rolls()
 
   -- helper function to process each category of messages
-  local function process_messages(messages, max_count)
+  local function process_messages(messages)
     config.CLICKABLE_TEXT_HEIGHT = Settings.CustomFontSize + 3
     for _, msg in ipairs(messages) do
-      if count >= max_count then break end
       create_roller_message(msg)
       local colored_text = create_color_message(msg)
 
@@ -445,12 +460,7 @@ function update_text_area(frame)
     end
   end
 
-  -- Process different message categories
-  process_messages(sr_ms_messages, 5)
-  process_messages(ms_roll_messages, 5)
-  process_messages(sr_os_messages, 5)
-  process_messages(os_roll_messages, 5)
-  process_messages(tmog_roll_messages, 6)
+  process_messages(roll_result)
 end
 
 local function init_item_info(frame)
@@ -988,7 +998,7 @@ function setup_roll_icons(button, message)
   -- Count how many icons we'll have
   local icon_count = 0
   if message.has_debt then icon_count = icon_count + 1 end
-  if message.has_alt_icon then icon_count = icon_count + 1 end
+  if message.is_alt then icon_count = icon_count + 1 end
   if message.is_high_rank then icon_count = icon_count + 1 end
   if message.prio_os then icon_count = icon_count + 1 end
 
@@ -1037,7 +1047,7 @@ function setup_roll_icons(button, message)
   end
 
   -- Alt icon (leaf) - replaces "*"
-  if message.has_alt_icon then
+  if message.is_alt then
     local alt_icon = create_icon_with_tooltip(button.iconFrame,
                                               "Interface\\AddOns\\LootBlare\\assets\\leaf.tga",
                                               "Alter", {0.2, 1, 0.2})
