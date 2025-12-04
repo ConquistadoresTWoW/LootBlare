@@ -163,12 +163,10 @@ function handle_chat_message(event, message, sender)
     -- ML is reseting the SR list for the current item
     if sender == master_looter and sender ~= UnitName('player') then
       if message == config.LB_CLEAR_ROLL_RESULTS then
-        lb_print("reset rolls")
         reset_rolls()
         update_text_area(item_roll_frame)
       end
       if string.find(message, config.LB_ADD_ROLL_RESULT) then
-        lb_print(message)
         local _, _, roll_message_str = string.find(message,
                                                    config.LB_ADD_ROLL_RESULT ..
                                                      '(.+)')

@@ -42,6 +42,3 @@ function lb_has_prio_os(player_name)
     return false -- Player not found in guild or no prio os
   end
 end
-
--- /run print(tostring(lb_is_high_rank("Segismundo")))
--- /run print(lb_get_player_rank("Segismundo"))
