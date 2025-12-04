@@ -25,20 +25,12 @@ function handle_chat_message(event, message, sender)
         -- Record that this player has rolled for current item
         check_and_record_roll(roller)
 
-        local has_debt = false
-        if HC_GetCurrentDebtData ~= nil then
-          local n, debt, t = HC_GetCurrentDebtData(roller)
-          if debt and tonumber(debt) and tonumber(debt) > 0 then
-            has_debt = true
-          end
-        end
         message = {
           roller = roller,
           roll = roll,
           class = get_class_of_roller(roller),
           is_high_rank = lb_is_high_rank(roller),
-          has_debt = has_debt,
-          prio_os = lb_has_prio_os(roller)
+          has_debt = lb_has_debt(roller),
         }
 
         if has_ms_sr then

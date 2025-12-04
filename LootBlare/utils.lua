@@ -193,3 +193,12 @@ function load_ml_settings_from_string(settings_str)
   update_moa_button_texture()
   update_text_area(item_roll_frame)
 end
+
+function lb_has_debt(player_name)
+  local has_debt = false
+  if HC_GetCurrentDebtData ~= nil then
+    local n, debt, t = HC_GetCurrentDebtData(player_name)
+    if debt and tonumber(debt) and tonumber(debt) > 0 then has_debt = true end
+  end
+  return has_debt
+end
