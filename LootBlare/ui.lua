@@ -82,49 +82,34 @@ local function create_action_button(frame, button_text, tooltip_text, index,
 
   -- Modified click handler that checks if player has already rolled
   button:SetScript('OnClick', function(self)
-    local player_name = UnitName('player')
-    if has_rolled_for_current_item and has_rolled_for_current_item[player_name] then
+    if has_rolled_for_current_item then
       lb_print("You have already rolled for this item!")
       return
     end
     on_click_action()
-    -- Record the roll immediately
-    if not has_rolled_for_current_item then has_rolled_for_current_item = {} end
-    has_rolled_for_current_item[player_name] = true
+    has_rolled_for_current_item = true
     update_roll_buttons()
   end)
 
   button:SetScript('OnMouseDown', function(self)
-    local player_name = UnitName('player')
-    if not (has_rolled_for_current_item and
-      has_rolled_for_current_item[player_name]) then
-      background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
-    end
+    background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
   end)
 
   button:SetScript('OnMouseUp', function(self)
-    local player_name = UnitName('player')
-    if not (has_rolled_for_current_item and
-      has_rolled_for_current_item[player_name]) then
-      background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on release
-    end
+    background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark when disabled
   end)
 
   -- Add tooltip
   button:SetScript('OnEnter', function(self)
     GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
     GameTooltip:SetText(tooltip_text, nil, nil, nil, nil, true)
-    local player_name = UnitName('player')
-    if not (has_rolled_for_current_item and
-      has_rolled_for_current_item[player_name]) then
-      background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
-    end
+    background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
     GameTooltip:Show()
   end)
 
   button:SetScript('OnLeave', function(self)
     local player_name = UnitName('player')
-    if has_rolled_for_current_item and has_rolled_for_current_item[player_name] then
+    if has_rolled_for_current_item then
       background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark when disabled
     else
       background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
@@ -137,11 +122,6 @@ end
 
 function update_roll_buttons()
   if not item_roll_frame then return end
-
-  local player_name = UnitName('player')
-  local has_rolled = has_rolled_for_current_item and
-                       has_rolled_for_current_item[player_name] or false
-
   -- Update all roll buttons
   for i = 1, config.BUTTON_COUNT do
     local button_name = 'item_roll_frame_button_' .. i
@@ -150,9 +130,9 @@ function update_roll_buttons()
     if button then
       local font = button:GetFontString()
       if font then
-        if has_rolled then
+        if has_rolled_for_current_item then
           -- Disable the button by setting text color and making it unclickable
-          button:Disable()
+          -- button:Disable()
           font:SetTextColor(0.5, 0.5, 0.5) -- Darken text
           if button.background then
             button.background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark background
@@ -552,7 +532,6 @@ end
 
 function show_frame(frame, duration, item)
   -- Reset roll tracking for new item
-  has_rolled_for_current_item = {}
   update_roll_buttons()
 
   duration = tonumber(duration)

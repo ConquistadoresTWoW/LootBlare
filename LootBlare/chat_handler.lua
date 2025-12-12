@@ -9,21 +9,20 @@ function handle_chat_message(event, message, sender)
       player_name = UnitName('player')
       -- if the player is the new master looter, send settings
       if new_ml == player_name then send_ml_settings() end
-    elseif is_rolling and master_looter == UnitName('player') and
+    end
+    if is_rolling and sender == UnitName('player') and
+      string.find(message, 'rolls') then has_rolled_for_current_item = true end
+    if is_rolling and master_looter == UnitName('player') and
       string.find(message, 'rolls') and string.find(message, '(%d+)') then
       local _, _, roller, roll, min_roll, max_roll =
         string.find(message, '(%S+) rolls (%d+) %((%d+)%-(%d+)%)')
       max_roll = tonumber(max_roll)
       if roller and roll and rollers[roller] == nil then
-
         local has_ms_sr = has_sr(sr_ms_messages, roller)
         local has_os_sr = has_sr(sr_os_messages, roller)
         if (has_ms_sr or has_os_sr) and max_roll ~= 100 then return end
         roll = tonumber(roll)
         rollers[roller] = 1
-
-        -- Record that this player has rolled for current item
-        check_and_record_roll(roller)
 
         message = {
           roller = roller,
@@ -152,7 +151,7 @@ function handle_chat_message(event, message, sender)
       is_rolling = true
       show_frame(item_roll_frame, Settings.RollDuration, current_link)
       -- Reset roll tracking
-      has_rolled_for_current_item = {}
+      -- has_rolled_for_current_item = {}
       if update_roll_buttons then update_roll_buttons() end
     end
 
