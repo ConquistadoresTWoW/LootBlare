@@ -82,10 +82,6 @@ local function create_action_button(frame, button_text, tooltip_text, index,
 
   -- Modified click handler that checks if player has already rolled
   button:SetScript('OnClick', function(self)
-    if has_rolled_for_current_item then
-      lb_print("You have already rolled for this item!")
-      return
-    end
     on_click_action()
     has_rolled_for_current_item = true
     update_roll_buttons()
@@ -132,7 +128,7 @@ function update_roll_buttons()
       if font then
         if has_rolled_for_current_item then
           -- Disable the button by setting text color and making it unclickable
-          -- button:Disable()
+          button:Disable()
           font:SetTextColor(0.5, 0.5, 0.5) -- Darken text
           if button.background then
             button.background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark background
