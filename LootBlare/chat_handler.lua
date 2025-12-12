@@ -217,6 +217,12 @@ function handle_chat_message(event, message, sender)
     run_if_master_looter(function() loot_announce_handler() end, false)
   elseif event == 'GUILD_ROSTER_UPDATE' and len(lb_guild_info) == 0 then
     lb_load_guild_info()
+    if is_master_looter(UnitName('player')) then
+      master_looter = UnitName('player')
+      send_ml_settings()
+    else
+      SendAddonMessage(config.LB_PREFIX, config.LB_GET_ML_SETTINGS, 'RAID')
+    end
   end
 end
 
