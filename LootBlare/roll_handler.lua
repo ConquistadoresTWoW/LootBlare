@@ -45,7 +45,7 @@ function sort_rolls()
   end)
   table.sort(ms_roll_messages, function(a, b)
     local a_alt = a.is_alt or false
-    local b_alt = a.is_alt or false
+    local b_alt = b.is_alt or false
     local a_plus_one = a.plus_one or 0
     local b_plus_one = b.plus_one or 0
     local prio_mains = Settings.PrioMainOverAlts
@@ -62,7 +62,7 @@ function sort_rolls()
   end)
   table.sort(os_roll_messages, function(a, b)
     local a_alt = a.is_alt or false
-    local b_alt = a.is_alt or false
+    local b_alt = b.is_alt or false
     local a_plus_one = a.plus_one or 0
     local b_plus_one = b.plus_one or 0
     local prio_mains = Settings.PrioMainOverAlts
