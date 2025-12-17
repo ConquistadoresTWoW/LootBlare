@@ -53,7 +53,8 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   local width_multiplier = width_multiplier or 1
   local panel_width = frame:GetWidth()
   local spacing = (panel_width - total_button_width) / (config.BUTTON_COUNT + 1)
-  local button = CreateFrame('Button', nil, frame, UIParent)
+  local button = CreateFrame('Button', 'item_roll_frame_button_' .. index,
+                             frame, UIParent)
   button:SetWidth(config.BUTTON_WIDTH * width_multiplier)
   button:SetHeight(config.BUTTON_WIDTH)
   button:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT',
@@ -70,13 +71,28 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   background:SetAllPoints(button)
   background:SetTexture(1, 1, 1, 1)
   background:SetVertexColor(0.2, 0.2, 0.2, 1)
+  button.background = background
+
+  -- Store original roll function
+  button.originalOnClick = on_click_action
+
+  -- Store reference to the button for easy access
+  button.buttonIndex = index
+  button.buttonText = button_text
+
+  -- Modified click handler that checks if player has already rolled
+  button:SetScript('OnClick', function(self)
+    on_click_action()
+    has_rolled_for_current_item = true
+    update_roll_buttons()
+  end)
 
   button:SetScript('OnMouseDown', function(self)
     background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
   end)
 
   button:SetScript('OnMouseUp', function(self)
-    background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on release
+    background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark when disabled
   end)
 
   -- Add tooltip
@@ -88,12 +104,53 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   end)
 
   button:SetScript('OnLeave', function(self)
-    background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
+    local player_name = UnitName('player')
+    if has_rolled_for_current_item then
+      background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark when disabled
+    else
+      background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
+    end
     GameTooltip:Hide()
   end)
 
-  -- Add functionality to the button
-  button:SetScript('OnClick', function() on_click_action() end)
+  return button
+end
+
+function update_roll_buttons()
+  if not item_roll_frame then return end
+  -- Update all roll buttons
+  for i = 1, config.BUTTON_COUNT do
+    local button_name = 'item_roll_frame_button_' .. i
+    local button = _G[button_name]
+
+    if button then
+      local font = button:GetFontString()
+      if font then
+        if has_rolled_for_current_item then
+          -- Disable the button by setting text color and making it unclickable
+          button:Disable()
+          font:SetTextColor(0.5, 0.5, 0.5) -- Darken text
+          if button.background then
+            button.background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark background
+          end
+          -- Remove the highlight texture when disabled
+          button:SetHighlightTexture(nil)
+        else
+          -- Enable the button
+          button:Enable()
+          font:SetTextColor(1, 1, 1) -- Normal text color
+          if button.background then
+            button.background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Normal background
+          end
+          -- Restore highlight texture
+          local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
+          highlight:SetAllPoints(button)
+          highlight:SetTexture(0.2, 0.2, 0.2, 0.5)
+          button:SetHighlightTexture(highlight)
+        end
+      end
+    end
+  end
 end
 
 function create_item_roll_frame()
@@ -172,8 +229,7 @@ function create_item_roll_frame()
   main_over_alts_button:SetScript('OnEnter', function(self)
     GameTooltip:SetOwner(main_over_alts_button, 'ANCHOR_RIGHT')
     local text = Settings.PrioMainOverAlts and 'Enabled' or 'Disabled'
-    GameTooltip:AddLine('Prioritize main over alts: ' .. text, nil, nil, nil,
-                        true)
+    GameTooltip:AddLine('Lootin mode: ' .. text, nil, nil, nil, true)
     GameTooltip:Show()
   end)
   main_over_alts_button:SetScript('OnLeave',
@@ -208,7 +264,10 @@ function create_item_roll_frame()
   end)
 
   -- on show update the button texture
-  frame:SetScript('OnShow', function() update_moa_button_texture() end)
+  frame:SetScript('OnShow', function()
+    update_moa_button_texture()
+    update_roll_buttons()
+  end)
 
   local action_button_settings = {
     {
@@ -223,7 +282,7 @@ function create_item_roll_frame()
       width_multiplier = 1.2
     }, {
       text = 'TM',
-      tooltip = 'Roll for Trasmog',
+      tooltip = 'Roll for Transmog',
       roll = function() RandomRoll(1, 50) end,
       width_multiplier = 1.2
     }
@@ -234,7 +293,6 @@ function create_item_roll_frame()
 
   for i, settings in ipairs(action_button_settings) do
     settings.button_space_before = button_space_before
-    lb_print(button_space_before)
     total_button_width = total_button_width +
                            (config.BUTTON_WIDTH * settings.width_multiplier)
 
@@ -252,10 +310,14 @@ function create_item_roll_frame()
   frame.timer_button:SetWidth(50)
   frame.timer_button:SetHeight(20)
   frame.timer_button:SetPoint('CENTER', frame, 'TOPLEFT', 35, -32)
-  local timer_font_string = frame.timer_button:CreateFontString(nil, 'OVERLAY',
-                                                                'GameFontNormal')
-  timer_font_string:SetFont(timer_font_string:GetFont(), 20)
+
+  local timer_font_string = frame.timer_button:CreateFontString(nil, 'OVERLAY')
+  timer_font_string:SetFont(config.FONT_NAME, 20, config.FONT_OUTLINE)
   timer_font_string:SetPoint('CENTER', frame.timer_button, 'CENTER', 0, 0)
+
+  -- Set the text color to yellow using your config
+  timer_font_string:SetTextColor(1, 1, 0, 1) -- RGB for yellow
+
   frame.timer_button:SetFontString(timer_font_string)
   frame.timer_button:SetText('0')
   frame.timer_button:SetScript('OnClick', function()
@@ -270,24 +332,31 @@ function create_item_roll_frame()
   return frame
 end
 
-local function create_clickable_text(parent, text, player_name)
+function create_clickable_text(parent, text, player_name)
   local btn = CreateFrame("Button", nil, parent)
   config.CLICKABLE_TEXT_HEIGHT = Settings.CustomFontSize + 3
   btn:SetWidth(config.FRAME_WIDTH - 20)
-  btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT * 2) -- Double height for two lines
+
+  -- Keep the same height but adjust positioning
+  btn:SetHeight(config.CLICKABLE_TEXT_HEIGHT * 2)
+
+  btn.iconFrame = CreateFrame("Frame", nil, btn)
+  btn.iconFrame:SetWidth(24)
+  btn.iconFrame:SetHeight(24) -- Height for two lines
+  btn.iconFrame:SetPoint("LEFT", btn, "LEFT", -3, 0) -- Keep frame at original position
 
   -- Set button font
-  local font_string = btn:CreateFontString(nil, "OVERLAY")
-  font_string:SetFont(config.FONT_NAME, Settings.CustomFontSize,
-                      config.FONT_OUTLINE)
-  font_string:SetPoint("LEFT", btn, "LEFT", 5, -1.5)
-  font_string:SetText(text)
-  font_string:SetJustifyH("LEFT")
-  font_string:SetJustifyV("TOP")
-  -- add shadow to the font
-  font_string:SetShadowOffset(1, -1)
+  btn.font_string = btn:CreateFontString(nil, "OVERLAY")
+  btn.font_string:SetFont(config.FONT_NAME, Settings.CustomFontSize,
+                          config.FONT_OUTLINE)
+  btn.font_string:SetPoint("LEFT", btn.iconFrame, "RIGHT", 5, -2)
+  btn.font_string:SetJustifyH("LEFT")
+  btn.font_string:SetJustifyV("TOP")
+  btn.font_string:SetShadowOffset(1, -1)
+  btn.font_string:SetText(text)
 
-  btn:SetFontString(font_string)
+  btn:SetFontString(btn.font_string)
+
   -- Highlight effect when hovered
   btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
   btn:GetHighlightTexture():SetWidth(config.FRAME_WIDTH * 0.8)
@@ -302,6 +371,7 @@ local function create_clickable_text(parent, text, player_name)
     elseif arg1 == "RightButton" then
       reduce_plus_one(player_name)
     end
+    sort_rolls()
     update_text_area(item_roll_frame)
   end)
 
@@ -317,6 +387,22 @@ local function create_text_area(frame)
   return text_area
 end
 
+local function debug_print_message(msg)
+  lb_print('Roller: ' .. msg.roller)
+  lb_print('Roll: ' .. msg.roll)
+  lb_print('Class: ' .. tostring(msg.class))
+  lb_print('Is High Rank: ' .. tostring(msg.is_high_rank))
+  lb_print('Has Debt: ' .. tostring(msg.has_debt))
+  lb_print('Prio OS: ' .. tostring(msg.prio_os))
+  lb_print('Is Alt: ' .. tostring(msg.is_alt))
+  lb_print('Plus One: ' .. tostring(msg.plus_one))
+  lb_print('Has MS SR: ' .. tostring(msg.has_ms_sr))
+  lb_print('Has OS SR: ' .. tostring(msg.has_os_sr))
+  lb_print('SR: ' .. tostring(msg.sr))
+  lb_print('SR Type: ' .. tostring(msg.sr_type))
+  lb_print('Roll Type: ' .. tostring(msg.roll_type))
+end
+
 function update_text_area(frame)
   if not frame.text_area then frame.text_area = create_text_area(frame) end
   local text_area = frame.text_area
@@ -328,32 +414,29 @@ function update_text_area(frame)
   local colored_msg = ''
   local count = 0
   local y_offset = 0
-  sort_rolls()
 
   -- helper function to process each category of messages
-  local function process_messages(messages, max_count)
+  local function process_messages(messages)
     config.CLICKABLE_TEXT_HEIGHT = Settings.CustomFontSize + 3
     for _, msg in ipairs(messages) do
-      if count >= max_count then break end
       create_roller_message(msg)
       local colored_text = create_color_message(msg)
 
       local btn = create_clickable_text(text_area, colored_text, msg.roller)
       btn:SetPoint("TOPLEFT", text_area, "TOPLEFT", 10, -y_offset)
+
+      -- Set up icons for this button
+      setup_roll_icons(btn, msg)
+
       btn:Show()
 
       table.insert(text_area.text_lines, btn)
-      y_offset = y_offset + (config.CLICKABLE_TEXT_HEIGHT * 2) -- Double the height increment
+      y_offset = y_offset + (config.CLICKABLE_TEXT_HEIGHT * 2 + 5)
       count = count + 1
     end
   end
 
-  -- Process different message categories
-  process_messages(sr_ms_messages, 5)
-  process_messages(ms_roll_messages, 5)
-  process_messages(sr_os_messages, 5)
-  process_messages(os_roll_messages, 5)
-  process_messages(tmog_roll_messages, 6)
+  process_messages(roll_result)
 end
 
 local function init_item_info(frame)
@@ -444,13 +527,19 @@ local function set_item_info(frame, item_link_arg)
 end
 
 function show_frame(frame, duration, item)
+  -- Reset roll tracking for new item
+  update_roll_buttons()
+
   duration = tonumber(duration)
   frame.statusBar:SetMinMaxValues(0, duration)
   frame.statusBar:SetValue(duration)
   frame.statusBar:SetPoint("BOTTOM", frame, "TOP", 0, 1)
   frame.statusBar:Show() -- Show the bar when showing frame
 
-  frame:SetScript('OnShow', function() frame.statusBar:Show() end)
+  frame:SetScript('OnShow', function()
+    frame.statusBar:Show()
+    update_roll_buttons()
+  end)
   frame:SetScript('OnHide', function() frame.statusBar:Hide() end)
   frame:SetScript('OnUpdate', function()
     time_elapsed = time_elapsed + arg1
@@ -458,8 +547,12 @@ function show_frame(frame, duration, item)
 
     -- Update timer text
     if frame.timer_button then
-      -- frame.timerText:SetText(format('%.1f', duration - time_elapsed))
-      frame.timer_button:SetText(format('%.1f', duration - time_elapsed))
+      local remaining = duration - time_elapsed
+      if remaining <= 0 then
+        frame.timer_button:SetText('0')
+      else
+        frame.timer_button:SetText(format('%.1f', remaining))
+      end
     end
 
     -- Update status bar
@@ -623,6 +716,8 @@ function create_import_sr_frame()
   import_button:SetScript('OnClick', function()
     current_sr_text = edit_box:GetText()
     load_sr_from_csv()
+    send_ml_settings()
+    update_moa_button_texture()
     frame:Hide()
   end)
   import_button:SetPoint('RIGHT', clear_button, 'LEFT', -10, 0)
@@ -742,9 +837,9 @@ function create_settings_frame()
                                              'UICheckButtonTemplate')
   prio_main_over_alts_cb:SetPoint('TOPLEFT', frame_duration_edit_box,
                                   'BOTTOMLEFT', -10, -10)
-  getglobal(prio_main_over_alts_cb:GetName() .. 'Text'):SetText(
-    'Prioritize main over alts');
-  prio_main_over_alts_cb.tooltip = 'Prioritize mains over alts'
+  getglobal(prio_main_over_alts_cb:GetName() .. 'Text'):SetText('Lootin mode');
+  prio_main_over_alts_cb.tooltip =
+    'Prioritize mains over alts and high ranks over low ranks'
 
   -- reset after importing SRs
   local reset_po_after_importing_sr_cb =
@@ -845,6 +940,7 @@ function create_settings_frame()
       Settings.LootAnnounceMinQuality =
         loot_announce_min_quality_edit_box:GetText()
       send_ml_settings()
+      update_moa_button_texture()
       Settings.DNDMode = dnd_cb:GetChecked() == 1
     end
 
@@ -862,4 +958,101 @@ function create_settings_frame()
   frame:Hide()
 
   return frame
+end
+
+function setup_roll_icons(button, message)
+  -- Clear any existing icons
+  if button.icons then for _, icon in ipairs(button.icons) do icon:Hide() end end
+  button.icons = {}
+
+  local icon_x = 0
+  local icon_y = -8 -- Move icons up/down
+  local icon_size = 13
+  local line_height = icon_size + 2
+
+  -- Count how many icons we'll have
+  local icon_count = 0
+  if message.has_debt then icon_count = icon_count + 1 end
+  if message.is_alt then icon_count = icon_count + 1 end
+  if message.is_high_rank then icon_count = icon_count + 1 end
+  if message.prio_os then icon_count = icon_count + 1 end
+
+  -- If we have 3 icons, put the third one on a second line
+  local icons_per_line = 2
+  local icons_placed = 0
+
+  -- Helper function to create an icon with tooltip
+  local function create_icon_with_tooltip(parent, texture_path, tooltip_text,
+                                          tooltip_color)
+    local icon_button = CreateFrame("Button", nil, parent)
+    icon_button:SetWidth(icon_size)
+    icon_button:SetHeight(icon_size)
+    icon_button:SetPoint("LEFT", parent, "LEFT", icon_x, -icon_y)
+
+    local icon_texture = icon_button:CreateTexture(nil, "OVERLAY")
+    icon_texture:SetTexture(texture_path)
+    icon_texture:SetAllPoints(icon_button)
+
+    -- Tooltip
+    icon_button:SetScript("OnEnter", function()
+      GameTooltip:SetOwner(icon_button, "ANCHOR_RIGHT")
+      GameTooltip:SetText(tooltip_text, unpack(tooltip_color or {1, 1, 1}))
+      GameTooltip:Show()
+    end)
+    icon_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+    -- fix icon_x and icon_y for next icon
+    icon_x = icon_x + icon_size + 2
+    icons_placed = icons_placed + 1
+    if icons_placed == icons_per_line and icon_count > icons_per_line then
+      icon_x = 0
+      icon_y = icon_y + line_height
+      icons_placed = 0
+    end
+
+    return icon_button
+  end
+
+  -- Debt icon (gold) - replaces "!"
+  if message.has_debt then
+    local debt_icon = create_icon_with_tooltip(button.iconFrame,
+                                               "Interface\\AddOns\\LootBlare\\assets\\gold.tga",
+                                               "Deuda con Hacienda", {1, 1, 0})
+    table.insert(button.icons, debt_icon)
+  end
+
+  -- Alt icon (leaf) - replaces "*"
+  if message.is_alt then
+    local alt_icon = create_icon_with_tooltip(button.iconFrame,
+                                              "Interface\\AddOns\\LootBlare\\assets\\leaf.tga",
+                                              "Alter", {0.2, 1, 0.2})
+    table.insert(button.icons, alt_icon)
+  end
+
+  -- Rank icon (shield) - replaces "^"
+  if message.is_high_rank then
+    local rank_icon = create_icon_with_tooltip(button.iconFrame,
+                                               "Interface\\AddOns\\LootBlare\\assets\\shield.tga",
+                                               "Rango Conquistador",
+                                               {0.5, 0.8, 1})
+
+    table.insert(button.icons, rank_icon)
+  end
+
+  -- Prio OS icon 
+  if message.prio_os then
+    local prio_os_icon = create_icon_with_tooltip(button.iconFrame,
+                                                  "Interface\\AddOns\\LootBlare\\assets\\sword.tga",
+                                                  "OffSpec con Prioridad",
+                                                  {1, 0.5, 0})
+
+    table.insert(button.icons, prio_os_icon)
+  end
+
+  -- Adjust the icon frame height if we have multiple lines
+  if icon_y > 3 then -- Changed from 0 to 3 since we start at 3
+    button.iconFrame:SetHeight(line_height * 2)
+  else
+    button.iconFrame:SetHeight(icon_size)
+  end
 end

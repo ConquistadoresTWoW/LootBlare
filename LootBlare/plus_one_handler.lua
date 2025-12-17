@@ -1,3 +1,4 @@
+-- plus_one_handler.lua
 function print_plus_one_list()
   local plus_one_str = 'Plus one list: '
   for name, value in pairs(PlusOneList) do
@@ -6,6 +7,32 @@ function print_plus_one_list()
     end
   end
   lb_print(plus_one_str)
+end
+
+local function increase_po_message(player_name, increment)
+  if not increment then increment = 1 end
+  local function po_on_list(player_name, list)
+    for _, msg in ipairs(list) do
+      if msg.roller == player_name then
+        -- Initialize plus_one if it doesn't exist
+        if msg.plus_one == nil then
+          msg.plus_one = 0
+        end
+        msg.plus_one = msg.plus_one + increment
+        if msg.plus_one < 0 then
+          msg.plus_one = 0
+        end
+        return true
+      end
+    end
+    return false
+  end
+
+  if po_on_list(player_name, ms_roll_messages) then return end
+  if po_on_list(player_name, os_roll_messages) then return end
+  if po_on_list(player_name, sr_ms_messages) then return end
+  if po_on_list(player_name, sr_os_messages) then return end
+  if po_on_list(player_name, tmog_roll_messages) then return end
 end
 
 function increase_plus_one(player_name)
@@ -33,8 +60,9 @@ function increase_plus_one(player_name)
                       '+1|r. (|c' .. config.CHAT_COLORS.NEUTRAL .. '+1|r)',
                     'RAID')
   end
-  report_plus_one_list()
 
+  -- find player_name in all the roll lists and increase the plus one there
+  increase_po_message(player_name)
   return player_name
 end
 
@@ -121,7 +149,7 @@ function reduce_plus_one(player_name)
                       '-1|r. (|c' .. config.CHAT_COLORS.NEUTRAL .. '+0|r)',
                     'RAID')
   end
-  report_plus_one_list()
+  increase_po_message(player_name, -1)
 end
 
 function load_plus_one_from_string(plus_one_string)
