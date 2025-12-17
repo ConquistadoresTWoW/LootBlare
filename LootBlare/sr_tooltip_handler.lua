@@ -139,8 +139,8 @@ local original_SetMerchantItem = GameTooltip.SetMerchantItem
 local original_SetQuestItem = GameTooltip.SetQuestItem
 local original_SetQuestLogItem = GameTooltip.SetQuestLogItem
 local original_SetTradeSkillItem = GameTooltip.SetTradeSkillItem
-local original_SetInboxItem = GameTooltip.SetInboxItem
-local original_SetSendMailItem = GameTooltip.SetSendMailItem
+-- Remove hooks for functions that don't exist in Classic 1.12:
+-- original_SetInboxItem, original_SetSendMailItem don't exist in 1.12
 
 -- Hook GameTooltip:SetHyperlink
 function GameTooltip:SetHyperlink(link)
@@ -183,18 +183,20 @@ function GameTooltip:SetAuctionItem(type, index)
     AddSRInfoToTooltip(self, itemLink)
 end
 
--- Hook GameTooltip:SetAuctionSellItem
+-- Hook GameTooltip:SetAuctionSellItem (limited functionality in 1.12)
 function GameTooltip:SetAuctionSellItem()
     original_SetAuctionSellItem(self)
-    -- Note: GetAuctionSellItemInfo doesn't return a link directly in 1.12
-    -- This hook might need adjustment based on exact 1.12 API
+    -- GetAuctionSellItemInfo doesn't return a link in 1.12
+    -- This function exists but has limited data available
 end
 
 -- Hook GameTooltip:SetBuybackItem
-function GameTooltip:SetBuybackItem()
-    original_SetBuybackItem(self)
-    local itemLink = GetBuybackItemLink(GetNumBuybackItems())
-    AddSRInfoToTooltip(self, itemLink)
+function GameTooltip:SetBuybackItem(index)
+    original_SetBuybackItem(self, index)
+    local itemLink = GetBuybackItemLink(index)
+    if itemLink then
+        AddSRInfoToTooltip(self, itemLink)
+    end
 end
 
 -- Hook GameTooltip:SetMerchantItem
@@ -230,19 +232,8 @@ function GameTooltip:SetTradeSkillItem(tradeItemIndex, reagentIndex)
     AddSRInfoToTooltip(self, itemLink)
 end
 
--- Hook GameTooltip:SetInboxItem
-function GameTooltip:SetInboxItem(index)
-    original_SetInboxItem(self, index)
-    local itemLink = GetInboxItemLink(index)
-    AddSRInfoToTooltip(self, itemLink)
-end
-
--- Hook GameTooltip:SetSendMailItem
-function GameTooltip:SetSendMailItem()
-    original_SetSendMailItem(self)
-    local itemLink = GetSendMailItemLink()
-    AddSRInfoToTooltip(self, itemLink)
-end
+-- Remove hooks for non-existent functions in 1.12:
+-- SetInboxItem, SetSendMailItem don't exist in Classic
 
 -- Function to refresh tooltip SR info when SR list changes
 function RefreshTooltipSRInfo()
