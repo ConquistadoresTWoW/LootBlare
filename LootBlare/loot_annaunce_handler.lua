@@ -101,27 +101,29 @@ function loot_announce_handler()
         local sr_message = "- SR: "
         local sr_entries = {}
         
-        -- Add MS SRs
-        for _, sr in ipairs(ms_srs) do
-          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
-                             config.DEFAULT_TEXT_COLOR
-          local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
-          if sr["SR+"] > 1 then
-            entry = entry .. "(" .. sr["SR+"] .. ")"
-          end
-          table.insert(sr_entries, entry)
-        end
-        
-        -- Add OS SRs
-        for _, sr in ipairs(os_srs) do
-          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
-                             config.DEFAULT_TEXT_COLOR
-          local entry = "|c" .. class_color .. sr["Attendee"] .. "|r(OS)"
-          if sr["SR+"] > 1 then
-            entry = entry .. "(" .. sr["SR+"] .. ")"
-          end
-          table.insert(sr_entries, entry)
-        end
+		-- Add MS SRs
+		for _, sr in ipairs(ms_srs) do
+		local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
+							config.DEFAULT_TEXT_COLOR
+		local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
+		if sr["SR+"] > 1 then
+			entry = entry .. " [" .. sr["SR+"] .. "]"
+		end
+		table.insert(sr_entries, entry)
+		end
+		
+		-- Add OS SRs
+		for _, sr in ipairs(os_srs) do
+		local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
+							config.DEFAULT_TEXT_COLOR
+		local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
+		if sr["SR+"] > 1 then
+			entry = entry .. "(OS) [" .. sr["SR+"] .. "]"
+		else
+			entry = entry .. "(OS)"
+		end
+		table.insert(sr_entries, entry)
+		end
         
         -- Combine all entries
         sr_message = sr_message .. table.concat(sr_entries, ", ")
