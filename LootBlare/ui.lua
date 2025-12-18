@@ -461,16 +461,16 @@ local function init_item_info(frame)
   frame.name = name
   frame.itemLink = ''
 
-  local tt = CreateFrame('GameTooltip', 'CustomTooltip2', UIParent,
-                         'GameTooltipTemplate')
-
   -- Set up tooltip
-  icon_button:SetScript('OnEnter', function()
-    tt:SetOwner(icon_button, 'ANCHOR_RIGHT')
-    tt:SetHyperlink(frame.itemLink)
-    tt:Show()
-  end)
-  icon_button:SetScript('OnLeave', function() tt:Hide() end)
+	icon_button:SetScript('OnEnter', function()
+	GameTooltip:SetOwner(icon_button, 'ANCHOR_RIGHT')
+	GameTooltip:SetHyperlink(frame.itemLink)
+	GameTooltip:Show()
+	end)
+	
+	icon_button:SetScript('OnLeave', function()
+	GameTooltip:Hide()
+	end)
   icon_button:SetScript('OnClick', function()
     if (IsControlKeyDown()) then
       DressUpItemLink(frame.itemLink);
