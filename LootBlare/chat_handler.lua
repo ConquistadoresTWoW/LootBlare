@@ -69,6 +69,12 @@ function handle_chat_message(event, message, sender)
 
     if len(links) == 1 then
       current_link = links[1]
+      
+      -- Mark item for roll removal (3 second grace period)
+      if markItemForRollRemoval then
+        markItemForRollRemoval(current_link)
+      end
+      
       reset_rolls()
       -- Find and announce soft reserves for this item (new functionality)
 
@@ -96,29 +102,29 @@ function handle_chat_message(event, message, sender)
         local sr_message = "- SR: "
         local sr_entries = {}
 
-		-- Add MS SRs
-		for _, sr in ipairs(ms_srs) do
-		local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(
-								sr["Attendee"])] or config.DEFAULT_TEXT_COLOR
-		local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
-		if sr["SR+"] > 1 then
-			entry = entry .. " [" .. sr["SR+"] .. "]"
-		end
-		table.insert(sr_entries, entry)
-		end
-		
-		-- Add OS SRs
-		for _, sr in ipairs(os_srs) do
-		local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(
-								sr["Attendee"])] or config.DEFAULT_TEXT_COLOR
-		local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
-		if sr["SR+"] > 1 then
-			entry = entry .. "(OS) [" .. sr["SR+"] .. "]"
-		else
-			entry = entry .. "(OS)"
-		end
-		table.insert(sr_entries, entry)
-		end
+    -- Add MS SRs
+    for _, sr in ipairs(ms_srs) do
+    local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(
+                sr["Attendee"])] or config.DEFAULT_TEXT_COLOR
+    local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
+    if sr["SR+"] > 1 then
+      entry = entry .. " [" .. sr["SR+"] .. "]"
+    end
+    table.insert(sr_entries, entry)
+    end
+    
+    -- Add OS SRs
+    for _, sr in ipairs(os_srs) do
+    local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(
+                sr["Attendee"])] or config.DEFAULT_TEXT_COLOR
+    local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
+    if sr["SR+"] > 1 then
+      entry = entry .. "(OS) [" .. sr["SR+"] .. "]"
+    else
+      entry = entry .. "(OS)"
+    end
+    table.insert(sr_entries, entry)
+    end
 
         -- Combine all entries
         sr_message = sr_message .. table.concat(sr_entries, ", ")
@@ -131,6 +137,40 @@ function handle_chat_message(event, message, sender)
     end
 
     -- item_roll_frame:UnregisterEvent('ADDON_LOADED')
+    
+  -- Detect loot announcements for Loot Tracker
+  -- Only track announcements from the master looter
+  elseif event == 'CHAT_MSG_RAID' or event == 'CHAT_MSG_RAID_LEADER' or 
+       event == 'CHAT_MSG_PARTY' or event == 'CHAT_MSG_SAY' or event == 'CHAT_MSG_YELL' then
+    
+    -- Only track loot announcements from master looter
+    if sender == master_looter then
+        -- Look for item links in any chat message
+        -- Pattern matches messages starting with "- [" (ML announcement format) OR containing item links
+        if string.find(message, "%[.*%]") then
+            local itemLinks = extract_item_links_from_message(message)
+            if itemLinks and type(itemLinks) == "table" then
+                -- Check if we have any links
+                local hasLinks = false
+                for _, link in pairs(itemLinks) do
+                    if link then
+                        hasLinks = true
+                        break
+                    end
+                end
+                
+                if hasLinks and addLootToTracker then
+                    -- Add all found item links to tracker
+                    for _, link in pairs(itemLinks) do
+                        if link then
+                            addLootToTracker(link)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
   elseif event == 'CHAT_MSG_ADDON' and arg1 == config.LB_PREFIX then
     local prefix, message, channel, sender = arg1, arg2, arg3, arg4
 
@@ -187,9 +227,20 @@ function handle_chat_message(event, message, sender)
         PrioMainOverAlts = true,
         LootAnnounceActive = true,
         LootAnnounceMinQuality = 4, -- Epic
-        DNDMode = false
+        DNDMode = false,
+        LootTrackerEnabled = true,  -- Loot Tracker enabled by default
+        LootTrackerHorizontal = true  -- Horizontal layout by default
       }
     end
+    
+    -- Ensure Loot Tracker settings exist
+    if Settings.LootTrackerEnabled == nil then
+      Settings.LootTrackerEnabled = true
+    end
+    if Settings.LootTrackerHorizontal == nil then
+      Settings.LootTrackerHorizontal = true
+    end
+    
     if Settings.LootAnnounceActive == nil then
       Settings.LootAnnounceActive = true
     end
@@ -213,6 +264,11 @@ function handle_chat_message(event, message, sender)
     end
 
     if len(lb_guild_info) == 0 then lb_load_guild_info() end
+    
+    -- Initialize Loot Tracker
+    if initializeLootTracker then
+      initializeLootTracker()
+    end
   elseif event == 'ZONE_CHANGED_NEW_AREA' then
     reset_plus_one_when_entering_raid()
   elseif event == 'LOOT_OPENED' then
@@ -263,6 +319,8 @@ function handle_config_command(msg)
                '/lb ar alt1,alt2,alt3,...,altN|r to remove alts from the alts list.')
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
                '/lb po <player>|r to increase the plus one count for a player.')
+    lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
+               '/lb poos <player>|r to increase the plus one count for a player.')
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
                '/lb mo <player>|r to reduce the plus one count for a player.')
     lb_print('Type |c' .. config.DEFAULT_TEXT_COLOR ..
