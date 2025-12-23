@@ -18,9 +18,8 @@ item_roll_frame:SetScript('OnEvent',
 import_sr_frame = create_import_sr_frame()
 settings_frame = create_settings_frame()
 
--- Initialize Loot Tracker immediately (simpler approach)
+-- Initialize Loot Tracker
 local function initAll()
-    -- Initialize loot tracker if functions exist
     if createLootTrackerFrame and initializeLootTracker then
         if not lootTrackerFrame then
             lootTrackerFrame = createLootTrackerFrame()
@@ -29,7 +28,6 @@ local function initAll()
     end
 end
 
--- Run initialization after addon is fully loaded
 local initFrame = CreateFrame("Frame")
 initFrame:SetScript("OnUpdate", function()
     this:SetScript("OnUpdate", nil)  -- Run once
@@ -39,19 +37,3 @@ end)
 -- Register the slash command
 SLASH_LOOTBLARE1 = '/lootblare'
 SLASH_LOOTBLARE2 = '/lb'
-
--- Add Loot Tracker slash command
-SLASH_LOOTBLARE3 = '/lt'
-
--- Command handler
-SlashCmdList['LOOTBLARE'] = function(msg)
-    if msg == 'lt' or msg == 'ltoggle' then
-        if toggleLootTracker then
-            toggleLootTracker()
-        else
-            lb_print('Loot Tracker not loaded')
-        end
-    else
-        handle_config_command(msg)
-    end
-end
