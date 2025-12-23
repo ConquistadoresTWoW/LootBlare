@@ -1,7 +1,7 @@
 ## Interface: 11200
-## Title:  [Conquistadores] |cff00ccff LootBlare 2.4.2|r
+## Title:  [Conquistadores] |cff00ccff LootBlare 2.5.1|r
 ## Author: Ehawne, Sivent, Gulolio
-## Version: 2.4.2
+## Version: 2.5.1
 ## Notes: Make loot rolls obvious
 ## SavedVariables: AltList, SRList, PlusOneList, Settings, LastRaidData
 
@@ -17,5 +17,6 @@ LootBlare\loot_annaunce_handler.lua
 LootBlare\minimap_button.lua
 LootBlare\dnd_mode_handler.lua
 LootBlare\ui.lua
+LootBlare\rank_handler.lua
 LootBlare\chat_handler.lua
 LootBlare\LootBlare.lua

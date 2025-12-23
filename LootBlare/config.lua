@@ -31,7 +31,7 @@ config = {
   },
   ADDON_TEXT_COLOR = 'FFEDD8BB',
   DEFAULT_TEXT_COLOR = 'FFFFFF00',
-
+  ADDON_TEXT_COLOR_RGB = {0.93, 0.85, 0.73},
   SR_MS_TEXT_COLOR = 'FFFF0000',
   MS_TEXT_COLOR = 'FFFF7300',
   SR_OS_TEXT_COLOR = 'FFFFFF00',
@@ -46,9 +46,12 @@ config = {
   LB_ADD_SR = 'add sr:',
   LB_START_ROLL = 'start roll',
   LB_STOP_ROLL = 'stop roll',
+  LB_CLEAR_ROLL_RESULTS = 'CRR',
+  LB_ADD_ROLL_RESULT = 'ARR:',
   LB_ADD_ALTS = 'add alts:',
   LB_CLEAR_ALTS = 'clear alts',
   LB_ADD_PLUS_ONE = 'add plus:',
   LB_CLEAR_PLUS_ONE = 'clear plus',
-  GRESSIL = 'Gressil, Dawn of Ruin'
+  GRESSIL = 'Gressil, Dawn of Ruin',
+  GH_LINK = "https://github.com/ConquistadoresTWoW/LootBlare/"
 }

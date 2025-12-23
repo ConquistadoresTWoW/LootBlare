@@ -20,7 +20,7 @@ function create_color_message(message)
   local text_color = config.DEFAULT_TEXT_COLOR
 
   -- First line: Character name (class colored) + "rolls XX" (yellow)
-  local line1 = '|c' .. class_color .. message.alt_roller .. '|r |c' ..
+  local line1 = '|c' .. class_color .. message.roller_name .. '|r |c' ..
                   config.DEFAULT_TEXT_COLOR .. 'rolls ' .. message.roll .. '|r'
 
   -- Second line: Roll type and additional info
@@ -42,10 +42,9 @@ function create_color_message(message)
   end
 
   -- Add plus one info if applicable
-  if PlusOneList[message.roller] and PlusOneList[message.roller] > 0 then
-    table.insert(line2_parts,
-                 '|c' .. config.CHAT_COLORS.NEUTRAL .. '+ ' ..
-                   PlusOneList[message.roller] .. '|r')
+  if message.plus_one and message.plus_one > 0 then
+    table.insert(line2_parts, '|c' .. config.CHAT_COLORS.NEUTRAL .. '+ ' ..
+                   message.plus_one .. '|r')
   end
 
   -- Combine all parts of line 2
@@ -159,19 +158,46 @@ function run_if_master_looter(callback, notify)
   end
 end
 
+local latest_version = '[2.5.1]'
 function send_ml_settings()
   local master_looter = master_looter or 'unknown'
   local message = config.LB_SET_ML_SETTINGS .. Settings.RollDuration .. ',' ..
-                    tostring(Settings.PrioMainOverAlts) .. ',' .. master_looter
+                    tostring(Settings.PrioMainOverAlts) .. ',' .. master_looter ..
+                    ',' .. latest_version
   SendAddonMessage(config.LB_PREFIX, message, 'RAID')
 end
 
+lb_version_check = false
 function load_ml_settings_from_string(settings_str)
   local settings = string_split(settings_str, ',')
 
   Settings.RollDuration = tonumber(settings[1])
   Settings.PrioMainOverAlts = settings[2] == 'true'
   master_looter = settings[3]
+
+  if not lb_version_check then
+    local ml_version = settings[4] or '[0.0.0]'
+    if ml_version ~= latest_version then
+      local version_message =
+        'Your LootBlare version is old. Please update to version ' ..
+          tostring(ml_version) .. ' here: ' .. config.GH_LINK
+      local r, g, b = config.ADDON_TEXT_COLOR_RGB[1],
+                      config.ADDON_TEXT_COLOR_RGB[2],
+                      config.ADDON_TEXT_COLOR_RGB[3]
+      DEFAULT_CHAT_FRAME:AddMessage(version_message, r, g, b);
+    end
+    lb_version_check = true
+  end
+
   update_moa_button_texture()
   update_text_area(item_roll_frame)
+end
+
+function lb_has_debt(player_name)
+  local has_debt = false
+  if HC_GetCurrentDebtData ~= nil then
+    local n, debt, t = HC_GetCurrentDebtData(player_name)
+    if debt and tonumber(debt) and tonumber(debt) > 0 then has_debt = true end
+  end
+  return has_debt
 end
