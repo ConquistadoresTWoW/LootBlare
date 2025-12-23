@@ -3,7 +3,7 @@
 ## Author: Ehawne, Sivent, Gulolio
 ## Version: 2.5.1
 ## Notes: Make loot rolls obvious
-## SavedVariables: AltList, SRList, PlusOneList, Settings, LastRaidData
+## SavedVariables: AltList, SRList, PlusOneList, Settings, LastRaidData, LootTrackerDB
 
 LootBlare\prices_list.lua
 LootBlare\config.lua
@@ -19,4 +19,6 @@ LootBlare\dnd_mode_handler.lua
 LootBlare\ui.lua
 LootBlare\rank_handler.lua
 LootBlare\chat_handler.lua
+LootBlare\sr_tooltip_handler.lua
+LootBlare\loot_tracker.lua
 LootBlare\LootBlare.lua
