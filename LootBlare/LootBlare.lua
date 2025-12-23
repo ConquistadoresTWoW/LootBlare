@@ -37,3 +37,6 @@ end)
 -- Register the slash command
 SLASH_LOOTBLARE1 = '/lootblare'
 SLASH_LOOTBLARE2 = '/lb'
+
+-- Command handler
+SlashCmdList['LOOTBLARE'] = handle_config_command
