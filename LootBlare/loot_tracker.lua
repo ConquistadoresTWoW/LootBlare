@@ -1,45 +1,55 @@
 LootTrackerDB = LootTrackerDB or {}
 
 local BASE_ICON_SIZE = 34
-local BASE_SPACING = 8
-local ICON_LIFETIME = 15
-local REMOVE_FADE_TIME = 0.4
+local BASE_SPACING   = 8
+local ICON_LIFETIME  = 15
+local SAFE_TIME      = 2.5
 
-local SCALE_MIN = 0.4
-local SCALE_MAX = 2.0
-local SCALE_STEP = 0.1
 local DEFAULT_SCALE = 1.0
+local DRAG_PADDING = 16
+local LOOT_SOUND_PATH = "Interface\\AddOns\\LootBlare\\assets\\notification.mp3"
+
+local lastSoundTime = 0
+local SOUND_COOLDOWN = 1.0
+
+local QUALITY_COLORS = {
+  [0] = "ff9d9d9d",
+  [1] = "ffffffff",
+  [2] = "ff1eff00",
+  [3] = "ff0070dd",
+  [4] = "ffa335ee",
+  [5] = "ffff8000",
+}
 
 local lootItems = {}
 local lootCount = 0
 local currentScale = DEFAULT_SCALE
 
-lootTrackerFrame = nil
+lootTrackerFrame  = nil
 lootTrackerCenter = nil
+
+local isMoving = false
+
+local scanner = CreateFrame("GameTooltip", "LootTrackerScanner", nil, "GameTooltipTemplate")
+scanner:SetOwner(UIParent, "ANCHOR_NONE")
+
+local function BuildItemLink(itemString)
+  local name, _, quality = GetItemInfo(itemString)
+  if not name then return nil end
+  local hex = QUALITY_COLORS[quality or 1]
+  return "|c" .. hex .. "|H" .. itemString .. "|h[" .. name .. "]|h|r"
+end
 
 local function initDB()
   LootTrackerDB.scale = LootTrackerDB.scale or DEFAULT_SCALE
   LootTrackerDB.horizontal = LootTrackerDB.horizontal ~= false
-
-  if LootTrackerDB.showText == nil then LootTrackerDB.showText = true end
+  LootTrackerDB.showText = LootTrackerDB.showText ~= false
+  LootTrackerDB.soundEnabled = LootTrackerDB.soundEnabled ~= false
 
   LootTrackerDB.point = LootTrackerDB.point or "CENTER"
   LootTrackerDB.relativePoint = LootTrackerDB.relativePoint or "CENTER"
   LootTrackerDB.x = LootTrackerDB.x or 300
   LootTrackerDB.y = LootTrackerDB.y or 0
-end
-
-local function buildItemLink(item)
-  if item.realLink or not item.itemID then return end
-
-  local name, _, quality = GetItemInfo(item.itemID)
-  if not name then return end
-
-  local r, g, b = GetItemQualityColor(quality or 1)
-  local color = string.format("ff%02x%02x%02x", r * 255, g * 255, b * 255)
-
-  item.realLink = "|c" .. color .. "|Hitem:" .. item.itemID .. "|h[" .. name ..
-                    "]|h|r"
 end
 
 local function createLootRow(parent)
@@ -70,25 +80,20 @@ local function createLootRow(parent)
     this.highlight:Show()
     GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
     GameTooltip:SetHyperlink(this.item.itemString)
-    GameTooltip:Show()
   end)
 
   row:SetScript("OnLeave", function()
     this.highlight:Hide()
-    GameTooltip:Hide()
+    if GameTooltip:IsOwned(this) then GameTooltip:Hide() end
   end)
 
-  row:SetScript("OnClick", function()
+  row:SetScript("OnMouseDown", function()
     if not this.item then return end
-    buildItemLink(this.item)
 
-    if IsShiftKeyDown() and this.item.realLink then
-      if ChatFrameEditBox and ChatFrameEditBox:IsVisible() then
-        ChatFrameEditBox:Insert(this.item.realLink)
-      else
-        ChatFrame_OpenChat(this.item.realLink)
-      end
-    elseif IsControlKeyDown() then
+    if IsShiftKeyDown() and ChatFrameEditBox and ChatFrameEditBox:IsVisible() then
+      local link = BuildItemLink(this.item.itemString)
+      if link then ChatFrameEditBox:Insert(link) end
+    elseif IsControlKeyDown() and DressUpItemLink then
       DressUpItemLink(this.item.itemString)
     end
   end)
@@ -98,16 +103,17 @@ end
 
 function updateLootTrackerLayout()
   if not lootTrackerFrame or lootCount == 0 then
-    lootTrackerFrame:Hide()
+    if lootTrackerFrame then lootTrackerFrame:Hide() end
     return
   end
 
-  local size = BASE_ICON_SIZE * currentScale
+  local size    = BASE_ICON_SIZE * currentScale
   local spacing = BASE_SPACING * currentScale
-  local pad = 6 * currentScale
+  local pad     = 6 * currentScale
   local textPad = 8 * currentScale
+
   local horizontal = LootTrackerDB.horizontal
-  local showText = LootTrackerDB.showText == true
+  local showText   = LootTrackerDB.showText
 
   lootTrackerFrame.rows = lootTrackerFrame.rows or {}
 
@@ -120,60 +126,62 @@ function updateLootTrackerLayout()
       lootTrackerFrame.rows[i] = row
     end
 
-    row.item = item
-    item.icon = row
+    row:Show()
+    row:SetAlpha(1)
+    row:ClearAllPoints()
 
-    local name, _, quality = GetItemInfo(item.itemID)
+    row.item = item
+    item.row = row
+
+    local name, _, quality, _, _, _, _, _, tex = GetItemInfo(item.itemString)
     local r, g, b = GetItemQualityColor(quality or 1)
 
+    row:SetBackdropBorderColor(r * 0.9, g * 0.9, b * 0.9)
+
+    row.icon:SetTexture(tex or "Interface\\Icons\\INV_Misc_QuestionMark")
     row.icon:SetWidth(size)
     row.icon:SetHeight(size)
-    row.icon:ClearAllPoints()
 
-    row.text:SetText(name or "Unknown")
+    row.text:SetText(name or "Loading...")
     row.text:SetTextColor(r, g, b)
-    row.text:ClearAllPoints()
 
     local rowWidth, rowHeight
-
     if showText then
       row.text:Show()
       row.icon:SetPoint("LEFT", row, "LEFT", pad, 0)
       row.text:SetPoint("LEFT", row.icon, "RIGHT", textPad, 0)
 
-      local textWidth = row.text:GetStringWidth() or 0
-      rowWidth = size + textPad + textWidth + pad * 2
+      local textWidth = row.text:GetStringWidth()
+      if textWidth < 40 then textWidth = 40 end
+
+      rowWidth  = size + textPad + textWidth + pad * 2
       rowHeight = size + pad * 2
     else
       row.text:Hide()
       row.icon:SetPoint("CENTER", row, "CENTER")
-      rowWidth = size + pad * 2
+      rowWidth  = size + pad * 2
       rowHeight = size + pad * 2
     end
 
     row:SetWidth(rowWidth)
     row:SetHeight(rowHeight)
-    row:SetAlpha(item.alpha or 1)
-    row:SetBackdropBorderColor(r * 0.9, g * 0.9, b * 0.9, 1)
+  end
 
-    local _, _, _, _, _, _, _, _, tex = GetItemInfo(item.itemID)
-    row.icon:SetTexture(tex)
-
-    row:Show()
+  local rowCount = getn(lootTrackerFrame.rows)
+  for i = lootCount + 1, rowCount do
+    lootTrackerFrame.rows[i]:Hide()
   end
 
   local total = 0
   for i = 1, lootCount do
-    local r = lootTrackerFrame.rows[i]
-    total = total + (horizontal and r:GetWidth() or r:GetHeight())
+    total = total + (horizontal and lootTrackerFrame.rows[i]:GetWidth()
+                                 or lootTrackerFrame.rows[i]:GetHeight())
     if i < lootCount then total = total + spacing end
   end
 
   local cursor = -total / 2
   for i = 1, lootCount do
     local row = lootTrackerFrame.rows[i]
-    row:ClearAllPoints()
-
     if horizontal then
       row:SetPoint("LEFT", lootTrackerCenter, "CENTER", cursor, 0)
       cursor = cursor + row:GetWidth() + spacing
@@ -183,103 +191,139 @@ function updateLootTrackerLayout()
     end
   end
 
-  for i = lootCount + 1, getn(lootTrackerFrame.rows) do
-    lootTrackerFrame.rows[i]:Hide()
-  end
-
-  lootTrackerFrame:SetWidth(horizontal and total or
-                              lootTrackerFrame.rows[1]:GetWidth())
+  lootTrackerFrame:SetWidth(
+    (horizontal and total or lootTrackerFrame.rows[1]:GetWidth()) + DRAG_PADDING * 2
+  )
   lootTrackerFrame:SetHeight(
-    horizontal and lootTrackerFrame.rows[1]:GetHeight() or total)
+    (horizontal and lootTrackerFrame.rows[1]:GetHeight() or total) + DRAG_PADDING * 2
+  )
 
   lootTrackerFrame:Show()
 end
 
 function addLootToTracker(itemString)
-  if not Settings or not Settings.LootTrackerEnabled then return end
+  if not itemString then return end
   if not lootTrackerFrame then initializeLootTracker() end
-
-  local itemID = tonumber(string_match(itemString, "item:(%d+)"))
 
   table.insert(lootItems, {
     itemString = itemString,
-    itemID = itemID,
     time = GetTime(),
-    alpha = 1
+    resolved = false,
+    scanned = false
   })
 
   lootCount = lootCount + 1
   updateLootTrackerLayout()
+
+  if LootTrackerDB.soundEnabled then
+    local now = GetTime()
+    if now - lastSoundTime >= SOUND_COOLDOWN then
+      PlaySoundFile(LOOT_SOUND_PATH)
+      lastSoundTime = now
+    end
+  end
 end
 
 local cleanup = CreateFrame("Frame")
 cleanup:SetScript("OnUpdate", function()
-  local elapsed = arg1
-  if not elapsed then return end
+  if isMoving then return end
 
   local now = GetTime()
+  local needsUpdate = false
 
   for i = lootCount, 1, -1 do
     local item = lootItems[i]
-    if now - item.time > ICON_LIFETIME then
-      item.alpha = item.alpha - (elapsed / REMOVE_FADE_TIME)
-      if item.icon then item.icon:SetAlpha(item.alpha) end
-      if item.alpha <= 0 then
-        table.remove(lootItems, i)
-        lootCount = lootCount - 1
-        updateLootTrackerLayout()
+    local row = item.row
+    local elapsed = now - item.time
+
+    if not item.resolved then
+      if GetItemInfo(item.itemString) then
+        item.resolved = true
+        needsUpdate = true
+      elseif not item.scanned then
+        scanner:SetHyperlink(item.itemString)
+        item.scanned = true
       end
     end
+
+    if elapsed > ICON_LIFETIME then
+      if row then row:Hide() end
+      table.remove(lootItems, i)
+      lootCount = lootCount - 1
+      needsUpdate = true
+    elseif row and elapsed > ICON_LIFETIME - SAFE_TIME then
+      local t = (elapsed - (ICON_LIFETIME - SAFE_TIME)) / SAFE_TIME
+      if t < 0 then t = 0 end
+      if t > 1 then t = 1 end
+      row:SetAlpha(1 - t)
+    end
   end
+
+  if needsUpdate then updateLootTrackerLayout() end
 end)
 
 function createLootTrackerFrame()
   initDB()
 
   lootTrackerCenter = CreateFrame("Frame", nil, UIParent)
-  lootTrackerCenter:SetPoint(LootTrackerDB.point, UIParent,
-                             LootTrackerDB.relativePoint, LootTrackerDB.x,
-                             LootTrackerDB.y)
+  lootTrackerCenter:SetPoint(
+    LootTrackerDB.point,
+    UIParent,
+    LootTrackerDB.relativePoint,
+    LootTrackerDB.x,
+    LootTrackerDB.y
+  )
   lootTrackerCenter:SetWidth(1)
   lootTrackerCenter:SetHeight(1)
   lootTrackerCenter:SetMovable(true)
+  lootTrackerCenter:SetClampedToScreen(true)
 
   local f = CreateFrame("Frame", nil, UIParent)
-  f:SetPoint("CENTER", lootTrackerCenter, "CENTER")
-  f:SetWidth(1)
-  f:SetHeight(1)
-  f:SetClampedToScreen(true)
-
+  f:SetPoint("CENTER", lootTrackerCenter)
   f:SetMovable(true)
   f:EnableMouse(true)
+  f:EnableMouseWheel(true)
   f:RegisterForDrag("LeftButton")
 
-  f:SetScript("OnDragStart", function() lootTrackerCenter:StartMoving() end)
-
-  f:SetScript("OnDragStop", function()
-    lootTrackerCenter:StopMovingOrSizing()
-    local p, _, rp, x, y = lootTrackerCenter:GetPoint()
-    LootTrackerDB.point = p
-    LootTrackerDB.relativePoint = rp
-    LootTrackerDB.x = x
-    LootTrackerDB.y = y
+  f:SetScript("OnDragStart", function()
+    isMoving = true
+    lootTrackerCenter:StartMoving()
   end)
 
-  f:EnableMouseWheel(true)
+  f:SetScript("OnDragStop", function()
+    isMoving = false
+    lootTrackerCenter:StopMovingOrSizing()
+    local p, _, rp, x, y = lootTrackerCenter:GetPoint()
+    LootTrackerDB.point, LootTrackerDB.relativePoint = p, rp
+    LootTrackerDB.x, LootTrackerDB.y = x, y
+  end)
+
   f:SetScript("OnMouseWheel", function()
-    local delta = arg1
-    currentScale = math.max(SCALE_MIN, math.min(SCALE_MAX, currentScale +
-                                                  (delta > 0 and SCALE_STEP or
-                                                    -SCALE_STEP)))
+    if isMoving then return end
+    if not arg1 then return end
+
+    local step = 0.05
+    local minScale, maxScale = 0.5, 2.0
+
+    if arg1 > 0 then
+      currentScale = currentScale + step
+    else
+      currentScale = currentScale - step
+    end
+
+    if currentScale < minScale then currentScale = minScale end
+    if currentScale > maxScale then currentScale = maxScale end
+
     LootTrackerDB.scale = currentScale
     updateLootTrackerLayout()
   end)
 
-  f:Hide()
   currentScale = LootTrackerDB.scale
   return f
 end
 
 function initializeLootTracker()
-  if not lootTrackerFrame then lootTrackerFrame = createLootTrackerFrame() end
+  if not lootTrackerFrame then
+    lootTrackerFrame = createLootTrackerFrame()
+  end
 end
