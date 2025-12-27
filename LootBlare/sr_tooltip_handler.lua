@@ -32,16 +32,12 @@ local function AddSRInfoToTooltip(tooltip, itemLink)
   if totalSRs == 0 then return end
 
   table.sort(itemSRs, function(a, b)
-    if a["SR+"] == b["SR+"] then
-      return a.Attendee < b.Attendee
-    end
+    if a["SR+"] == b["SR+"] then return a.Attendee < b.Attendee end
     return a["SR+"] > b["SR+"]
   end)
 
   if totalSRs > MAX_SR_DISPLAY then
-    for i = MAX_SR_DISPLAY + 1, totalSRs do
-      itemSRs[i] = nil
-    end
+    for i = MAX_SR_DISPLAY + 1, totalSRs do itemSRs[i] = nil end
   end
 
   tooltip:AddLine(" ")
@@ -56,7 +52,8 @@ local function AddSRInfoToTooltip(tooltip, itemLink)
     local srValue = sr["SR+"] or 1
     local isMS = sr.MS
 
-    local classColor = config.RAID_CLASS_COLORS[class] or config.DEFAULT_TEXT_COLOR
+    local classColor = config.RAID_CLASS_COLORS[class] or
+                         config.DEFAULT_TEXT_COLOR
     local coloredName = "|c" .. classColor .. playerName .. "|r"
 
     local rightText = coloredName
@@ -74,7 +71,8 @@ local function AddSRInfoToTooltip(tooltip, itemLink)
   end
 
   if totalSRs > shown then
-    tooltip:AddDoubleLine("", "|cFFAAAAAA+" .. (totalSRs - shown) .. " more|r", 1, 1, 1, 0.7, 0.7, 0.7)
+    tooltip:AddDoubleLine("", "|cFFAAAAAA+" .. (totalSRs - shown) .. " more|r",
+                          1, 1, 1, 0.7, 0.7, 0.7)
   end
 
   tooltip:Show()
@@ -100,9 +98,7 @@ local function HookTooltip(tooltip)
       lastTooltipItem[self] = nil
 
       local link = GetContainerItemLink(bag, slot)
-      if link then
-        AddSRInfoToTooltip(self, link)
-      end
+      if link then AddSRInfoToTooltip(self, link) end
     end
   end
 
@@ -111,14 +107,12 @@ local function HookTooltip(tooltip)
     tooltip.SetInventoryItem = function(self, unit, slot)
       local hasItem = orig_SetInventoryItem(self, unit, slot)
       lastTooltipItem[self] = nil
-  
+
       if hasItem then
         local link = GetInventoryItemLink(unit, slot)
-        if link then
-          AddSRInfoToTooltip(self, link)
-        end
+        if link then AddSRInfoToTooltip(self, link) end
       end
-  
+
       return hasItem
     end
   end
@@ -130,9 +124,7 @@ local function HookTooltip(tooltip)
       lastTooltipItem[self] = nil
 
       local link = GetLootSlotLink(slot)
-      if link then
-        AddSRInfoToTooltip(self, link)
-      end
+      if link then AddSRInfoToTooltip(self, link) end
     end
   end
 

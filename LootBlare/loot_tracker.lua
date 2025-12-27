@@ -1,9 +1,9 @@
 LootTrackerDB = LootTrackerDB or {}
 
 local BASE_ICON_SIZE = 34
-local BASE_SPACING   = 8
-local ICON_LIFETIME  = 15
-local SAFE_TIME      = 2.5
+local BASE_SPACING = 8
+local ICON_LIFETIME = 15
+local SAFE_TIME = 2.5
 
 local DEFAULT_SCALE = 1.0
 local DRAG_PADDING = 16
@@ -18,19 +18,20 @@ local QUALITY_COLORS = {
   [2] = "ff1eff00",
   [3] = "ff0070dd",
   [4] = "ffa335ee",
-  [5] = "ffff8000",
+  [5] = "ffff8000"
 }
 
 local lootItems = {}
 local lootCount = 0
 local currentScale = DEFAULT_SCALE
 
-lootTrackerFrame  = nil
+lootTrackerFrame = nil
 lootTrackerCenter = nil
 
 local isMoving = false
 
-local scanner = CreateFrame("GameTooltip", "LootTrackerScanner", nil, "GameTooltipTemplate")
+local scanner = CreateFrame("GameTooltip", "LootTrackerScanner", nil,
+                            "GameTooltipTemplate")
 scanner:SetOwner(UIParent, "ANCHOR_NONE")
 
 local function BuildItemLink(itemString)
@@ -107,13 +108,13 @@ function updateLootTrackerLayout()
     return
   end
 
-  local size    = BASE_ICON_SIZE * currentScale
+  local size = BASE_ICON_SIZE * currentScale
   local spacing = BASE_SPACING * currentScale
-  local pad     = 6 * currentScale
+  local pad = 6 * currentScale
   local textPad = 8 * currentScale
 
   local horizontal = LootTrackerDB.horizontal
-  local showText   = LootTrackerDB.showText
+  local showText = LootTrackerDB.showText
 
   lootTrackerFrame.rows = lootTrackerFrame.rows or {}
 
@@ -154,12 +155,12 @@ function updateLootTrackerLayout()
       local textWidth = row.text:GetStringWidth()
       if textWidth < 40 then textWidth = 40 end
 
-      rowWidth  = size + textPad + textWidth + pad * 2
+      rowWidth = size + textPad + textWidth + pad * 2
       rowHeight = size + pad * 2
     else
       row.text:Hide()
       row.icon:SetPoint("CENTER", row, "CENTER")
-      rowWidth  = size + pad * 2
+      rowWidth = size + pad * 2
       rowHeight = size + pad * 2
     end
 
@@ -168,14 +169,12 @@ function updateLootTrackerLayout()
   end
 
   local rowCount = getn(lootTrackerFrame.rows)
-  for i = lootCount + 1, rowCount do
-    lootTrackerFrame.rows[i]:Hide()
-  end
+  for i = lootCount + 1, rowCount do lootTrackerFrame.rows[i]:Hide() end
 
   local total = 0
   for i = 1, lootCount do
-    total = total + (horizontal and lootTrackerFrame.rows[i]:GetWidth()
-                                 or lootTrackerFrame.rows[i]:GetHeight())
+    total = total + (horizontal and lootTrackerFrame.rows[i]:GetWidth() or
+              lootTrackerFrame.rows[i]:GetHeight())
     if i < lootCount then total = total + spacing end
   end
 
@@ -191,13 +190,12 @@ function updateLootTrackerLayout()
     end
   end
 
-  lootTrackerFrame:SetWidth(
-    (horizontal and total or lootTrackerFrame.rows[1]:GetWidth()) + DRAG_PADDING * 2
-  )
-  lootTrackerFrame:SetHeight(
-    (horizontal and lootTrackerFrame.rows[1]:GetHeight() or total) + DRAG_PADDING * 2
-  )
-
+  lootTrackerFrame:SetWidth((horizontal and total or
+                              lootTrackerFrame.rows[1]:GetWidth()) +
+                              DRAG_PADDING * 2)
+  lootTrackerFrame:SetHeight((horizontal and
+                               lootTrackerFrame.rows[1]:GetHeight() or total) +
+                               DRAG_PADDING * 2)
   lootTrackerFrame:Show()
 end
 
@@ -266,13 +264,9 @@ function createLootTrackerFrame()
   initDB()
 
   lootTrackerCenter = CreateFrame("Frame", nil, UIParent)
-  lootTrackerCenter:SetPoint(
-    LootTrackerDB.point,
-    UIParent,
-    LootTrackerDB.relativePoint,
-    LootTrackerDB.x,
-    LootTrackerDB.y
-  )
+  lootTrackerCenter:SetPoint(LootTrackerDB.point, UIParent,
+                             LootTrackerDB.relativePoint, LootTrackerDB.x,
+                             LootTrackerDB.y)
   lootTrackerCenter:SetWidth(1)
   lootTrackerCenter:SetHeight(1)
   lootTrackerCenter:SetMovable(true)
@@ -323,7 +317,5 @@ function createLootTrackerFrame()
 end
 
 function initializeLootTracker()
-  if not lootTrackerFrame then
-    lootTrackerFrame = createLootTrackerFrame()
-  end
+  if not lootTrackerFrame then lootTrackerFrame = createLootTrackerFrame() end
 end
