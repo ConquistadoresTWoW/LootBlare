@@ -202,6 +202,7 @@ end
 function addLootToTracker(itemString)
   if not itemString then return end
   if not lootTrackerFrame then initializeLootTracker() end
+  if Settings.LootTrackerEnabled == false then return end
 
   table.insert(lootItems, {
     itemString = itemString,
