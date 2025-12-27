@@ -53,5 +53,14 @@ config = {
   LB_ADD_PLUS_ONE = 'add plus:',
   LB_CLEAR_PLUS_ONE = 'clear plus',
   GRESSIL = 'Gressil, Dawn of Ruin',
-  GH_LINK = "https://github.com/ConquistadoresTWoW/LootBlare/"
+  GH_LINK = "https://github.com/ConquistadoresTWoW/LootBlare/",
+  ITEM_QUALITY_COLORS = {
+    [0] = {hex = "ff9d9d9d", r = 0.62, g = 0.62, b = 0.62}, -- Poor (Gray)
+    [1] = {hex = "ffffffff", r = 1.00, g = 1.00, b = 1.00}, -- Common (White)
+    [2] = {hex = "ff1eff00", r = 0.12, g = 1.00, b = 0.00}, -- Uncommon (Green)
+    [3] = {hex = "ff0070dd", r = 0.00, g = 0.44, b = 0.87}, -- Rare (Blue)
+    [4] = {hex = "ffa335ee", r = 0.64, g = 0.21, b = 0.93}, -- Epic (Purple)
+    [5] = {hex = "ffff8000", r = 1.00, g = 0.50, b = 0.00} -- Legendary (Orange)
+  },
+  FONT_COLOR_CODE_CLOSE = "|r"
 }

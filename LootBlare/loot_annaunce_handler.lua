@@ -63,7 +63,7 @@ function loot_announce_handler()
         not EXCLUDED_ITEMS_TABLE[item_name] and
         not string.find(item_name, IDOL_PREFIX) then
         table.insert(item_link_list, item_link)
-        
+
         -- Check if this item has any soft reserves
         local sr_list = find_soft_reservers_for_item(item_link)
         if sr_list and len(sr_list) > 0 then
@@ -77,14 +77,14 @@ function loot_announce_handler()
     SendChatMessage(announcestring, "RAID", nil, nil)
     for _, item_link in ipairs(item_link_list) do
       SendChatMessage("- " .. item_link, "RAID", nil, nil)
-      
+
       -- Announce soft reserves for this item if any exist
       local sr_list = items_with_sr[item_link]
       if sr_list and len(sr_list) > 0 then
         -- Group SRs by type (MS/OS) and sort by SR+ value
         local ms_srs = {}
         local os_srs = {}
-        
+
         for _, sr in ipairs(sr_list) do
           if sr["MS"] then
             table.insert(ms_srs, sr)
@@ -92,37 +92,37 @@ function loot_announce_handler()
             table.insert(os_srs, sr)
           end
         end
-        
+
         -- Sort by SR+ value (descending)
         table.sort(ms_srs, function(a, b) return a["SR+"] > b["SR+"] end)
         table.sort(os_srs, function(a, b) return a["SR+"] > b["SR+"] end)
-        
+
         -- Build SR announcement message
         local sr_message = "- SR: "
         local sr_entries = {}
-        
+        --- 
         -- Add MS SRs
         for _, sr in ipairs(ms_srs) do
-          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
-                             config.DEFAULT_TEXT_COLOR
+          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(
+                                sr["Attendee"])] or config.DEFAULT_TEXT_COLOR
           local entry = "|c" .. class_color .. sr["Attendee"] .. "|r"
           if sr["SR+"] > 1 then
             entry = entry .. "(" .. sr["SR+"] .. ")"
           end
           table.insert(sr_entries, entry)
         end
-        
+
         -- Add OS SRs
         for _, sr in ipairs(os_srs) do
-          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(sr["Attendee"])] or 
-                             config.DEFAULT_TEXT_COLOR
+          local class_color = config.RAID_CLASS_COLORS[get_class_of_roller(
+                                sr["Attendee"])] or config.DEFAULT_TEXT_COLOR
           local entry = "|c" .. class_color .. sr["Attendee"] .. "|r(OS)"
           if sr["SR+"] > 1 then
             entry = entry .. "(" .. sr["SR+"] .. ")"
           end
           table.insert(sr_entries, entry)
         end
-        
+
         -- Combine all entries
         sr_message = sr_message .. table.concat(sr_entries, ", ")
         SendChatMessage(sr_message, "RAID", nil, nil)

@@ -461,16 +461,14 @@ local function init_item_info(frame)
   frame.name = name
   frame.itemLink = ''
 
-  local tt = CreateFrame('GameTooltip', 'CustomTooltip2', UIParent,
-                         'GameTooltipTemplate')
-
   -- Set up tooltip
   icon_button:SetScript('OnEnter', function()
-    tt:SetOwner(icon_button, 'ANCHOR_RIGHT')
-    tt:SetHyperlink(frame.itemLink)
-    tt:Show()
+    GameTooltip:SetOwner(icon_button, 'ANCHOR_RIGHT')
+    GameTooltip:SetHyperlink(frame.itemLink)
+    GameTooltip:Show()
   end)
-  icon_button:SetScript('OnLeave', function() tt:Hide() end)
+
+  icon_button:SetScript('OnLeave', function() GameTooltip:Hide() end)
   icon_button:SetScript('OnClick', function()
     if (IsControlKeyDown()) then
       DressUpItemLink(frame.itemLink);
@@ -749,8 +747,8 @@ end
 
 function create_settings_frame()
   local frame = CreateFrame('Frame', 'settings_frame', UIParent)
-  frame:SetWidth(300)
-  frame:SetHeight(420)
+  frame:SetWidth(320)
+  frame:SetHeight(590)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
   frame:SetBackdrop({
     bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
@@ -762,62 +760,89 @@ function create_settings_frame()
   frame:SetBackdropColor(0, 0, 0, 1)
   frame:SetMovable(true)
   frame:EnableMouse(true)
-  frame:RegisterForDrag('LeftButton') -- Only start dragging with the left mouse button
+  frame:RegisterForDrag('LeftButton')
   frame:SetScript('OnDragStart', function() frame:StartMoving() end)
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
 
-  -- add titel to the frame
+  -- ================= TITLE =================
   local title = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
   title:SetPoint('CENTER', frame, 'TOP', 0, -20)
   title:SetFont(title:GetFont(), 12)
   title:SetText('General Settings')
 
-  -- local settings
-  -- add edit box to set font size
-  local font_size_edit_box = CreateFrame('EditBox', nill, frame,
+  -- ================= GENERAL SETTINGS =================
+  local font_size_edit_box = CreateFrame('EditBox', nil, frame,
                                          'InputBoxTemplate')
   font_size_edit_box:SetPoint('TOPLEFT', frame, 'TOPLEFT', 30, -35)
   font_size_edit_box:SetWidth(20)
   font_size_edit_box:SetHeight(15)
   font_size_edit_box:SetAutoFocus(false)
   font_size_edit_box:SetFontObject('ChatFontNormal')
-  font_size_edit_box:SetAutoFocus(false)
   font_size_edit_box:SetNumeric(true)
+
   local font_size_label = frame:CreateFontString(nil, 'OVERLAY',
                                                  'GameFontNormal')
   font_size_label:SetPoint('LEFT', font_size_edit_box, 'RIGHT', 5, 0)
   font_size_label:SetText('Font size')
-  -- add edit box to set frame auto close
+
   local frame_auto_close_cb = CreateFrame('CheckButton', 'ac_cb', frame,
                                           'UICheckButtonTemplate')
   frame_auto_close_cb:SetPoint('TOPLEFT', font_size_edit_box, 'BOTTOMLEFT', -10,
                                -10)
+  getglobal(frame_auto_close_cb:GetName() .. 'Text'):SetText('Auto close frame')
 
-  getglobal(frame_auto_close_cb:GetName() .. 'Text'):SetText('Auto close frame');
-  frame_auto_close_cb.tooltip = 'Auto close frame'
-
-  -- hide when using spell
   local hwus_cb = CreateFrame('CheckButton', 'hwus_cb', frame,
                               'UICheckButtonTemplate')
   hwus_cb:SetPoint('TOPLEFT', frame_auto_close_cb, 'BOTTOMLEFT', 0, 0)
-  getglobal(hwus_cb:GetName() .. 'Text'):SetText('Hide when using spell');
-  hwus_cb.tooltip = 'Hide when using spell'
+  getglobal(hwus_cb:GetName() .. 'Text'):SetText('Hide when using spell')
 
-  -- ML settings
-  -- Add label roll settings (master looter)
+  -- ================= LOOT TRACKER SETTINGS =================
+  local loot_tracker_label = frame:CreateFontString(nil, 'OVERLAY',
+                                                    'GameFontNormal')
+  loot_tracker_label:SetPoint('CENTER', frame, 'TOP', 0, -150)
+  loot_tracker_label:SetFont(loot_tracker_label:GetFont(), 12)
+  loot_tracker_label:SetText('Loot Tracker Settings')
+
+  local loot_tracker_toggle_cb = CreateFrame('CheckButton',
+                                             'loot_tracker_toggle_cb', frame,
+                                             'UICheckButtonTemplate')
+  loot_tracker_toggle_cb:SetPoint('TOPLEFT', frame, 'TOPLEFT', 30, -165)
+  getglobal(loot_tracker_toggle_cb:GetName() .. 'Text'):SetText(
+    'Enable Loot Tracker')
+
+  local loot_tracker_layout_cb = CreateFrame('CheckButton',
+                                             'loot_tracker_layout_cb', frame,
+                                             'UICheckButtonTemplate')
+  loot_tracker_layout_cb:SetPoint('TOPLEFT', loot_tracker_toggle_cb,
+                                  'BOTTOMLEFT', 0, 0)
+  getglobal(loot_tracker_layout_cb:GetName() .. 'Text'):SetText(
+    'Horizontal Layout')
+
+  local loot_tracker_text_cb = CreateFrame('CheckButton',
+                                           'loot_tracker_text_cb', frame,
+                                           'UICheckButtonTemplate')
+  loot_tracker_text_cb:SetPoint('TOPLEFT', loot_tracker_layout_cb, 'BOTTOMLEFT',
+                                0, 0)
+  getglobal(loot_tracker_text_cb:GetName() .. 'Text'):SetText('Show item names')
+
+  local loot_tracker_sound_cb = CreateFrame('CheckButton',
+                                            'loot_tracker_sound_cb', frame,
+                                            'UICheckButtonTemplate')
+  loot_tracker_sound_cb:SetPoint('TOPLEFT', loot_tracker_text_cb, 'BOTTOMLEFT',
+                                 0, 0)
+  getglobal(loot_tracker_sound_cb:GetName() .. 'Text'):SetText(
+    'Loot Tracker Sound')
+
+  -- ================= MASTER LOOTER SETTINGS =================
   local ml_label = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-  ml_label:SetPoint('CENTER', frame, 'TOP', 0, -150)
+  ml_label:SetPoint('CENTER', frame, 'TOP', 0, -310)
   ml_label:SetFont(ml_label:GetFont(), 12)
   ml_label:SetText('Master Looter Settings')
 
-  -- show current master looter read Only
   local ml_text = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-  ml_text:SetPoint('TOPLEFT', frame, 'TOPLEFT', 20, -170)
-
+  ml_text:SetPoint('TOPLEFT', frame, 'TOPLEFT', 30, -330)
   ml_text:SetFont(ml_text:GetFont(), 12)
   ml_text:SetText('Current ML: Unknown')
-
-  -- roll duration 
   local frame_duration_edit_box = CreateFrame('EditBox',
                                               'frame_duration_edit_box', frame,
                                               'InputBoxTemplate')
@@ -827,39 +852,34 @@ function create_settings_frame()
   frame_duration_edit_box:SetAutoFocus(false)
   frame_duration_edit_box:SetFontObject('ChatFontNormal')
   frame_duration_edit_box:SetNumeric(true)
+
   local frame_duration_label = frame:CreateFontString(nil, 'OVERLAY',
                                                       'GameFontNormal')
   frame_duration_label:SetPoint('LEFT', frame_duration_edit_box, 'RIGHT', 5, 0)
   frame_duration_label:SetText('Roll duration (s)')
 
-  -- prio mains over alts
   local prio_main_over_alts_cb = CreateFrame('CheckButton', 'pmoa_cb', frame,
                                              'UICheckButtonTemplate')
   prio_main_over_alts_cb:SetPoint('TOPLEFT', frame_duration_edit_box,
                                   'BOTTOMLEFT', -10, -10)
-  getglobal(prio_main_over_alts_cb:GetName() .. 'Text'):SetText('Lootin mode');
+  getglobal(prio_main_over_alts_cb:GetName() .. 'Text'):SetText('Lootin mode')
   prio_main_over_alts_cb.tooltip =
     'Prioritize mains over alts and high ranks over low ranks'
 
-  -- reset after importing SRs
   local reset_po_after_importing_sr_cb =
     CreateFrame('CheckButton', 'rpoasr_cb', frame, 'UICheckButtonTemplate')
   reset_po_after_importing_sr_cb:SetPoint('TOPLEFT', prio_main_over_alts_cb,
                                           'BOTTOMLEFT', 0, 0)
   getglobal(reset_po_after_importing_sr_cb:GetName() .. 'Text'):SetText(
-    'Reset PO after importing SRs');
-  reset_po_after_importing_sr_cb.tooltip = 'Reset PO after importing SRs'
+    'Reset PO after importing SRs')
 
-  -- loot announce on or off
   local loot_announce_cb = CreateFrame('CheckButton', 'loot_announce_cb', frame,
                                        'UICheckButtonTemplate')
   loot_announce_cb:SetPoint('TOPLEFT', reset_po_after_importing_sr_cb,
                             'BOTTOMLEFT', 0, 0)
   getglobal(loot_announce_cb:GetName() .. 'Text'):SetText(
-    'Loot announce on or off');
-  loot_announce_cb.tooltip = 'Loot announce on or off'
+    'Loot announce on or off')
 
-  -- min quality for items to announce in chat
   local loot_announce_min_quality_edit_box =
     CreateFrame('EditBox', 'loot_announce_min_quality_edit_box', frame,
                 'InputBoxTemplate')
@@ -870,6 +890,7 @@ function create_settings_frame()
   loot_announce_min_quality_edit_box:SetAutoFocus(false)
   loot_announce_min_quality_edit_box:SetFontObject('ChatFontNormal')
   loot_announce_min_quality_edit_box:SetNumeric(true)
+
   local loot_announce_min_quality_label =
     frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
   loot_announce_min_quality_label:SetPoint('LEFT',
@@ -877,17 +898,19 @@ function create_settings_frame()
                                            'RIGHT', 5, 0)
   loot_announce_min_quality_label:SetText('Loot announce min quality (0-4)')
 
-  -- do not disturb while being master looter cb
   local dnd_cb = CreateFrame('CheckButton', 'dnd_cb', frame,
                              'UICheckButtonTemplate')
   dnd_cb:SetPoint('TOPLEFT', loot_announce_min_quality_edit_box, 'BOTTOMLEFT',
                   -10, -10)
-  getglobal(dnd_cb:GetName() .. 'Text'):SetText('Block whispers while being ML');
-  dnd_cb.tooltip = 'Block whispers while being ML'
+  getglobal(dnd_cb:GetName() .. 'Text'):SetText('Block whispers while being ML')
 
-  frame:RegisterEvent('OnShow')
+  -- ================= ON SHOW =================
   frame:SetScript('OnShow', function()
     if master_looter ~= UnitName('player') then
+      loot_tracker_toggle_cb:Disable()
+      loot_tracker_layout_cb:Disable()
+      loot_tracker_text_cb:Disable()
+      loot_tracker_sound_cb:Disable()
       prio_main_over_alts_cb:Disable()
       reset_po_after_importing_sr_cb:Disable()
       reset_po_after_importing_sr_cb:Hide()
@@ -898,6 +921,10 @@ function create_settings_frame()
       dnd_cb:Disable()
       dnd_cb:Hide()
     else
+      loot_tracker_toggle_cb:Enable()
+      loot_tracker_layout_cb:Enable()
+      loot_tracker_text_cb:Enable()
+      loot_tracker_sound_cb:Enable()
       prio_main_over_alts_cb:Enable()
       reset_po_after_importing_sr_cb:Enable()
       reset_po_after_importing_sr_cb:Show()
@@ -921,16 +948,27 @@ function create_settings_frame()
     loot_announce_min_quality_edit_box:SetText(
       Settings.LootAnnounceMinQuality or 4)
     dnd_cb:SetChecked(Settings.DNDMode or false)
+
+    loot_tracker_toggle_cb:SetChecked(Settings.LootTrackerEnabled == true)
+    loot_tracker_layout_cb:SetChecked(Settings.LootTrackerHorizontal == true)
+    loot_tracker_text_cb:SetChecked(LootTrackerDB and LootTrackerDB.showText ==
+                                      true)
+    loot_tracker_sound_cb:SetChecked(LootTrackerDB and
+                                       LootTrackerDB.soundEnabled == true)
   end)
 
+  -- ================= SAVE BUTTON =================
   local save_button = CreateFrame('Button', nil, frame, 'UIPanelButtonTemplate')
+  save_button:SetPoint('BOTTOM', frame, 'BOTTOM', 0, 10)
+  save_button:SetHeight(20)
+  save_button:SetWidth(100)
+  save_button:SetText('Save Settings!')
+
   save_button:SetScript('OnClick', function()
-    -- Save the settings
     Settings.CustomFontSize = font_size_edit_box:GetText()
     Settings.FrameAutoClose = frame_auto_close_cb:GetChecked() == 1
     Settings.HideWhenUsingSpell = hwus_cb:GetChecked() == 1
 
-    -- master looter actions
     if master_looter == UnitName('player') then
       Settings.RollDuration = frame_duration_edit_box:GetText()
       Settings.ResetPOAfterImportingSR =
@@ -939,24 +977,33 @@ function create_settings_frame()
       Settings.LootAnnounceActive = loot_announce_cb:GetChecked() == 1
       Settings.LootAnnounceMinQuality =
         loot_announce_min_quality_edit_box:GetText()
+      Settings.DNDMode = dnd_cb:GetChecked() == 1
       send_ml_settings()
       update_moa_button_texture()
-      Settings.DNDMode = dnd_cb:GetChecked() == 1
+    end
+
+    Settings.LootTrackerEnabled = loot_tracker_toggle_cb:GetChecked() == 1
+    Settings.LootTrackerHorizontal = loot_tracker_layout_cb:GetChecked() == 1
+
+    LootTrackerDB.horizontal = Settings.LootTrackerHorizontal
+    LootTrackerDB.showText = loot_tracker_text_cb:GetChecked() == 1
+    LootTrackerDB.soundEnabled = loot_tracker_sound_cb:GetChecked() == 1
+
+    if lootTrackerFrame then
+      updateLootTrackerLayout()
+      if Settings.LootTrackerEnabled then
+        lootTrackerFrame:Show()
+      else
+        lootTrackerFrame:Hide()
+      end
     end
 
     lb_print('Settings saved!')
     frame:Hide()
   end)
-  save_button:SetPoint('BOTTOM', frame, 'BOTTOM', 0, 10)
-  save_button:SetHeight(20)
-  save_button:SetWidth(100)
-  save_button:SetText('Save Settings!')
 
-  -- Close button
   create_top_button(frame, 'TOPRIGHT', -10, -10)
-
   frame:Hide()
-
   return frame
 end
 

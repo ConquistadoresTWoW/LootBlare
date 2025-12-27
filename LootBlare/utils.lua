@@ -158,7 +158,7 @@ function run_if_master_looter(callback, notify)
   end
 end
 
-local latest_version = '[2.5.1]'
+local latest_version = '[3.0.0]'
 function send_ml_settings()
   local master_looter = master_looter or 'unknown'
   local message = config.LB_SET_ML_SETTINGS .. Settings.RollDuration .. ',' ..

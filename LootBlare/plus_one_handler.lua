@@ -1,3 +1,4 @@
+-- plus_one_handler.lua
 function print_plus_one_list()
   local plus_one_str = 'Plus one list: '
   for name, value in pairs(PlusOneList) do
@@ -13,7 +14,10 @@ local function increase_po_message(player_name, increment)
   local function po_on_list(player_name, list)
     for _, msg in ipairs(list) do
       if msg.roller == player_name then
+        -- Initialize plus_one if it doesn't exist
+        if msg.plus_one == nil then msg.plus_one = 0 end
         msg.plus_one = msg.plus_one + increment
+        if msg.plus_one < 0 then msg.plus_one = 0 end
         return true
       end
     end
