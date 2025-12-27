@@ -1,4 +1,4 @@
-# Loot Blare 2.5.1
+# Loot Blare 3.0.0
 
 Loot Blare is a World of Warcraft addon originally designed **Turtle WoW**. The original version of this addon can be found [here](https://github.com/MarcelineVQ/LootBlare). This version of Loot Blare was completely updated by and for the **Conquistadores** guild.
 
@@ -87,6 +87,7 @@ The minimap button has the following shortcuts:
 ![LootBlare Frame](./assets/lootblareframe.png)
 
 Changelog:
+- **3.0.0**: Add SR on tooltip and loot tracker
 - **2.5.1**: Add version check
 - **2.5.0**: Add Rank Priority System (Lootin mode)
 - **2.4.2**: Send OS payment to TM rolls without applying +1

@@ -1,7 +1,7 @@
 ## Interface: 11200
-## Title:  [Conquistadores] |cff00ccff LootBlare 2.5.1|r
+## Title:  [Conquistadores] |cff00ccff LootBlare 3.0.0|r
 ## Author: Ehawne, Sivent, Gulolio
-## Version: 2.5.1
+## Version: 3.0.0
 ## Notes: Make loot rolls obvious
 ## SavedVariables: AltList, SRList, PlusOneList, Settings, LastRaidData, LootTrackerDB
 
