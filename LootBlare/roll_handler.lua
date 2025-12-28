@@ -89,11 +89,11 @@ function sort_rolls()
     end
   end
 
-  insert_into_result(sr_ms_messages, 5)
-  insert_into_result(ms_roll_messages, 5)
-  insert_into_result(sr_os_messages, 5)
-  insert_into_result(os_roll_messages, 5)
-  insert_into_result(tmog_roll_messages, 6)
+  insert_into_result(sr_ms_messages, 4)
+  insert_into_result(ms_roll_messages, 4)
+  insert_into_result(sr_os_messages, 4)
+  insert_into_result(os_roll_messages, 4)
+  insert_into_result(tmog_roll_messages, 5)
 
   lb_send_roll_results()
 end
