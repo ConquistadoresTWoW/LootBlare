@@ -55,6 +55,8 @@ function create_color_message(message)
 end
 
 function len(t)
+  if type(t) ~= 'table' then return 0 end
+  if t == nil then return 0 end
   c = 0
   for _ in pairs(t) do c = c + 1 end
   return c
