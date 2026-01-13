@@ -22,8 +22,16 @@ local function parse_csv()
   local header = string_split(lines[1])
 
   -- Validate the header structure
-  local expected_header = {"ID", "Item", "Attendee", "Comment", "SR+"}
-  if len(header) ~= len(expected_header) then
+  local no_sr_plus = false
+  local header_with_sr_plus = {"ID", "Item", "Attendee", "Comment", "SR+"}
+  local header_without_sr_plus = {"ID", "Item", "Attendee", "Comment"}
+  local expected_header = nil
+  if len(header) == len(header_with_sr_plus) then
+    expected_header = header_with_sr_plus
+  elseif len(header) == len(header_without_sr_plus) then
+    expected_header = header_without_sr_plus
+    no_sr_plus = true
+  else
     return nil, "Invalid CSV header: Incorrect number of fields"
   end
 
@@ -37,7 +45,6 @@ local function parse_csv()
 
   -- Parse the data
   local data = {}
-  local is_pug = true
 
   for i = 2, len(lines) do
     local row = {
@@ -61,18 +68,23 @@ local function parse_csv()
     local comment = string.lower(row["Comment"])
     row["MS"] = not (string.find(comment, 'os')) and true
     if string.find(comment, 'alt') then row["Alt"] = true end
-    row["SR+"] = tonumber(row["SR+"])
-    if row["SR+"] ~= 0 then is_pug = false end
+    if no_sr_plus then
+      row["SR+"] = 1
+    else
+      local sr_value = tonumber(row["SR+"]) or 1
+      if sr_value < 0 then
+        row["SR+"] = 0
+      elseif sr_value == 0 then
+        row["SR+"] = 1
+      else
+        row["SR+"] = sr_value
+      end
+    end
     if row["Alt"] then AltList[row["Attendee"]] = true end
     if AltList[row["Attendee"]] then row["Alt"] = true end
 
     table.insert(data, row)
   end
-
-  -- In raiders, if the SR+ is off then all the SR+ are exported as 0, which is the same value 
-  -- as the invalid SR when the SR+ is on. This is a workaround to fix the SR+ values when the SR+ is off.
-  if is_pug then for i, row in ipairs(data) do row["SR+"] = 1 end end
-
   return data, nil
 end
 

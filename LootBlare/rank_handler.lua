@@ -3,18 +3,22 @@ function lb_load_guild_info()
   GuildRoster() -- Request guild roster update
 
   for i = 1, GetNumGuildMembers(true) do
-    local name, rank, rankIndex, _, _, _, _, officer_note =
+    local name, rank, rankIndex, _, _, _, public_note, officer_note =
       GetGuildRosterInfo(i)
 
     -- lower the officer_note and search for prioos:spec pattern
     local officer_note = string.lower(officer_note or "")
     local prio_os = string_match(officer_note, "prioos:(%S+)")
+    local public_note = string.lower(public_note or "")
+    local is_alt = string_match(public_note, "*alt (%S+)")
+    local is_alt = is_alt ~= nil
 
     if not name then break end
     -- ranks start at 0
     lb_guild_info[name] = {}
     lb_guild_info[name].rankIndex = rankIndex or 0
     lb_guild_info[name].prio_os = prio_os ~= nil
+    lb_guild_info[name].is_alt = is_alt or False
   end
 end
 
