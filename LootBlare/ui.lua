@@ -526,6 +526,7 @@ end
 
 function show_frame(frame, duration, item)
   -- Reset roll tracking for new item
+  update_moa_button_texture()
   update_roll_buttons()
 
   duration = tonumber(duration)
@@ -536,6 +537,7 @@ function show_frame(frame, duration, item)
 
   frame:SetScript('OnShow', function()
     frame.statusBar:Show()
+    update_moa_button_texture()
     update_roll_buttons()
   end)
   frame:SetScript('OnHide', function() frame.statusBar:Hide() end)
