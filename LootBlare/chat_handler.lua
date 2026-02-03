@@ -31,7 +31,7 @@ function handle_chat_message(event, message, sender)
           is_high_rank = lb_is_high_rank(roller),
           has_debt = lb_has_debt(roller),
           prio_os = lb_has_prio_os(roller),
-          is_alt = lb_guild_info[roller].is_alt or false,
+          is_alt = lb_is_alt(roller),
           plus_one = PlusOneList[roller] or 0,
           has_ms_sr = has_ms_sr,
           has_os_sr = has_os_sr

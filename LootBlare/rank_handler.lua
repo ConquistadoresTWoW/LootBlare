@@ -46,3 +46,11 @@ function lb_has_prio_os(player_name)
     return false -- Player not found in guild or no prio os
   end
 end
+
+function lb_is_alt(player_name)
+  if lb_guild_info[player_name] and lb_guild_info[player_name].is_alt then
+    return lb_guild_info[player_name].is_alt
+  else
+    return false -- Player not found in guild or not an alt
+  end
+end
