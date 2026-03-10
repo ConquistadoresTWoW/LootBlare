@@ -131,7 +131,13 @@ function handle_chat_message(event, message, sender)
       end
       sort_rolls()
       update_text_area(item_roll_frame)
+      local rollingItemId = string_match(current_link, "item:(%d+)") or ""
+      -- Send legacy message first for backwards compatibility with older versions
       SendAddonMessage(config.LB_PREFIX, config.LB_START_ROLL, 'RAID')
+      -- Send new message with item ID for auto-roll feature
+      if rollingItemId ~= "" then
+        SendAddonMessage(config.LB_PREFIX, config.LB_START_ROLL .. ":" .. rollingItemId, 'RAID')
+      end
     end
 
     -- item_roll_frame:UnregisterEvent('ADDON_LOADED')
@@ -183,14 +189,25 @@ function handle_chat_message(event, message, sender)
     end
 
     -- ML is starting a roll
-    if sender == master_looter and message == config.LB_START_ROLL then
-      update_text_area(item_roll_frame)
-      time_elapsed = 0
-      is_rolling = true
-      show_frame(item_roll_frame, Settings.RollDuration, current_link)
-      -- Reset roll tracking
-      -- has_rolled_for_current_item = {}
-      if update_roll_buttons then update_roll_buttons() end
+    if sender == master_looter and string.find(message, "^" .. config.LB_START_ROLL) then
+      -- Parse the item ID embedded in the message ("start roll:12345")
+      -- This is only present in newer versions; older format is just "start roll"
+      local _, _, rollingItemId = string.find(message, config.LB_START_ROLL .. ":(%d+)")
+      rollingItemId = tonumber(rollingItemId)
+
+      -- The ML sends both "start roll" (legacy) and "start roll:ID" (new).
+      -- If we already handled the legacy message this roll, only fire auto-roll from the new one.
+      if not rollingItemId then
+        -- Legacy message: start the roll frame as normal
+        update_text_area(item_roll_frame)
+        time_elapsed = 0
+        is_rolling = true
+        show_frame(item_roll_frame, Settings.RollDuration, current_link)
+        if update_roll_buttons then update_roll_buttons() end
+      else
+        -- New message: just fire the auto-roll, frame already started from legacy message
+        if triggerQueuedRoll then triggerQueuedRoll(rollingItemId) end
+      end
     end
 
     if sender == master_looter and message == config.LB_STOP_ROLL then
@@ -225,8 +242,17 @@ function handle_chat_message(event, message, sender)
         LootAnnounceMinQuality = 4, -- Epic
         DNDMode = false,
         LootTrackerEnabled = true, -- Loot Tracker enabled by default
-        LootTrackerHorizontal = true -- Horizontal layout by default
+        LootTrackerHorizontal = true, -- Horizontal layout by default
+        RollFrameScale = 1.0 -- Roll frame scale (scroll to resize)
       }
+    end
+
+    -- Ensure RollFrameScale exists for saves that predate this setting
+    if Settings.RollFrameScale == nil then Settings.RollFrameScale = 1.0 end
+
+    -- Restore saved roll frame scale on login
+    if item_roll_frame and Settings.RollFrameScale ~= 1.0 then
+      item_roll_frame:SetScale(Settings.RollFrameScale)
     end
 
     -- Ensure Loot Tracker settings exist

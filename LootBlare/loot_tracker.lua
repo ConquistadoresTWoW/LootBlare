@@ -30,6 +30,91 @@ lootTrackerCenter = nil
 
 local isMoving = false
 
+-- ─── Auto-roll queue ────────────────────────────────────────────────────────
+-- Maps itemId (number) → queued roll type ("MS", "OS", "TM", or nil)
+-- Using item ID as the key means the queue survives any link-format differences
+-- between what the tracker stores and what the ML raid-warning produces.
+local autoRollQueue = {}
+
+-- Helper: pull the numeric item ID out of any item link or plain itemString
+local function extractItemId(str)
+  if not str then return nil end
+  return tonumber(string_match(str, "item:(%d+)"))
+end
+
+-- Roll-type configuration
+local ROLL_TYPES = {
+  { key = "MS", max = 100, label = "MS", activeR = 1,   activeG = 0.45, activeB = 0,   inactiveR = 0.25, inactiveG = 0.12, inactiveB = 0.0  },
+  { key = "OS", max = 99,  label = "OS", activeR = 0,   activeG = 0.8,  activeB = 0,   inactiveR = 0.0,  inactiveG = 0.20, inactiveB = 0.0  },
+  { key = "TM", max = 50,  label = "TM", activeR = 0,   activeG = 0.7,  activeB = 0.9, inactiveR = 0.0,  inactiveG = 0.18, inactiveB = 0.22 },
+}
+
+local ROLL_BTN_W  = 28
+local ROLL_BTN_H  = 13
+local ROLL_BTN_GAP = 3
+
+-- Update the visual state of the three roll buttons on a row
+local function refreshRollButtons(row)
+  if not row or not row.item then return end
+  local itemId = extractItemId(row.item.itemString)
+  local queued = itemId and autoRollQueue[itemId]
+  for _, btn in ipairs(row.rollBtns or {}) do
+    local rt = btn.rollType
+    local isActive = (queued == rt.key)
+    if isActive then
+      btn:SetBackdropColor(rt.activeR, rt.activeG, rt.activeB, 0.90)
+      btn:SetBackdropBorderColor(rt.activeR * 1.4, rt.activeG * 1.4, rt.activeB * 1.4, 1)
+      btn.label:SetTextColor(1, 1, 1, 1)
+    else
+      btn:SetBackdropColor(rt.inactiveR, rt.inactiveG, rt.inactiveB, 0.75)
+      btn:SetBackdropBorderColor(0.3, 0.3, 0.3, 0.8)
+      btn.label:SetTextColor(0.6, 0.6, 0.6, 1)
+    end
+  end
+end
+
+-- Called from chat_handler when LB_START_ROLL arrives.
+-- itemId is the plain numeric ID embedded in the addon message.
+function triggerQueuedRoll(itemId)
+  if not itemId then return end
+  itemId = tonumber(itemId)
+  if not itemId then return end
+
+  local queuedType = autoRollQueue[itemId]
+  if not queuedType then return end
+
+  -- Find the max roll for this type
+  local maxRoll = 100
+  for _, rt in ipairs(ROLL_TYPES) do
+    if rt.key == queuedType then maxRoll = rt.max end
+  end
+
+  -- Clear the queue entry immediately so it can't double-fire
+  autoRollQueue[itemId] = nil
+
+  -- Refresh buttons on any tracker row showing this item
+  if lootTrackerFrame and lootTrackerFrame.rows then
+    for _, row in ipairs(lootTrackerFrame.rows) do
+      if row.item and extractItemId(row.item.itemString) == itemId then
+        refreshRollButtons(row)
+      end
+    end
+  end
+
+  -- Fire after a random 1–3 second delay
+  local delay = 1.0 + math.random() * 2.0
+  local elapsed = 0
+  local fireFrame = CreateFrame("Frame")
+  fireFrame:SetScript("OnUpdate", function()
+    elapsed = elapsed + arg1
+    if elapsed >= delay then
+      this:SetScript("OnUpdate", nil)
+      RandomRoll(1, maxRoll)
+    end
+  end)
+end
+-- ─────────────────────────────────────────────────────────────────────────────
+
 local scanner = CreateFrame("GameTooltip", "LootTrackerScanner", nil,
                             "GameTooltipTemplate")
 scanner:SetOwner(UIParent, "ANCHOR_NONE")
@@ -51,6 +136,91 @@ local function initDB()
   LootTrackerDB.relativePoint = LootTrackerDB.relativePoint or "CENTER"
   LootTrackerDB.x = LootTrackerDB.x or 300
   LootTrackerDB.y = LootTrackerDB.y or 0
+end
+
+local function createRollButton(parent, rollType)
+  local btn = CreateFrame("Button", nil, parent)
+  btn:SetWidth(ROLL_BTN_W)
+  btn:SetHeight(ROLL_BTN_H)
+  btn:EnableMouse(true)
+  btn.rollType = rollType
+
+  btn:SetBackdrop({
+    bgFile   = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeSize = 1,
+  })
+  btn:SetBackdropColor(rollType.inactiveR, rollType.inactiveG, rollType.inactiveB, 0.75)
+  btn:SetBackdropBorderColor(0.3, 0.3, 0.3, 0.8)
+
+  btn.label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  btn.label:SetAllPoints(btn)
+  btn.label:SetJustifyH("CENTER")
+  btn.label:SetJustifyV("MIDDLE")
+  btn.label:SetText(rollType.label)
+  btn.label:SetFont("Fonts\\FRIZQT__.TTF", 9, "OUTLINE")
+  btn.label:SetTextColor(0.6, 0.6, 0.6, 1)
+
+  btn:SetScript("OnClick", function()
+    local strip = this:GetParent()
+    local row = strip and strip.row
+    if not row or not row.item then return end
+    local itemId = extractItemId(row.item.itemString)
+    if not itemId then return end
+    local rt = this.rollType
+
+    if autoRollQueue[itemId] == rt.key then
+      autoRollQueue[itemId] = nil
+    else
+      autoRollQueue[itemId] = rt.key
+    end
+
+    refreshRollButtons(row)
+  end)
+
+  -- Tooltip on hover
+  btn:SetScript("OnEnter", function()
+    local rt = this.rollType
+    local strip = this:GetParent()
+    local row = strip and strip.row
+    local itemId = row and row.item and extractItemId(row.item.itemString)
+    local queued = itemId and autoRollQueue[itemId]
+
+    GameTooltip:SetOwner(this, "ANCHOR_TOP")
+    if queued == rt.key then
+      GameTooltip:SetText("|cFFFFFF00" .. rt.label .. " roll queued|r\nClick to cancel", nil, nil, nil, nil, 1)
+    else
+      GameTooltip:SetText("Queue |cFFFFFF00" .. rt.label .. "|r roll (1/" .. rt.max .. ")\nWill auto-roll when ML opens this item", nil, nil, nil, nil, 1)
+    end
+    GameTooltip:Show()
+  end)
+
+  btn:SetScript("OnLeave", function()
+    GameTooltip:Hide()
+  end)
+
+  return btn
+end
+
+local function createRollButtonStrip()
+  local strip = CreateFrame("Frame", nil, UIParent)
+  strip:SetFrameStrata("HIGH")
+  strip:SetBackdrop({
+    bgFile   = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeSize = 1,
+  })
+  strip:SetBackdropColor(0.05, 0.05, 0.05, 0.90)
+  strip:SetBackdropBorderColor(0.25, 0.25, 0.25, 0.9)
+
+  strip.btns = {}
+  for i, rt in ipairs(ROLL_TYPES) do
+    local btn = createRollButton(strip, rt)
+    strip.btns[i] = btn
+  end
+
+  strip:Hide()
+  return strip
 end
 
 local function createLootRow(parent)
@@ -75,6 +245,13 @@ local function createLootRow(parent)
   row.highlight:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
   row.highlight:SetVertexColor(1, 1, 1, 0.12)
   row.highlight:Hide()
+
+  -- Button strip is a separate frame floating below this row
+  row.rollStrip = createRollButtonStrip()
+  -- Keep a back-reference so buttons can find their row
+  row.rollStrip.row = row
+  -- Alias so refreshRollButtons still works
+  row.rollBtns = row.rollStrip.btns
 
   row:SetScript("OnEnter", function()
     if not this.item then return end
@@ -108,19 +285,23 @@ function updateLootTrackerLayout()
     return
   end
 
-  local size = BASE_ICON_SIZE * currentScale
-  local spacing = BASE_SPACING * currentScale
-  local pad = 6 * currentScale
-  local textPad = 8 * currentScale
+  local size     = BASE_ICON_SIZE * currentScale
+  local spacing  = BASE_SPACING * currentScale
+  local pad      = 6 * currentScale
+  local textPad  = 8 * currentScale
+  local btnH     = ROLL_BTN_H * currentScale
+  local btnW     = ROLL_BTN_W * currentScale
+  local btnGap   = ROLL_BTN_GAP * currentScale
+  local numRollTypes = getn(ROLL_TYPES)
 
   local horizontal = LootTrackerDB.horizontal
-  local showText = LootTrackerDB.showText
+  local showText   = LootTrackerDB.showText
 
   lootTrackerFrame.rows = lootTrackerFrame.rows or {}
 
   for i = 1, lootCount do
     local item = lootItems[i]
-    local row = lootTrackerFrame.rows[i]
+    local row  = lootTrackerFrame.rows[i]
 
     if not row then
       row = createLootRow(lootTrackerFrame)
@@ -146,7 +327,12 @@ function updateLootTrackerLayout()
     row.text:SetText(name or "Loading...")
     row.text:SetTextColor(r, g, b)
 
+    -- Button strip sits outside/below the row, anchored to its bottom
+    local totalBtnW = numRollTypes * btnW + (numRollTypes - 1) * btnGap
+    local stripPad  = 3 * currentScale
+
     local rowWidth, rowHeight
+
     if showText then
       row.text:Show()
       row.icon:SetPoint("LEFT", row, "LEFT", pad, 0)
@@ -155,21 +341,48 @@ function updateLootTrackerLayout()
       local textWidth = row.text:GetStringWidth()
       if textWidth < 40 then textWidth = 40 end
 
-      rowWidth = size + textPad + textWidth + pad * 2
+      rowWidth  = size + textPad + textWidth + pad * 2
       rowHeight = size + pad * 2
     else
       row.text:Hide()
-      row.icon:SetPoint("CENTER", row, "CENTER")
-      rowWidth = size + pad * 2
+      row.icon:SetPoint("CENTER", row, "CENTER", 0, 0)
+
+      rowWidth  = size + pad * 2
       rowHeight = size + pad * 2
     end
 
+    -- Make sure row is wide enough for the button strip
+    if rowWidth < totalBtnW + pad * 2 then rowWidth = totalBtnW + pad * 2 end
+
     row:SetWidth(rowWidth)
     row:SetHeight(rowHeight)
+
+    -- Position and size the floating button strip below the row
+    local strip = row.rollStrip
+    strip:ClearAllPoints()
+    strip:SetPoint("TOP", row, "BOTTOM", 0, -2)
+    strip:SetWidth(totalBtnW + stripPad * 2)
+    strip:SetHeight(btnH + stripPad * 2)
+    strip:Show()
+    strip:SetAlpha(row:GetAlpha())
+
+    for j, btn in ipairs(strip.btns) do
+      btn:SetWidth(btnW)
+      btn:SetHeight(btnH)
+      btn:ClearAllPoints()
+      btn:SetPoint("LEFT", strip, "LEFT", stripPad + (j - 1) * (btnW + btnGap), 0)
+    end
+
+    refreshRollButtons(row)
   end
 
   local rowCount = getn(lootTrackerFrame.rows)
-  for i = lootCount + 1, rowCount do lootTrackerFrame.rows[i]:Hide() end
+  for i = lootCount + 1, rowCount do
+    lootTrackerFrame.rows[i]:Hide()
+    if lootTrackerFrame.rows[i].rollStrip then
+      lootTrackerFrame.rows[i].rollStrip:Hide()
+    end
+  end
 
   local total = 0
   for i = 1, lootCount do
@@ -206,9 +419,9 @@ function addLootToTracker(itemString)
 
   table.insert(lootItems, {
     itemString = itemString,
-    time = GetTime(),
-    resolved = false,
-    scanned = false
+    time       = GetTime(),
+    resolved   = false,
+    scanned    = false
   })
 
   lootCount = lootCount + 1
@@ -231,30 +444,37 @@ cleanup:SetScript("OnUpdate", function()
   local needsUpdate = false
 
   for i = lootCount, 1, -1 do
-    local item = lootItems[i]
-    local row = item.row
+    local item    = lootItems[i]
+    local row     = item.row
     local elapsed = now - item.time
 
     if not item.resolved then
       if GetItemInfo(item.itemString) then
         item.resolved = true
-        needsUpdate = true
-      elseif not item.scanned then
+        needsUpdate   = true
+      elseif not item.scanned and not (LootFrame and LootFrame:IsShown()) then
         scanner:SetHyperlink(item.itemString)
         item.scanned = true
       end
     end
 
     if elapsed > ICON_LIFETIME then
-      if row then row:Hide() end
+      -- Clean up any queued roll for this item when it expires
+      local itemId = extractItemId(item.itemString)
+      if itemId then autoRollQueue[itemId] = nil end
+      if row then
+        row:Hide()
+        if row.rollStrip then row.rollStrip:Hide() end
+      end
       table.remove(lootItems, i)
-      lootCount = lootCount - 1
-      needsUpdate = true
+      lootCount     = lootCount - 1
+      needsUpdate   = true
     elseif row and elapsed > ICON_LIFETIME - SAFE_TIME then
       local t = (elapsed - (ICON_LIFETIME - SAFE_TIME)) / SAFE_TIME
       if t < 0 then t = 0 end
       if t > 1 then t = 1 end
       row:SetAlpha(1 - t)
+      if row.rollStrip then row.rollStrip:SetAlpha(1 - t) end
     end
   end
 
