@@ -87,6 +87,7 @@ The minimap button has the following shortcuts:
 ![LootBlare Frame](./assets/lootblareframe.png)
 
 Changelog:
+- **3.1.0**: Fix ML not seeing items issue + new loot tracker feature
 - **3.0.0**: Add SR on tooltip and loot tracker
 - **2.5.1**: Add version check
 - **2.5.0**: Add Rank Priority System (Lootin mode)
