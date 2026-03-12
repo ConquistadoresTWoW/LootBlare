@@ -39,6 +39,16 @@ function loot_announce_handler()
     return -- If loot announcements are disabled, do nothing
   end
 
+  -- Defer by one frame so the loot window is fully open and item data requests
+  -- from our tooltip scanner don't race with the server's loot response.
+  local deferred = CreateFrame("Frame")
+  deferred:SetScript("OnUpdate", function()
+    this:SetScript("OnUpdate", nil) -- run once
+    loot_announce_handler_impl()
+  end)
+end
+
+function loot_announce_handler_impl()
   local has_superwow = SetAutoloot and true or false
 
   if has_superwow then

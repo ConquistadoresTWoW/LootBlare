@@ -66,12 +66,22 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   font:SetFont(config.FONT_NAME, config.FONT_SIZE, config.FONT_OUTLINE)
   font:SetPoint("CENTER", button, "CENTER", 0, -4) -- Move text down by 2 pixels
 
-  -- Add background
+  -- Add background (matches loot tracker dark skin)
   local background = button:CreateTexture(nil, 'BACKGROUND')
+  background:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
   background:SetAllPoints(button)
-  background:SetTexture(1, 1, 1, 1)
-  background:SetVertexColor(0.2, 0.2, 0.2, 1)
+  background:SetVertexColor(0.15, 0.15, 0.15, 0.9)
   button.background = background
+
+  -- Crisp 1px border overlay (loot tracker style)
+  local border = CreateFrame("Frame", nil, button)
+  border:SetAllPoints(button)
+  border:SetBackdrop({
+    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeSize = 1,
+  })
+  border:SetBackdropBorderColor(0.35, 0.35, 0.35, 1)
+  button.border = border
 
   -- Store original roll function
   button.originalOnClick = on_click_action
@@ -88,27 +98,27 @@ local function create_action_button(frame, button_text, tooltip_text, index,
   end)
 
   button:SetScript('OnMouseDown', function(self)
-    background:SetVertexColor(0.6, 0.6, 0.6, 1) -- Even lighter gray when pressed
+    background:SetVertexColor(0.35, 0.35, 0.35, 1)
   end)
 
   button:SetScript('OnMouseUp', function(self)
-    background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark when disabled
+    background:SetVertexColor(0.08, 0.08, 0.08, 1)
   end)
 
   -- Add tooltip
   button:SetScript('OnEnter', function(self)
     GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
     GameTooltip:SetText(tooltip_text, nil, nil, nil, nil, true)
-    background:SetVertexColor(0.4, 0.4, 0.4, 1) -- Lighter gray on hover
+    background:SetVertexColor(0.25, 0.25, 0.25, 1)
     GameTooltip:Show()
   end)
 
   button:SetScript('OnLeave', function(self)
     local player_name = UnitName('player')
     if has_rolled_for_current_item then
-      background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark when disabled
+      background:SetVertexColor(0.08, 0.08, 0.08, 1)
     else
-      background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Dark gray when not hovered
+      background:SetVertexColor(0.15, 0.15, 0.15, 0.9)
     end
     GameTooltip:Hide()
   end)
@@ -129,9 +139,9 @@ function update_roll_buttons()
         if has_rolled_for_current_item then
           -- Disable the button by setting text color and making it unclickable
           button:Disable()
-          font:SetTextColor(0.5, 0.5, 0.5) -- Darken text
+          font:SetTextColor(0.4, 0.4, 0.4) -- Darken text
           if button.background then
-            button.background:SetVertexColor(0.1, 0.1, 0.1, 1) -- Very dark background
+            button.background:SetVertexColor(0.08, 0.08, 0.08, 1)
           end
           -- Remove the highlight texture when disabled
           button:SetHighlightTexture(nil)
@@ -140,12 +150,13 @@ function update_roll_buttons()
           button:Enable()
           font:SetTextColor(1, 1, 1) -- Normal text color
           if button.background then
-            button.background:SetVertexColor(0.2, 0.2, 0.2, 1) -- Normal background
+            button.background:SetVertexColor(0.15, 0.15, 0.15, 0.9)
           end
           -- Restore highlight texture
           local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
           highlight:SetAllPoints(button)
-          highlight:SetTexture(0.2, 0.2, 0.2, 0.5)
+          highlight:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+          highlight:SetVertexColor(1, 1, 1, 0.08)
           button:SetHighlightTexture(highlight)
         end
       end
@@ -159,17 +170,15 @@ function create_item_roll_frame()
   frame:SetHeight(config.FRAME_HEIGHT)
   frame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
 
-  -- Create backdrop with border
+  -- Create backdrop with border (matches loot tracker skin)
   frame:SetBackdrop({
-    bgFile = 'Interface/Tooltips/UI-Tooltip-Background',
-    edgeFile = 'Interface/Tooltips/UI-Tooltip-Border',
-    tile = true,
-    tileSize = 16,
-    edgeSize = 16,
-    insets = {left = 4, right = 4, top = 4, bottom = 4}
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeSize = 1,
+    insets = {left = 1, right = 1, top = 1, bottom = 1}
   })
-  frame:SetBackdropColor(0, 0, 0, 1) -- Black background with full opacity
-  frame:SetBackdropBorderColor(0, 0, 0, 0) -- Start with transparent border
+  frame:SetBackdropColor(0.08, 0.08, 0.08, 0.85)
+  frame:SetBackdropBorderColor(0.3, 0.3, 0.3, 1) -- Neutral border until item quality is known
 
   -- Create status bar with custom texture
   frame.statusBar = CreateFrame("StatusBar", nil, frame)
@@ -202,9 +211,30 @@ function create_item_roll_frame()
 
   frame:SetMovable(true)
   frame:EnableMouse(true)
+  frame:EnableMouseWheel(true)
   frame:RegisterForDrag('LeftButton')
   frame:SetScript('OnDragStart', function() frame:StartMoving() end)
   frame:SetScript('OnDragStop', function() frame:StopMovingOrSizing() end)
+
+  -- Scroll to resize: SetScale uniformly scales the frame and every child element
+  frame:SetScript('OnMouseWheel', function()
+    if not arg1 then return end
+
+    local step = 0.05
+    local minScale, maxScale = 0.5, 2.0
+
+    local currentScale = Settings and Settings.RollFrameScale or 1.0
+    if arg1 > 0 then
+      currentScale = currentScale + step
+    else
+      currentScale = currentScale - step
+    end
+    if currentScale < minScale then currentScale = minScale end
+    if currentScale > maxScale then currentScale = maxScale end
+
+    if Settings then Settings.RollFrameScale = currentScale end
+    frame:SetScale(currentScale)
+  end)
 
   create_top_button(frame)
   local main_over_alts_button = CreateFrame('Button', nil, frame,
@@ -440,35 +470,64 @@ function update_text_area(frame)
 end
 
 local function init_item_info(frame)
-  -- Create the texture for the item icon
-  local icon = frame:CreateTexture()
-  icon:SetWidth(40) -- Size of the icon
-  icon:SetHeight(40) -- Size of the icon
-  icon:SetPoint('TOP', frame, 'TOP', 0, -10)
+  local ICON_SIZE = 34
+  local PAD = 4 -- padding inside the border container
 
-  -- Create a button for mouse interaction
-  local icon_button = CreateFrame('Button', nil, frame)
-  icon_button:SetWidth(40) -- Size of the icon
-  icon_button:SetHeight(40) -- Size of the icon
-  icon_button:SetPoint('TOP', frame, 'TOP', 0, -10)
+  -- Outer container: dark background + quality-colored 1px border (loot tracker style)
+  local icon_container = CreateFrame('Frame', nil, frame)
+  icon_container:SetWidth(ICON_SIZE + PAD * 2)
+  icon_container:SetHeight(ICON_SIZE + PAD * 2)
+  icon_container:SetPoint('TOP', frame, 'TOP', 0, -10)
+  icon_container:SetBackdrop({
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeSize = 1,
+    insets = {left = 1, right = 1, top = 1, bottom = 1}
+  })
+  icon_container:SetBackdropColor(0.08, 0.08, 0.08, 0.9)
+  icon_container:SetBackdropBorderColor(0.3, 0.3, 0.3, 1) -- neutral until quality known
+
+  -- Icon texture inside the container, trimmed like the loot tracker
+  local icon = icon_container:CreateTexture(nil, 'ARTWORK')
+  icon:SetWidth(ICON_SIZE)
+  icon:SetHeight(ICON_SIZE)
+  icon:SetPoint('CENTER', icon_container, 'CENTER', 0, 0)
+  icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) -- trim built-in WoW icon border
+
+  -- Subtle hover highlight overlay (loot tracker style)
+  local icon_hover = icon_container:CreateTexture(nil, 'OVERLAY')
+  icon_hover:SetAllPoints(icon_container)
+  icon_hover:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+  icon_hover:SetVertexColor(1, 1, 1, 0.12)
+  icon_hover:Hide()
+
+  -- Create a button for mouse interaction, parented to container
+  local icon_button = CreateFrame('Button', nil, icon_container)
+  icon_button:SetAllPoints(icon_container)
 
   -- Create a FontString for the item name
   local name = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
-  name:SetPoint('TOP', icon, 'BOTTOM', 0, -10)
+  name:SetPoint('TOP', icon_container, 'BOTTOM', 0, -8)
 
   frame.icon = icon
   frame.iconButton = icon_button
+  frame.iconContainer = icon_container
+  frame.iconHover = icon_hover
   frame.name = name
   frame.itemLink = ''
 
   -- Set up tooltip
   icon_button:SetScript('OnEnter', function()
+    icon_hover:Show()
     GameTooltip:SetOwner(icon_button, 'ANCHOR_RIGHT')
     GameTooltip:SetHyperlink(frame.itemLink)
     GameTooltip:Show()
   end)
 
-  icon_button:SetScript('OnLeave', function() GameTooltip:Hide() end)
+  icon_button:SetScript('OnLeave', function()
+    icon_hover:Hide()
+    GameTooltip:Hide()
+  end)
   icon_button:SetScript('OnClick', function()
     if (IsControlKeyDown()) then
       DressUpItemLink(frame.itemLink);
@@ -508,17 +567,23 @@ local function set_item_info(frame, item_link_arg)
     frame.name:SetText('Unknown item, attempting to query...')
     -- Set border to gray for unknown items
     frame:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+    if frame.iconContainer then
+      frame.iconContainer:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+    end
     frame.statusBar:SetStatusBarColor(0.5, 0.5, 0.5) -- green timer bar
     return true
   end
 
   frame.icon:SetTexture(item_icon)
-  frame.iconButton:SetNormalTexture(item_icon)
   frame.name:SetText(get_colored_text_by_quality(item_name, item_quality))
   frame.itemLink = item_link
 
   -- Set the border color based on item quality
   local r, g, b = GetItemQualityColor(item_quality)
+  frame:SetBackdropBorderColor(r, g, b, 1)
+  if frame.iconContainer then
+    frame.iconContainer:SetBackdropBorderColor(r * 0.9, g * 0.9, b * 0.9, 1)
+  end
   frame:SetBackdropBorderColor(r, g, b, 1)
   frame.statusBar:SetStatusBarColor(r, g, b)
   return true
