@@ -160,7 +160,30 @@ function run_if_master_looter(callback, notify)
   end
 end
 
-local latest_version = '[3.1.0]'
+-- Read version from .toc so it only needs to be updated in one place
+local raw_version = GetAddOnMetadata("LootBlare", "Version") or "0.0.0"
+local latest_version = "[" .. raw_version .. "]"
+
+local function is_older_version(my_ver, their_ver)
+  -- Strip brackets: "[3.1.0]" -> "3.1.0"
+  my_ver = string.gsub(my_ver, "[%[%]]", "")
+  their_ver = string.gsub(their_ver, "[%[%]]", "")
+
+  local my_major, my_minor, my_patch = string_match(my_ver, "(%d+)%.(%d+)%.(%d+)")
+  local their_major, their_minor, their_patch = string_match(their_ver, "(%d+)%.(%d+)%.(%d+)")
+
+  my_major, my_minor, my_patch = tonumber(my_major), tonumber(my_minor), tonumber(my_patch)
+  their_major, their_minor, their_patch = tonumber(their_major), tonumber(their_minor), tonumber(their_patch)
+
+  if not (my_major and their_major) then return false end
+
+  if my_major ~= their_major then return my_major < their_major end
+  if my_minor ~= their_minor then return my_minor < their_minor end
+  return my_patch < their_patch
+end
+
+local lb_version_check = false
+
 function send_ml_settings()
   local master_looter = master_looter or 'unknown'
   local message = config.LB_SET_ML_SETTINGS .. Settings.RollDuration .. ',' ..
@@ -169,7 +192,6 @@ function send_ml_settings()
   SendAddonMessage(config.LB_PREFIX, message, 'RAID')
 end
 
-lb_version_check = false
 function load_ml_settings_from_string(settings_str)
   local settings = string_split(settings_str, ',')
 
@@ -179,14 +201,12 @@ function load_ml_settings_from_string(settings_str)
 
   if not lb_version_check then
     local ml_version = settings[4] or '[0.0.0]'
-    if ml_version ~= latest_version then
-      local version_message =
-        'Your LootBlare version is old. Please update to version ' ..
-          tostring(ml_version) .. ' here: ' .. config.GH_LINK
-      local r, g, b = config.ADDON_TEXT_COLOR_RGB[1],
-                      config.ADDON_TEXT_COLOR_RGB[2],
-                      config.ADDON_TEXT_COLOR_RGB[3]
-      DEFAULT_CHAT_FRAME:AddMessage(version_message, r, g, b);
+    if is_older_version(latest_version, ml_version) then
+      local download_url = "https://github.com/ConquistadoresTWoW/LootBlare/archive/refs/heads/master.zip"
+      DEFAULT_CHAT_FRAME:AddMessage(
+        '|c' .. config.ADDON_TEXT_COLOR .. 'LootBlare: ' .. '|r' ..
+        '|c' .. config.CHAT_COLORS.INFO .. ml_version .. ' is available! ' .. '|r' ..
+        '|c' .. config.ADDON_TEXT_COLOR .. download_url .. '|r')
     end
     lb_version_check = true
   end

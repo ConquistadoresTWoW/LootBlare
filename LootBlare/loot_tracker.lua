@@ -459,9 +459,12 @@ cleanup:SetScript("OnUpdate", function()
     end
 
     if elapsed > ICON_LIFETIME then
-      -- Clean up any queued roll for this item when it expires
-      local itemId = extractItemId(item.itemString)
-      if itemId then autoRollQueue[itemId] = nil end
+      -- NOTE: intentionally do NOT clear autoRollQueue here.
+      -- The queue must survive past the tracker icon lifetime so that
+      -- triggerQueuedRoll() can still fire when the ML opens the roll
+      -- after the icon has already faded away.
+      -- The queue entry is cleared inside triggerQueuedRoll() on fire,
+      -- or by the player toggling the button off manually.
       if row then
         row:Hide()
         if row.rollStrip then row.rollStrip:Hide() end
