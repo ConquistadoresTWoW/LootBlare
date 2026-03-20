@@ -94,23 +94,16 @@ function increase_plus_one_and_whisper_os_payment(player_name, current_link)
 
   if not is_tm_roll then player_name = increase_plus_one(player_name) end
 
-  local item_name, item_link, item_quality, _, _, _, _, _, _ = GetItemInfo(
-                                                                 current_link)
+  local item_name, item_link, item_quality, _, _, _, _, _, _, sell_price = GetItemInfo(current_link)
 
-  local item_id = tonumber(string_match(item_link, 'item:(%d+):'))
-
-  local sell_buy_str = pfui_sell_data[item_id] or ''
-
-  if sell_buy_str == '' then
-    lb_print('No sell price found for ' .. item_name)
+  if not sell_price or sell_price == 0 then
+    lb_print('No sell price found for ' .. (item_name or '?'))
     return
   end
 
-  local _, _, sell, buy = string.find(sell_buy_str, "(.*),(.*)")
-  sell = create_gold_string(tonumber(sell))
+  local item_id = tonumber(string_match(item_link, 'item:(%d+):'))
+  local sell = create_gold_string(sell_price)
 
-  -- local message = item_link .. " ganado por OS. Pagar al banco/ML: " .. sell
-  local _, _, _, color, _ = GetItemQualityColor(item_quality) or "ffffff"
   local r, g, b, hex_color = GetItemQualityColor(item_quality)
   local message = string.format(
                     "Precio OS: %s|Hitem:%d:0:0:0|h[%s]|h|r - %s >>>INGRESAR EN BANCO DE LA GUILD<<<",

@@ -394,6 +394,24 @@ function handle_config_command(msg)
       PlusOneList = {}
       lb_print('Plus one list cleared')
     end)
+  elseif msg == 'iteminfo' then
+    local link = current_link
+    if not link then lb_print('No current item link. Announce an item first.') return end
+    local r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13 = GetItemInfo(link)
+    lb_print('GetItemInfo returns:')
+    lb_print('1=' .. tostring(r1))
+    lb_print('2=' .. tostring(r2))
+    lb_print('3=' .. tostring(r3))
+    lb_print('4=' .. tostring(r4))
+    lb_print('5=' .. tostring(r5))
+    lb_print('6=' .. tostring(r6))
+    lb_print('7=' .. tostring(r7))
+    lb_print('8=' .. tostring(r8))
+    lb_print('9=' .. tostring(r9))
+    lb_print('10=' .. tostring(r10))
+    lb_print('11=' .. tostring(r11))
+    lb_print('12=' .. tostring(r12))
+    lb_print('13=' .. tostring(r13))
   else
     lb_print('Invalid command. Type /lb help for a list of commands.')
   end
