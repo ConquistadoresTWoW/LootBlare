@@ -1,4 +1,4 @@
-# Loot Blare 3.0.0
+# Loot Blare 3.2.0
 
 Loot Blare is a World of Warcraft addon originally designed **Turtle WoW**. The original version of this addon can be found [here](https://github.com/MarcelineVQ/LootBlare). This version of Loot Blare was completely updated by and for the **Conquistadores** guild.
 
